@@ -59,7 +59,7 @@ public static class SelectTextureModal
         SysVec2 workCenter = workPos + (workSize * 0.5f);
 
         ImGui.SetNextWindowPos(workCenter, ImGuiCond.Always, new SysVec2(0.5f, 0.5f));
-        ImGui.SetNextWindowSizeConstraints(new SysVec2(300, 0), workSize);
+        ImGui.SetNextWindowSizeConstraints(new SysVec2(300, 500), workSize);
 
         ImGuiWindowFlags modalFlags = ImGuiWindowFlags.Modal
                                       | ImGuiWindowFlags.NoResize
