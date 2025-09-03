@@ -1,0 +1,47 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <RollForward>Major</RollForward>
+    <PublishReadyToRun>false</PublishReadyToRun>
+    <TieredCompilation>false</TieredCompilation>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <Version>1.0.0</Version>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>Icon.ico</ApplicationIcon>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Icon.ico" />
+    <None Remove="Icon.bmp" />
+    <None Include="Content/**/*" CopyToOutputDirectory="PreserveNewest" />
+    <EmbeddedResource Include="Icon.ico" LogicalName="Icon.ico" />
+    <EmbeddedResource Include="Icon.bmp" LogicalName="Icon.bmp" />
+    <EmbeddedResource Include="i18n\**\*.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\external\monogame-extended\source\monogame.extended\monogame.extended.csproj" />
+    <PackageReference Include="Hexa.NET.ImGui" Version="2.2.8.5" />
+    <PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.*" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Microsoft.Xna.Framework.Color" Alias="XnaColor" />
+    <Using Include="Microsoft.Xna.Framework.Rectangle" Alias="XnaRect" />
+    <Using Include="Microsoft.Xna.Framework.Vector2" Alias="XnaVec2" />
+    <Using Include="Microsoft.Xna.Framework.Vector3" Alias="XnaVec3" />
+    <Using Include="Microsoft.Xna.Framework.Vector4" Alias="XnaVec4" />
+    <Using Include="System.Numerics.Vector2" Alias="SysVec2" />
+    <Using Include="System.Numerics.Vector3" Alias="SysVec3" />
+    <Using Include="System.Numerics.Vector4" Alias="SysVec4" />
+  </ItemGroup>
+
+</Project>

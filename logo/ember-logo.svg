@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   version="1.1"
+   viewBox="0 0 512 512"
+   id="svg298"
+   sodipodi:docname="ember-logo.svg"
+   inkscape:version="1.2.2 (732a01da63, 2022-12-09)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs302" />
+  <sodipodi:namedview
+     id="namedview300"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     showgrid="false"
+     inkscape:zoom="2.0566406"
+     inkscape:cx="256"
+     inkscape:cy="255.75689"
+     inkscape:window-width="3840"
+     inkscape:window-height="2054"
+     inkscape:window-x="1609"
+     inkscape:window-y="-11"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg298" />
+  <rect
+     transform="scale(-1,1)"
+     x="-512"
+     width="512"
+     height="512"
+     rx="100"
+     ry="100"
+     fill="#f8723d"
+     stop-color="#000000"
+     style="paint-order:stroke fill markers"
+     id="rect278" />
+  <path
+     d="m 305.2501,20.764092 a 1.1398015,1.1398015 0 0 1 1.7097,1.234785 c -4.46422,17.666924 -26.40541,119.964103 52.90578,186.357543 77.50651,64.96869 79.88109,162.70667 22.13115,227.96031 -69.05298,78.17139 -188.44718,64.39879 -239.83324,13.01273 -36.1887,-35.99872 -101.917256,-153.39828 10.63815,-251.5162 a 0.94983461,0.94983461 0 0 1 1.51974,0 c 2.75452,11.68296 21.84619,85.48511 72.75733,94.98346 2.37458,0 3.51438,-1.04482 2.37458,-3.22944 C 214.4459,260.50234 146.81768,112.32814 305.2501,20.764092 Z"
+     stroke-linecap="round"
+     id="path190"
+     style="stroke-width:20;fill:none;stroke:#ffffff;stroke-opacity:1;stroke-dasharray:none" />
+</svg>
