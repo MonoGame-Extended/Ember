@@ -58,11 +58,37 @@ jobs:
         shell: bash
         run: mkdir -p ./${{ matrix.artifact }}
 
-      - name: Package
+      - name: Debug and test MonoPack
         shell: bash
         env:
           MGFXC_WINE_PATH: ${{ matrix.wineprefix }}
-        run: monopack -z -p ./src/Ember/Ember.csproj -o ./${{ matrix.artifact }} ${{ matrix.rids }} -i ./src/Ember/Info.plist -c ./src/Ember/Icon.icns
+        run: |
+          echo "=== Current working directory ==="
+          pwd
+          
+          echo "=== Directory contents ==="
+          ls -la
+          
+          echo "=== Check if project file exists ==="
+          ls -la ./src/Ember/Ember.csproj
+          
+          echo "=== Check if Info.plist exists ==="
+          ls -la ./src/Ember/Info.plist
+          
+          echo "=== Check if Icon.icns exists ==="
+          ls -la ./src/Ember/Icon.icns
+          
+          echo "=== Test basic dotnet publish manually ==="
+          dotnet publish ./src/Ember/Ember.csproj -c Release -r win-x64 --self-contained -o ./test-output
+          
+          echo "=== Check if manual publish worked ==="
+          ls -la ./test-output/
+          
+          echo "=== Clean up test output ==="
+          rm -rf ./test-output
+          
+          echo "=== Now try MonoPack with verbose output ==="
+          monopack -v -z -p ./src/Ember/Ember.csproj -o ./${{ matrix.artifact }} ${{ matrix.rids }} -i ./src/Ember/Info.plist -c ./src/Ember/Icon.icns
 
       - name: Upload Release Assets
         shell: bash
