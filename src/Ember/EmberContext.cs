@@ -122,6 +122,7 @@ public static class EmberContext
         s_contentManager.RootDirectory = ProjectDirectory;
 
         ParticleEffect = new(ProjectName);
+        CenterParticleEffect();
         HasUnsavedChanges = true;
         SaveProject();
     }
@@ -136,6 +137,7 @@ public static class EmberContext
 
         using ParticleEffectReader reader = new(ProjectFilePath, s_contentManager);
         ParticleEffect = reader.ReadParticleEffect();
+        CenterParticleEffect();
     }
 
     public static void SaveProject()
@@ -177,6 +179,16 @@ public static class EmberContext
         }
 
         s_game.Exit();
+    }
+
+    public static void CenterParticleEffect()
+    {
+        if (ParticleEffect == null)
+        {
+            return;
+        }
+
+        ParticleEffect.Position = s_graphicsDevice.Viewport.Bounds.Center.ToVector2();
     }
 
     public static void AddEmitter()

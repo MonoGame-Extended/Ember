@@ -2,6 +2,7 @@
 // Licensed under the MIT license.
 // See LICENSE file in the project root for full license information.
 
+using System;
 using System.Diagnostics;
 using System.Globalization;
 using System.Reflection;
@@ -43,8 +44,14 @@ public class EmberEditor : Game
         _graphics.ApplyChanges();
 
         Window.AllowUserResizing = true;
+        Window.ClientSizeChanged += OnClientSizeChanged;
         Content.RootDirectory = "Content";
         IsMouseVisible = true;
+    }
+
+    private void OnClientSizeChanged(object sender, EventArgs e)
+    {
+        EmberContext.CenterParticleEffect();
     }
 
     protected override unsafe void Initialize()
