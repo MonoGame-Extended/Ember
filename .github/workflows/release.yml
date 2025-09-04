@@ -54,6 +54,10 @@ jobs:
       - name: Install MonoPack
         run: dotnet tool install -g MonoPack
 
+      - name: Create Package Directory
+        shell: bash
+        run: mkdir -p ./${{ matrix.artifact }}
+
       - name: Package
         shell: bash
         env:
