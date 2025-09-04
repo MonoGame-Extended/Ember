@@ -55,6 +55,28 @@ jobs:
       - name: Install MonoPack
         run: dotnet tool install -g MonoPack
 
+      - name: Debug Linux environment
+        if: runner.os == 'Linux'
+        shell: bash
+        run: |
+          echo "=== Current working directory ==="
+          pwd
+          
+          echo "=== Environment variables ==="
+          env | grep -E "(MGFXC|WINE|PATH)" || echo "No WINE/MGFXC vars found"
+          
+          echo "=== Directory structure ==="
+          find . -name "*.csproj" -o -name "*.plist" -o -name "*.icns" | head -10
+          
+          echo "=== Test manual dotnet publish on Linux ==="
+          dotnet publish ./src/Ember/Ember.csproj -c Release -r linux-x64 --self-contained -o ./linux-test
+          
+          echo "=== Check manual publish result ==="
+          ls -la ./linux-test/ || echo "Manual publish failed"
+          
+          echo "=== Clean up ==="
+          rm -rf ./linux-test        
+
       - name: Package
         shell: bash
         env:
