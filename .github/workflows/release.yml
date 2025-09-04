@@ -1,0 +1,74 @@
+name: Build and Attach On Release
+
+on:
+  release:
+    types: [created]
+
+jobs:
+  build:
+    name: build-${{ matrix.os }} ${{ matrix.artifact }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: windows-latest
+            rids: -rids win-x64,win-arm64
+            artifact: publish-win
+          - os: macos-latest
+            rids: -rids osx-arm64,osx-x64
+            artifact: publish-osx
+            wineprefix: /Users/runner/.winemonogame
+          - os: ubuntu-latest
+            rids: -r linux-x64
+            artifact: publish-linux
+            wineprefix: /home/runner/.winemonogame
+      fail-fast: false
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.release.tag_name }}
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Setup WINE (macOS)
+        if: runner.os == 'macOS'
+        shell: bash
+        run: |
+          brew install p7zip
+          brew install --cask wine-stable
+          xattr -dr com.apple.quarantine "/Applications/Wine Stable.app"
+          wget -qO- https://monogame.net/downloads/net8_mgfxc_wine_setup.sh | bash
+
+      - name: Setup WINE (Linux)
+        if: runner.os == 'Linux'
+        shell: bash
+        run: |
+          sudo apt-get update && sudo apt-get install -y curl p7zip-full wine64
+          wget -qO- https://monogame.net/downloads/net8_mgfxc_wine_setup.sh | bash
+
+      - name: Install MonoPack
+        run: dotnet tool install -g MonoPack
+
+      - name: Package
+        shell: bash
+        env:
+          MGFXC_WINE_PATH: ${{ matrix.wineprefix }}
+        run: monopack -z -p ./src/Ember/Ember.csproj -o ./${{ matrix.artifact }} ${{ matrix.rids }} -i ./src/Ember/Info.plist -c ./src/Ember/Icon.icns
+
+      - name: Upload Release Assets
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          find ./${{ matrix.artifact }} -name "*.zip" -type f | while read zipfile; do
+            filename=$(basename "$zipfile")
+            echo "Uploading $filename..."
+            gh release upload ${{ github.event.release.tag_name }} "$zipfile" --repo ${{ github.repository }}
+          done
+
+
