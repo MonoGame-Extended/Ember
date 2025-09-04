@@ -25,7 +25,8 @@ public class EmberEditor : Game
 {
     private static EmberEditor s_instance;
     private static readonly CompositeFormat s_windowTitle = CompositeFormat.Parse("Ember: {0} | {1:F3} ms/Frame | {2:F1} FPS");
-    private static readonly string s_version = FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).FileVersion;
+    private static readonly string s_version = Assembly.GetExecutingAssembly().GetName().Version?.ToString();
+
     private static float s_frameRate;
 
     private readonly GraphicsDeviceManager _graphics;
