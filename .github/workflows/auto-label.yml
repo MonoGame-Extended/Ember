@@ -1,0 +1,241 @@
+name: Auto Label Issues and PRs
+
+on:
+  issues:
+    types: [opened, edited]
+  pull_request:
+    types: [opened, edited, ready_for_review, converted_to_draft]
+
+jobs:
+  auto-label:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
+      contents: read
+
+    steps:
+      - name: Auto Label Issues and PRs
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const number = context.payload.number;
+            const isIssue = context.eventName === 'issues';
+            const isPR = context.eventName === 'pull_request';
+
+            // Get current labels to avoid duplicates
+            const currentLabels = context.payload[isIssue ? 'issue' : 'pull_request'].labels.map(l => l.name);
+            const labelsToAdd = [];
+            const labelsToRemove = [];
+
+            console.log(`Processing ${isIssue ? 'issue' : 'PR'} #${number}`);
+
+            if (isIssue)
+            {
+                // === ISSUE LABELING ===
+                const content = (context.payload.issue.title + ' ' + (context.payload.issue.body || '')).toLowerCase();
+
+                // Auto-add Status: Available for new issues
+                if (!currentLabels.some(l => l.startsWith('Status:')))
+                {
+                    labelsToAdd.push('Status: Available');
+                }
+
+                // Type detection based on title/body content
+                if (content.includes('bug') || content.includes('fix') || content.includes('broken') || content.includes('error'))
+                {
+                    if (!currentLabels.includes('Type: Bug'))
+                    {
+                        labelsToAdd.push('Type: Bug');
+                    }
+                }
+                else if (content.includes('feat') || content.includes('feature') || content.includes('add') || content.includes('new'))
+                {
+                    if (!currentLabels.includes('Type: Feature'))
+                    {
+                        labelsToAdd.push('Type: Feature');
+                    }
+                }
+                else if (content.includes('doc') || content.includes('documentation'))
+                {
+                    if (!currentLabels.includes('Type: Documentation'))
+                    {
+                        labelsToAdd.push('Type: Documentation');
+                    }
+                }
+                else if (content.includes('question') || content.includes('help') || content.includes('how'))
+                {
+                    if (!currentLabels.includes('Type: Question'))
+                    {
+                        labelsToAdd.push('Type: Question');
+                    }
+                }
+
+                // Priority detection (only if explicitly mentioned)
+                if (content.includes('critical') || content.includes('urgent'))
+                {
+                    if (!currentLabels.includes('Priority: Critical'))
+                    {
+                        labelsToAdd.push('Priority: Critical');
+                    }
+                }
+                else if (content.includes('high priority'))
+                {
+                    if (!currentLabels.includes('Priority: High'))
+                    {
+                        labelsToAdd.push('Priority: High');
+                    }
+                }
+            }
+            else if (isPR)
+            {
+                // === PULL REQUEST LABELING ===
+                const content = (context.payload.pull_request.title + ' ' + (context.payload.pull_request.body || '')).toLowerCase();
+                const isDraft = context.payload.pull_request.draft;
+
+                // Status based on draft state
+                if (isDraft)
+                {
+                    if (!currentLabels.includes('Status: In Progress'))
+                    {
+                        labelsToAdd.push('Status: In Progress');
+                    }
+
+                    labelsToRemove.push('Status: Review Needed');
+                }
+                else
+                {
+                    if (!currentLabels.includes('Status: Review Needed'))
+                    {
+                        labelsToAdd.push('Status: Review Needed');
+                    }
+
+                    labelsToRemove.push('Status: In Progress');
+                }
+
+                // Type detection
+                if (content.includes('fix') || content.includes('bug') || content.includes('hotfix'))
+                {
+                    if (!currentLabels.includes('Type: Bug')) labelsToAdd.push('Type: Bug');
+                }
+                else if (content.includes('feat') || content.includes('feature') || content.includes('add'))
+                {
+                    if (!currentLabels.includes('Type: Feature'))
+                    {
+                        labelsToAdd.push('Type: Feature');
+                    }
+                }
+                else if (content.includes('enhance') || content.includes('improve') || content.includes('update'))
+                {
+                    if (!currentLabels.includes('Type: Enhancement'))
+                    {
+                        labelsToAdd.push('Type: Enhancement');
+                    }
+                }
+                else if (content.includes('doc') || content.includes('readme'))
+                {
+                    if (!currentLabels.includes('Type: Documentation'))
+                    {
+                        labelsToAdd.push('Type: Documentation');
+                    }
+                }
+                else if (content.includes('refactor') || content.includes('cleanup') || content.includes('chore'))
+                {
+                    if (!currentLabels.includes('Type: Maintenance'))
+                    {
+                        labelsToAdd.push('Type: Maintenance');
+                    }
+                }
+
+                // Breaking change detection
+                if (content.includes('breaking') || content.includes('breaking change') || content.includes('!:'))
+                {
+                    if (!currentLabels.includes('Type: Breaking Change'))
+                    {
+                        labelsToAdd.push('Type: Breaking Change');
+                    }
+                }
+
+                // Get list of changed files for area detection
+                try
+                {
+                    const { data: files } = await github.rest.pulls.listFiles(
+                        {
+                            owner,
+                            repo,
+                            pull_number: number,
+                        });
+
+                    const changedFiles = files.map(f => f.filename);
+                    console.log('Changed files:', changedFiles);
+
+                    // Area detection based on common game development file patterns
+                    const hasTests = changedFiles.some(f => f.includes('/test/') || f.includes('/tests/'));
+                    const hasDocs = changedFiles.some(f => f.match(/\.md$/) || f.includes('/docs/') || f.includes('README'));
+                    const hasConfig = changedFiles.some(f => f.includes('.config') || f.includes('.json') || f.includes('.xml'));
+
+                    if (hasTests && !currentLabels.includes('Area: Tests'))
+                    {
+                        labelsToAdd.push('Area: Tests');
+                    }
+
+                    if (hasDocs && !currentLabels.includes('Type: Documentation'))
+                    {
+                        labelsToAdd.push('Type: Documentation');
+                    }
+
+                    if (hasConfig && !currentLabels.includes('Area: Configuration'))
+                    {
+                        labelsToAdd.push('Area: Configuration');
+                    }
+
+                    // Platform detection (most C# projects are cross-platform by default)
+                    if (!currentLabels.some(l => l.startsWith('Platform:')))
+                    {
+                        labelsToAdd.push('Platform: Cross-platform');
+                    }
+                }
+                catch (error)
+                {
+                    console.log('Error fetching files:', error);
+                }
+            }
+
+            // Apply labels
+            if (labelsToAdd.length > 0)
+            {
+                console.log('Adding labels:', labelsToAdd);
+                await github.rest.issues.addLabels(
+                    {
+                        owner,
+                        repo,
+                        issue_number: number,
+                        labels: labelsToAdd
+                    });
+            }
+
+            // Remove labels (one by one since GitHub API requires it)
+            for (const label of labelsToRemove)
+            {
+                if (currentLabels.includes(label))
+                {
+                    console.log('Removing label:', label);
+                    try
+                    {
+                        await github.rest.issues.removeLabel(
+                            {
+                                owner,
+                                repo,
+                                issue_number: number,
+                                name: label
+                            });
+                    }
+                    catch (error)
+                    {
+                        console.log(`Could not remove label ${label}:`, error);
+                    }
+                }
+            }
+
+            console.log('Label automation complete');
