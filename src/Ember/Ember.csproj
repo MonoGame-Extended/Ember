@@ -28,7 +28,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\external\monogame-extended\source\monogame.extended\monogame.extended.csproj" />
+    <ProjectReference Include="..\..\external\monogame-extended\source\Monogame.Extended\Monogame.Extended.csproj" />
     <PackageReference Include="Hexa.NET.ImGui" Version="2.2.8.5" />
     <PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.*" />
   </ItemGroup>
