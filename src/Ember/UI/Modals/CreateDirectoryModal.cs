@@ -108,7 +108,7 @@ public static class CreateDirectoryModal
                 ImGui.Spacing();
             }
 
-            ImGui.BeginDisabled(isDirectoryNameValid);
+            ImGui.BeginDisabled(!isDirectoryNameValid);
             if (ImGui.Button(SR.Popup_CreateDirectoryModal_CreateDirectory_Label))
             {
                 try
