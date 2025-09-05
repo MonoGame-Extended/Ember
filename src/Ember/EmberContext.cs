@@ -139,6 +139,8 @@ public static class EmberContext
         ProjectDirectory = Path.GetDirectoryName(filePath);
         ProjectFilePath = filePath;
 
+        s_contentManager.RootDirectory = ProjectDirectory;
+
         using ParticleEffectReader reader = new(ProjectFilePath, s_contentManager);
         ParticleEffect = reader.ReadParticleEffect();
         CenterParticleEffect();
