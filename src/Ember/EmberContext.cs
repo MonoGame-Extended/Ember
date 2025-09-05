@@ -106,6 +106,8 @@ public static class EmberContext
         ArgumentException.ThrowIfNullOrWhiteSpace(projectName);
         ArgumentException.ThrowIfNullOrWhiteSpace(projectDirectory);
 
+        ClearContext();
+
         ProjectName = projectName;
         ProjectDirectory = projectDirectory;
 
@@ -131,6 +133,8 @@ public static class EmberContext
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(filePath);
 
+        ClearContext();
+
         ProjectName = Path.GetFileNameWithoutExtension(filePath);
         ProjectDirectory = Path.GetDirectoryName(filePath);
         ProjectFilePath = filePath;
@@ -151,6 +155,27 @@ public static class EmberContext
         writer.WriteParticleEffect(ParticleEffect);
 
         HasUnsavedChanges = false;
+    }
+
+    private static void ClearContext()
+    {
+        if (ParticleEffect != null)
+        {
+            ParticleEffect.Dispose();
+            ParticleEffect = null;
+        }
+
+        s_contentManager.Unload();
+
+        SelectedParticleEmitter = null;
+        SelectedParticleEmitterIndex = -1;
+        SelectedModifier = null;
+        SelectedModifierIndex = -1;
+        SelectedInterpolator = null;
+        SelectedInterpolatorIndex = -1;
+        CurrentInterpolators = null;
+
+        GC.Collect();
     }
 
     public static void Exit()
