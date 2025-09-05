@@ -174,6 +174,10 @@ public static class EmberContext
         SelectedInterpolator = null;
         SelectedInterpolatorIndex = -1;
         CurrentInterpolators = null;
+        s_emitterLocks.Clear();
+        s_modifierLocks.Clear();
+        s_interpolatorLocks.Clear();
+        s_textureCache.Clear();
 
         GC.Collect();
     }
