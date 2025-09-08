@@ -1,0 +1,39 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ParticleEffect Name="spark" Position="640,504" Rotation="0" Scale="1,1" AutoTrigger="True" AutoTriggerFrequency="1">
+  <Emitters>
+    <ParticleEmitter Name="ParticleEmitter" LifeSpan="2" Offset="0,0" LayerDepth="0" ReclaimFrequency="60" Capacity="2000" ModifierExecutionStrategy="Serial" RenderingOrder="FrontToBack">
+      <TextureRegion Name="Particle.png" Bounds="0,0,64,64" />
+      <Parameters>
+        <Quantity Kind="Constant" Constant="10" />
+        <Speed Kind="Random" RandomMin="0" RandomMax="100" />
+        <Color Kind="Constant" Constant="52.352943,0.80314964,0.5019608" />
+        <Opacity Kind="Constant" Constant="1" />
+        <Scale Kind="Constant" Constant="1,1" />
+        <Rotation Kind="Random" RandomMin="-3.1415927" RandomMax="3.1415927" />
+        <Mass Kind="Random" RandomMin="8" RandomMax="12" />
+      </Parameters>
+      <Profile Type="PointProfile" />
+      <Modifiers>
+        <Modifier Name="LinearGravityModifier" Frequency="15" Type="LinearGravityModifier" Direction="0,1" Strength="30" />
+        <Modifier Name="OpacityFastFadeModifier" Frequency="10" Type="OpacityFastFadeModifier" />
+      </Modifiers>
+    </ParticleEmitter>
+    <ParticleEmitter Name="ParticleEmitter" LifeSpan="2" Offset="100,0" LayerDepth="0" ReclaimFrequency="60" Capacity="2000" ModifierExecutionStrategy="Serial" RenderingOrder="FrontToBack">
+      <TextureRegion Name="Particle.png" Bounds="0,0,64,64" />
+      <Parameters>
+        <Quantity Kind="Constant" Constant="10" />
+        <Speed Kind="Random" RandomMin="0" RandomMax="100" />
+        <Color Kind="Constant" Constant="52.352943,0.80314964,0.5019608" />
+        <Opacity Kind="Constant" Constant="1" />
+        <Scale Kind="Constant" Constant="1,1" />
+        <Rotation Kind="Random" RandomMin="-3.1415927" RandomMax="3.1415927" />
+        <Mass Kind="Random" RandomMin="8" RandomMax="12" />
+      </Parameters>
+      <Profile Type="PointProfile" />
+      <Modifiers>
+        <Modifier Name="LinearGravityModifier" Frequency="15" Type="LinearGravityModifier" Direction="0,1" Strength="30" />
+        <Modifier Name="OpacityFastFadeModifier" Frequency="10" Type="OpacityFastFadeModifier" />
+      </Modifiers>
+    </ParticleEmitter>
+  </Emitters>
+</ParticleEffect>

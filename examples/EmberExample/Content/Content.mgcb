@@ -1,0 +1,38 @@
+
+#----------------------------- Global Properties ----------------------------#
+
+/outputDir:bin/$(Platform)
+/intermediateDir:obj/$(Platform)
+/platform:DesktopGL
+/config:
+/profile:Reach
+/compress:False
+
+#-------------------------------- References --------------------------------#
+
+
+#---------------------------------- Content ---------------------------------#
+
+#begin loadtest/loadtest.ember
+/copy:loadtest/loadtest.ember
+
+#begin loadtest/Pixel.png
+/copy:loadtest/Pixel.png
+
+#begin ring/ring.ember
+/copy:ring/ring.ember
+
+#begin ring/Ring.png
+/copy:ring/Ring.png
+
+#begin smoke/Cloud.png
+/copy:smoke/Cloud.png
+
+#begin smoke/smoke.ember
+/copy:smoke/smoke.ember
+
+#begin spark/Particle.png
+/copy:spark/Particle.png
+
+#begin spark/spark.ember
+/copy:spark/spark.ember
