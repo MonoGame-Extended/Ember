@@ -95,7 +95,10 @@ public class Game1 : Game
     {
         ImGuiRenderer.BeforeLayout(gameTime);
 
-        if (ImGui.Begin("Debug"u8))
+        ImGui.SetNextWindowPos(System.Numerics.Vector2.Zero, ImGuiCond.Always);
+        ImGui.SetNextWindowSize(new(450, 200), ImGuiCond.Always);
+
+        if (ImGui.Begin("Debug"u8, ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoTitleBar))
         {
             // Buttons to choose different effect samples to show
             if (ImGui.BeginTable("##sample_buttons"u8, 4, ImGuiTableFlags.SizingStretchProp))
