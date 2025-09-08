@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using EmberExample.Graphics;
 using Hexa.NET.ImGui;
@@ -18,6 +19,8 @@ public class Game1 : Game
     private bool _emitOnClick = true;
     private MouseState _prevMouseState;
     private MouseState _curMouseState;
+    private readonly Stopwatch _updateTimer = new();
+    private readonly Stopwatch _drawTimer = new();
 
     private readonly string _contentPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Content");
 
@@ -56,10 +59,9 @@ public class Game1 : Game
         _prevMouseState = _curMouseState;
         _curMouseState = Mouse.GetState();
 
+        _updateTimer.Restart();
         if (_particleEffect != null)
         {
-            _particleEffect.Update(gameTime);
-
             if (_emitOnClick && _curMouseState.LeftButton == ButtonState.Pressed)
             {
                 Vector2 start = _prevMouseState.Position.ToVector2();
@@ -67,21 +69,24 @@ public class Game1 : Game
                 LineSegment line = new(start, end);
                 _particleEffect.Trigger(line, 0.0f);
             }
-        }
 
-        base.Update(gameTime);
+            _particleEffect.Update(gameTime);
+        }
+        _updateTimer.Stop();
     }
 
     protected override void Draw(GameTime gameTime)
     {
         GraphicsDevice.Clear(Color.Black);
 
+        _drawTimer.Restart();
         if (_particleEffect != null)
         {
             _spriteBatch.Begin(samplerState: SamplerState.PointClamp);
             _spriteBatch.Draw(_particleEffect);
             _spriteBatch.End();
         }
+        _drawTimer.Stop();
 
         DrawDebugWindow(gameTime);
     }
@@ -135,6 +140,7 @@ public class Game1 : Game
 
             ImGui.Spacing();
 
+            // Options and info
             if (ImGui.BeginTable("##debug_table"u8, 2, ImGuiTableFlags.SizingStretchProp))
             {
                 ImGui.TableSetupColumn("##label_column"u8, ImGuiTableColumnFlags.WidthStretch, 1.0f);
@@ -156,14 +162,47 @@ public class Game1 : Game
                 ImGui.SameLine();
                 ImGui.Checkbox("##emit_on_click"u8, ref _emitOnClick);
 
+                ImGui.TableNextRow();
+                ImGui.TableNextColumn();
+                ImGui.AlignTextToFramePadding();
+                ImGui.Text("Particles: ");
+                ImGui.TableNextColumn();
+                ImGui.AlignTextToFramePadding();
+                ImGui.Text(string.Format("{0:n0}", _particleEffect.ActiveParticles));
+
+                ImGui.TableNextRow();
+                ImGui.TableNextColumn();
+                ImGui.AlignTextToFramePadding();
+                ImGui.Text("FPS: ");
+                ImGui.TableNextColumn();
+                ImGui.AlignTextToFramePadding();
+                float frameRate = ImGui.GetIO().Framerate;
+                ImGui.Text(string.Format("{0:n2} ", frameRate));
+
+                ImGui.TableNextRow();
+                ImGui.TableNextColumn();
+                ImGui.AlignTextToFramePadding();
+                ImGui.Text("Update: ");
+                ImGui.TableNextColumn();
+                ImGui.AlignTextToFramePadding();
+                float updateTime = (float)_updateTimer.Elapsed.TotalSeconds;
+                ImGui.Text(string.Format("{0:n4}s ({1,8:P2}%)", updateTime, updateTime / 0.01666666f));
+
+                ImGui.TableNextRow();
+                ImGui.TableNextColumn();
+                ImGui.AlignTextToFramePadding();
+                ImGui.Text("Draw: ");
+                ImGui.TableNextColumn();
+                ImGui.AlignTextToFramePadding();
+                float drawTime = (float)_drawTimer.Elapsed.TotalSeconds;
+                ImGui.Text(string.Format("{0:n4}s ({1,8:P2}%)", drawTime, drawTime / 0.01666666f));
+
                 ImGui.EndTable();
             }
         }
 
         ImGui.End();
 
-
-        // End the use interface draw
         ImGuiRenderer.AfterLayout();
     }
 
