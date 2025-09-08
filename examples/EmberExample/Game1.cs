@@ -151,7 +151,7 @@ public class Game1 : Game
                 ImGui.AlignTextToFramePadding();
                 ImGui.BeginDisabled(_particleEffect == null);
                 ImGui.Text("Auto Trigger: ");
-                ImGui.SameLine();
+                ImGui.TableNextColumn();
                 ImGui.Checkbox("##auto_trigger"u8, ref _particleEffect.AutoTrigger);
                 ImGui.EndDisabled();
 
@@ -159,7 +159,7 @@ public class Game1 : Game
                 ImGui.TableNextColumn();
                 ImGui.AlignTextToFramePadding();
                 ImGui.Text("Emit on click");
-                ImGui.SameLine();
+                ImGui.TableNextColumn();
                 ImGui.Checkbox("##emit_on_click"u8, ref _emitOnClick);
 
                 ImGui.TableNextRow();
