@@ -29,19 +29,8 @@ public class Game1 : Game
         _graphics.ApplyChanges();
 
         Content.RootDirectory = "Content";
-        Window.AllowUserResizing = true;
-        Window.ClientSizeChanged += OnClientSizeChanged;
         InactiveSleepTime = TimeSpan.Zero;
         IsMouseVisible = true;
-    }
-
-    private void OnClientSizeChanged(object sender, EventArgs e)
-    {
-        if (_particleEffect != null)
-        {
-            // Center the particle effect for the auto trigger
-            _particleEffect.Position = GraphicsDevice.Viewport.Bounds.Center.ToVector2();
-        }
     }
 
     protected override void Initialize()
