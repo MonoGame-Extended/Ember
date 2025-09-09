@@ -144,8 +144,10 @@ public static class SelectedModifierPropertiesChildWindow
 
         ImGui.TableNextColumn();
         ImGui.SetNextItemWidth(-1);
-        if (ImGui.DragFloat(SR.Modifier_Property_Frequency_Description, ref modifier.Frequency, 0.1f, 0.0f, float.MaxValue, "%.2f"))
+        float frequency = modifier.Frequency;
+        if (ImGui.DragFloat(SR.Modifier_Property_Frequency_Description, ref frequency, 0.1f, 0.0f, float.MaxValue, "%.2f"))
         {
+            modifier.Frequency = frequency;
             EmberContext.HasUnsavedChanges = true;
         }
     }
