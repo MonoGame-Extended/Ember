@@ -82,7 +82,7 @@ public class Game1 : Game
         _drawTimer.Restart();
         if (_particleEffect != null)
         {
-            _spriteBatch.Begin(samplerState: SamplerState.PointClamp);
+            _spriteBatch.Begin(samplerState: SamplerState.PointClamp, blendState: BlendState.NonPremultiplied);
             _spriteBatch.Draw(_particleEffect);
             _spriteBatch.End();
         }
@@ -220,6 +220,6 @@ public class Game1 : Game
         using ParticleEffectReader reader = new(fileName, Content);
         _particleEffect = reader.ReadParticleEffect();
         _particleEffect.Position = GraphicsDevice.Viewport.Bounds.Center.ToVector2();
-        _particleEffect.AutoTrigger = true;
+        _particleEffect.AutoTrigger = false;
     }
 }

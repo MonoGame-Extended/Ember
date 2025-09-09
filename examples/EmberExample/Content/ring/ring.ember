@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <ParticleEffect Name="ring" Position="640,360" Rotation="0" Scale="1,1" AutoTrigger="True" AutoTriggerFrequency="1">
   <Emitters>
-    <ParticleEmitter Name="ParticleEmitter" LifeSpan="1" Offset="0,0" LayerDepth="0" ReclaimFrequency="60" Capacity="2000" ModifierExecutionStrategy="Serial" RenderingOrder="FrontToBack">
+    <ParticleEmitter Name="ParticleEmitter" LifeSpan="3" Offset="0,0" LayerDepth="0" ReclaimFrequency="60" Capacity="2000" ModifierExecutionStrategy="Serial" RenderingOrder="FrontToBack">
       <TextureRegion Name="Ring.png" Bounds="0,0,128,128" />
       <Parameters>
         <Quantity Kind="Constant" Constant="1" />
