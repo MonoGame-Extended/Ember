@@ -45,9 +45,11 @@ internal static partial class SR
     internal static ReadOnlySpan<byte> Button_ExtraLargeFont => GetResourceUtf8Bytes(nameof(Button_ExtraLargeFont));
     internal static ReadOnlySpan<byte> Button_LargeFont => GetResourceUtf8Bytes(nameof(Button_LargeFont));
     internal static ReadOnlySpan<byte> Button_NewDirectory => GetResourceUtf8Bytes(nameof(Button_NewDirectory));
+    internal static ReadOnlySpan<byte> Button_NewDirectory_Tooltip => GetResourceUtf8Bytes(nameof(Button_NewDirectory_Tooltip));
     internal static ReadOnlySpan<byte> Button_No => GetResourceUtf8Bytes(nameof(Button_No));
     internal static ReadOnlySpan<byte> Button_Overwrite => GetResourceUtf8Bytes(nameof(Button_Overwrite));
     internal static ReadOnlySpan<byte> Button_Refresh => GetResourceUtf8Bytes(nameof(Button_Refresh));
+    internal static ReadOnlySpan<byte> Button_Refresh_Tooltip => GetResourceUtf8Bytes(nameof(Button_Refresh_Tooltip));
     internal static ReadOnlySpan<byte> Button_ResetSourceRectangle => GetResourceUtf8Bytes(nameof(Button_ResetSourceRectangle));
     internal static ReadOnlySpan<byte> Button_Select => GetResourceUtf8Bytes(nameof(Button_Select));
     internal static ReadOnlySpan<byte> Button_SelectTexture => GetResourceUtf8Bytes(nameof(Button_SelectTexture));
@@ -120,6 +122,7 @@ internal static partial class SR
     internal static ReadOnlySpan<byte> Label_BackgroundColor => GetResourceUtf8Bytes(nameof(Label_BackgroundColor));
     internal static ReadOnlySpan<byte> Label_BaseFontSize => GetResourceUtf8Bytes(nameof(Label_BaseFontSize));
     internal static ReadOnlySpan<byte> Label_DPIScale => GetResourceUtf8Bytes(nameof(Label_DPIScale));
+    internal static ReadOnlySpan<byte> Label_Location => GetResourceUtf8Bytes(nameof(Label_Location));
     internal static ReadOnlySpan<byte> Label_To => GetResourceUtf8Bytes(nameof(Label_To));
     internal static ReadOnlySpan<byte> Label_UIScale => GetResourceUtf8Bytes(nameof(Label_UIScale));
 

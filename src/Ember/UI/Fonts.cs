@@ -20,6 +20,10 @@ public static class Fonts
     public const string DisabledIcon = "\uf2d3";
     public const string DirectoryIcon = "\uf07b";
     public const string ImageIcon = "\uf03e";
+    public const string RefreshIcon = "\uf021";
+    public const string UpIcon = "\uf062";
+    public const string ChevronLeftIcon = "\uf053";
+    public const string ChevronRightIcon = "\uf054";
 
     public static unsafe void Load()
     {

@@ -132,9 +132,11 @@ public class EmberEditor : Game
             ModifiersWindow.Draw();
         }
 
-        CreateNewProjectModal.Draw();
-        OpenProjectModal.Draw();
-        SelectTextureModal.Draw();
+        FileBrowserModal.Draw();
+
+        // CreateNewProjectModal.Draw();
+        // OpenProjectModal.Draw();
+        // SelectTextureModal.Draw();
         OverwriteExistingFileModal.Draw();
         ChooseModifierModal.Draw();
         ChooseInterpolatorModal.Draw();
