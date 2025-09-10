@@ -57,6 +57,7 @@ public static class FileBrowserModal
     private static int s_pathPartsCount;
     private static Stack<string> s_backStack = [];
     private static Stack<string> s_forwardStack = [];
+    private static float s_fileBrowserListXOffset ;
 
 
     static FileBrowserModal()
@@ -72,8 +73,6 @@ public static class FileBrowserModal
             }
         }
         s_volumes = volumes.ToArray();
-
-
     }
 
     public static void OpenDirectorySelector(string initialDirectory, Action<FileBrowserModalResult> onClose)
@@ -144,13 +143,19 @@ public static class FileBrowserModal
         if (ImGui.BeginPopupModal(s_popupId, null, modalFlags))
         {
             DrawNavigationBar();
-            ImGui.Separator();
+            ImGui.Spacing();
 
+            DrawQuickLinks();
+            ImGui.SameLine();
             DrawFileList();
-            ImGui.Separator();
+
+            ImGui.Spacing();
+
+            DrawSelected();
+            ImGui.Spacing();
 
             DrawStatusBar();
-            ImGui.Separator();
+            ImGui.Spacing();
 
             DrawActionButtons();
 
@@ -269,14 +274,71 @@ public static class FileBrowserModal
 
     }
 
+    private static void DrawQuickLinks()
+    {
+        SysVec2 childSize = new(200, -120);
+
+        if (ImGui.BeginChild("##quick_links"u8, childSize, ImGuiChildFlags.Borders))
+        {
+            string userProfilePath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+            string downloadsPath = Path.Combine(userProfilePath, "Downloads");
+
+            ImGui.PushStyleVar(ImGuiStyleVar.ButtonTextAlign, SysVec2.UnitY * 0.5f);
+            if (ImGui.Button(SR.Button_HomeDirectory, -SysVec2.UnitX))
+            {
+                NavigateTo(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile));
+            }
+
+            if (ImGui.Button(SR.Button_DesktopDirectory, -SysVec2.UnitX))
+            {
+                NavigateTo(Environment.GetFolderPath(Environment.SpecialFolder.Desktop));
+            }
+
+            if (Path.Exists(downloadsPath) && ImGui.Button(SR.Button_DownloadsDirectory, -SysVec2.UnitX))
+            {
+                NavigateTo(downloadsPath);
+            }
+
+            if (ImGui.Button(SR.Button_DocumentsDirectory, -SysVec2.UnitX))
+            {
+                NavigateTo(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments));
+            }
+
+            if (ImGui.Button(SR.Button_PicturesDirectory, -SysVec2.UnitX))
+            {
+                NavigateTo(Environment.GetFolderPath(Environment.SpecialFolder.MyPictures));
+            }
+
+            if (ImGui.Button(SR.Button_MusicDirectory, -SysVec2.UnitX))
+            {
+                NavigateTo(Environment.GetFolderPath(Environment.SpecialFolder.MyMusic));
+            }
+
+            if (ImGui.Button(SR.Button_VideoDirectory, -SysVec2.UnitX))
+            {
+                NavigateTo(Environment.GetFolderPath(Environment.SpecialFolder.MyVideos));
+            }
+            ImGui.PopStyleVar();
+        }
+        ImGui.EndChild();
+    }
+
     private static void DrawFileList()
     {
         // File/Directory List with improved styling
-        SysVec2 childSize = new(0, -120); // Leave space for status and buttons
+        SysVec2 childSize = new(0, -120);
 
-        if (ImGui.BeginChild("##file_browser_list", childSize, ImGuiChildFlags.Borders))
+        // Get the position of the modal window first
+        SysVec2 parentWindowPos = ImGui.GetWindowPos();
+
+        if (ImGui.BeginChild("##file_browser_list"u8, childSize, ImGuiChildFlags.Borders))
         {
-            // Table for better layout
+            // Now get the position of the file browser list
+            SysVec2 childWindowPos = ImGui.GetWindowPos();
+
+            // Store the relative position for the offset when drawing the selected label.
+            s_fileBrowserListXOffset = childWindowPos.X - parentWindowPos.X;
+
             if (ImGui.BeginTable("##file_table", 2, ImGuiTableFlags.RowBg | ImGuiTableFlags.ScrollY))
             {
                 ImGui.TableSetupColumn("Name", ImGuiTableColumnFlags.WidthStretch);
@@ -319,8 +381,29 @@ public static class FileBrowserModal
 
                 ImGui.EndTable();
             }
+
+
         }
         ImGui.EndChild();
+    }
+
+    private static void DrawSelected()
+    {
+        // Set the cursor so the selected label left aligns with the file browser
+        // child window
+        ImGui.SetCursorPosX(s_fileBrowserListXOffset );
+        ImGui.AlignTextToFramePadding();
+        ImGui.Text(SR.Label_Selected);
+
+        ImGui.SameLine();
+        ImGui.Spacing();
+
+        ImGui.SameLine();
+        string selected = s_selectedFileItem?.Path ?? string.Empty;
+        ImGui.BeginDisabled();
+        ImGui.SetNextItemWidth(-1);
+        ImGui.InputText("##currently_selected", ref selected, 512, ImGuiInputTextFlags.ReadOnly);
+        ImGui.EndDisabled();
     }
 
     private static void DrawStatusBar()
