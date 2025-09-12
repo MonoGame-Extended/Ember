@@ -78,11 +78,11 @@ public static class CreateNewProjectModal
             ImGui.SameLine();
             if (ImGui.Button("..."u8))
             {
-                SelectDirectoryModal.Open(s_projectDirectory, (result) =>
+                FileBrowserModal.OpenDirectorySelector(s_projectDirectory, result =>
                 {
                     if (result.Status == ModalResult.Success)
                     {
-                        s_projectDirectory = result.SelectedDirectory.Value.Path;
+                        s_projectDirectory = result.SelectedItem.FullName;
                     }
                 });
             }
@@ -126,7 +126,7 @@ public static class CreateNewProjectModal
                 Close(new CreateNewProjectModalResult(ModalResult.Cancel, null, null, false));
             }
 
-            SelectDirectoryModal.Draw();
+            FileBrowserModal.Draw();
 
             ImGui.EndPopup();
         }

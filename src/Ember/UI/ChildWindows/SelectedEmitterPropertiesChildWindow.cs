@@ -116,11 +116,11 @@ public static class SelectedEmitterPropertiesChildWindow
             // Show button with texture name
             if (ImGui.Button(textureName, new SysVec2(-1, 0)))
             {
-                SelectTextureModal.Open(EmberContext.ProjectDirectory, (result) =>
+                FileBrowserModal.OpenTextureSelector(EmberContext.ProjectDirectory, result =>
                 {
                     if (result.Status == ModalResult.Success)
                     {
-                        EmberContext.AddTexture(result.SelectedTexture.Value.Path);
+                        EmberContext.AddTexture(result.SelectedItem.FullName);
                     }
                 });
             }
@@ -175,11 +175,11 @@ public static class SelectedEmitterPropertiesChildWindow
             // No texture is assigned, show placeholder button
             if (ImGui.Button(SR.Button_SelectTexture, new SysVec2(-1, 0)))
             {
-                SelectTextureModal.Open(EmberContext.ProjectDirectory, (result) =>
+                FileBrowserModal.OpenTextureSelector(EmberContext.ProjectDirectory, result =>
                 {
                     if (result.Status == ModalResult.Success)
                     {
-                        EmberContext.AddTexture(result.SelectedTexture.Value.Path);
+                        EmberContext.AddTexture(result.SelectedItem.FullName);
                     }
                 });
             }
