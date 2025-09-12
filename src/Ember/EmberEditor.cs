@@ -3,7 +3,6 @@
 // See LICENSE file in the project root for full license information.
 
 using System;
-using System.Diagnostics;
 using System.Globalization;
 using System.Reflection;
 using System.Text;
@@ -111,7 +110,6 @@ public class EmberEditor : Game
     {
         GraphicsDevice.Clear(EmberContext.ClearColor);
 
-        // Draw the particle effect
         if (EmberContext.ParticleEffect is ParticleEffect particleEffect)
         {
             _spriteBatch.Begin(samplerState: SamplerState.PointWrap, blendState: BlendState.AlphaBlend);
@@ -119,7 +117,6 @@ public class EmberEditor : Game
             _spriteBatch.End();
         }
 
-        // Draw the user interface
         ImGuiRenderer.BeforeLayout(gameTime);
 
         MainMenuBar.Draw();
@@ -133,14 +130,13 @@ public class EmberEditor : Game
         }
 
         CreateNewProjectModal.Draw();
-        OpenProjectModal.Draw();
-        SelectTextureModal.Draw();
+        FileBrowserModal.Draw();
+
         OverwriteExistingFileModal.Draw();
         ChooseModifierModal.Draw();
         ChooseInterpolatorModal.Draw();
         UnsavedChangesModal.Draw();
 
-        // End the use interface draw
         ImGuiRenderer.AfterLayout();
 
         s_frameRate = ImGui.GetIO().Framerate;

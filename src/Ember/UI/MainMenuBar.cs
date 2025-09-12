@@ -39,11 +39,11 @@ public static class MainMenuBar
 
             if (ImGui.MenuItem(SR.Menu_File_OpenExistingProject))
             {
-                OpenProjectModal.Open(string.Empty, (result) =>
+                FileBrowserModal.OpenProjectSelector(EmberContext.ProjectDirectory, result =>
                 {
                     if (result.Status == ModalResult.Success)
                     {
-                        EmberContext.OpenProject(result.SelectedProject.Value.Path);
+                        EmberContext.OpenProject(result.SelectedItem.FullName);
                     }
                 });
             }

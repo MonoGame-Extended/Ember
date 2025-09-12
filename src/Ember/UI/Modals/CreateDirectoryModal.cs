@@ -9,7 +9,7 @@ using Hexa.NET.ImGui;
 
 namespace Ember.UI.Modals;
 
-public record CreateDirectoryModalResult(ModalResult Status, FileItem? CreatedDirectory);
+public record CreateDirectoryModalResult(ModalResult Status, DirectoryInfo CreatedDirectory);
 
 public static class CreateDirectoryModal
 {
@@ -34,16 +34,14 @@ public static class CreateDirectoryModal
 
     private static Action<CreateDirectoryModalResult> s_onClose;
 
-    private static string s_directoryName = string.Empty;
-    private static string s_parentDirectory = string.Empty;
-    private static string s_newDirectory = string.Empty;
+    private static string s_newDirectoryName = string.Empty;
+    private static DirectoryInfo s_parentDirectory;
     private static bool s_shouldOpen;
 
-    public static void Open(string parentDirectory, Action<CreateDirectoryModalResult> onClose)
+    public static void Open(DirectoryInfo parentDirectory, Action<CreateDirectoryModalResult> onClose)
     {
         s_parentDirectory = parentDirectory;
-        s_directoryName = string.Empty;
-        s_newDirectory = string.Empty;
+        s_newDirectoryName = string.Empty;
         s_onClose = onClose;
         s_shouldOpen = true;
     }
@@ -94,7 +92,7 @@ public static class CreateDirectoryModal
                 ImGui.SetKeyboardFocusHere();
             }
 
-            bool enterPressed = ImGui.InputText("##folder_name"u8, ref s_directoryName, 256)
+            bool enterPressed = ImGui.InputText("##folder_name"u8, ref s_newDirectoryName, 256)
                                 | ImGui.IsKeyPressed(ImGuiKey.Enter);
 
             bool isDirectoryNameValid = IsDirectoryNameValid();
@@ -113,9 +111,9 @@ public static class CreateDirectoryModal
             {
                 try
                 {
-                    s_newDirectory = Path.Combine(s_parentDirectory, s_directoryName);
-                    Directory.CreateDirectory(s_newDirectory);
-                    Close(new CreateDirectoryModalResult(ModalResult.Success, new FileItem(s_newDirectory)));
+                    string newDirectoryPath = Path.Combine(s_parentDirectory.FullName, s_newDirectoryName);
+                    DirectoryInfo newDirectory = Directory.CreateDirectory(newDirectoryPath);
+                    Close(new CreateDirectoryModalResult(ModalResult.Success, newDirectory));
                 }
                 catch
                 {
@@ -137,12 +135,12 @@ public static class CreateDirectoryModal
 
     private static bool IsDirectoryNameValid()
     {
-        if (string.IsNullOrWhiteSpace(s_directoryName))
+        if (string.IsNullOrWhiteSpace(s_newDirectoryName))
         {
             return false;
         }
 
-        string trimmedName = s_directoryName.Trim();
+        string trimmedName = s_newDirectoryName.Trim();
 
         // Check for invalid file system characters
         char[] invalidChars = Path.GetInvalidPathChars();
