@@ -5,7 +5,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using Ember.UI.Styling;
+using System.Linq;
 using Hexa.NET.ImGui;
 
 namespace Ember.UI.Modals;
@@ -15,18 +15,9 @@ namespace Ember.UI.Modals;
 /// </summary>
 public enum FileBrowserMode
 {
-    /// <summary>
-    /// Select directories only
-    /// </summary>
-    SelectDirectory,
-    /// <summary>
-    /// Select texture files (.png)
-    /// </summary>
-    SelectTexture,
-    /// <summary>
-    /// Select project files (.ember)
-    /// </summary>
-    SelectProject
+    Directory,
+    Texture,
+    Project,
 }
 
 /// <summary>
@@ -34,67 +25,101 @@ public enum FileBrowserMode
 /// </summary>
 /// <param name="Status">The result status of the modal operation</param>
 /// <param name="SelectedItem">The selected file or directory item, if any</param>
-public record FileBrowserModalResult(ModalResult Status, FileItem? SelectedItem);
+public record FileBrowserModalResult(ModalResult Status, FileSystemInfo SelectedItem);
 
 /// <summary>
 /// A unified file browser modal that can handle directory selection, texture selection, and project selection
 /// </summary>
 public static class FileBrowserModal
 {
-    private static readonly string[] s_volumes;
-    private static string s_currentVolume = string.Empty;
-    private static string s_currentDirectory = string.Empty;
-    private static string s_parentDirectory = string.Empty;
-    private static readonly List<FileItem> s_items = [];
-    private static FileItem? s_selectedFileItem;
-    private static int s_selectedIndex = -1;
+    private enum FileListColumn
+    {
+        Icon = 0,
+        Name = 1,
+        Size = 2,
+        Type = 3,
+        Modified = 4
+    }
+
+    private static readonly string[] s_validImageExtensions = [".png", ".jpg", ".jpeg", ".bmp"];
+
+    // Volume tracking
+    private static readonly List<DirectoryInfo> s_volumes = [];
+    private static DirectoryInfo s_currentVolume;
+
+    // Directory tracking
+    private static DirectoryInfo s_currentDirectory;
+    private static DirectoryInfo s_parentDirectory;
+
+    // Back and Forward tracking
+    private readonly static Stack<DirectoryInfo> s_backStack = [];
+    private readonly static Stack<DirectoryInfo> s_forwardStack = [];
+
+    // Quick link directories
+    private static readonly DirectoryInfo s_homeDirectory;
+    private static readonly DirectoryInfo s_desktopDirectory;
+    private static readonly DirectoryInfo s_downloadsDirectory;
+    private static readonly DirectoryInfo s_documentsDirectory;
+    private static readonly DirectoryInfo s_picturesDirectory;
+    private static readonly DirectoryInfo s_musicDirectory;
+    private static readonly DirectoryInfo s_videoDirectory;
+
+    // Items in current directory
+    private static readonly List<FileSystemInfo> s_items = [];
+
+    // Currently selected item
+    private static FileSystemInfo s_selectedFileItem;
+
+    private static bool s_itemsNeedSort;
+    private static bool s_isValidSelection;
+
     private static bool s_shouldOpen;
     private static Action<FileBrowserModalResult> s_onClose;
     private static FileBrowserMode s_mode;
     private static string s_popupId = string.Empty;
-    private static string s_windowTitle = string.Empty;
-    private static string s_noSelectionMessage = string.Empty;
-    private static int s_pathPartsCount;
-    private static Stack<string> s_backStack = [];
-    private static Stack<string> s_forwardStack = [];
-    private static float s_fileBrowserListXOffset ;
+
+    private static float s_fileBrowserListXOffset;
 
 
     static FileBrowserModal()
     {
-        List<string> volumes = [];
         DriveInfo[] drives = DriveInfo.GetDrives();
         for (int i = 0; i < drives.Length; i++)
         {
             DriveInfo drive = drives[i];
             if (drive.IsReady && drive.DriveType == DriveType.Fixed)
             {
-                volumes.Add(drive.Name);
+                DirectoryInfo directoryInfo = new(drive.Name);
+                s_volumes.Add(directoryInfo);
             }
         }
-        s_volumes = volumes.ToArray();
+
+        // Generate quick link directories
+        s_homeDirectory = new DirectoryInfo(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile));
+        s_desktopDirectory = new DirectoryInfo(Environment.GetFolderPath(Environment.SpecialFolder.Desktop));
+        s_downloadsDirectory = new DirectoryInfo(Path.Combine(s_homeDirectory.FullName, "Downloads"));
+        s_documentsDirectory = new DirectoryInfo(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments));
+        s_picturesDirectory = new DirectoryInfo(Environment.GetFolderPath(Environment.SpecialFolder.MyPictures));
+        s_musicDirectory = new DirectoryInfo(Environment.GetFolderPath(Environment.SpecialFolder.MyMusic));
+        s_videoDirectory = new DirectoryInfo(Environment.GetFolderPath(Environment.SpecialFolder.MyVideos));
     }
 
     public static void OpenDirectorySelector(string initialDirectory, Action<FileBrowserModalResult> onClose)
     {
-        Open(initialDirectory, onClose, FileBrowserMode.SelectDirectory,
-             SR.Popup_SelectDirectoryModal, "Select Directory", SR.Message_NoDirectorySelected);
+        Open(initialDirectory, onClose, FileBrowserMode.Directory, nameof(SR.Popup_SelectDirectoryModal));
     }
 
     public static void OpenTextureSelector(string initialDirectory, Action<FileBrowserModalResult> onClose)
     {
-        Open(initialDirectory, onClose, FileBrowserMode.SelectTexture,
-             SR.Popup_SelectTextureModal, "Select Texture", SR.Message_NoImageSelected);
+        Open(initialDirectory, onClose, FileBrowserMode.Texture, nameof(SR.Popup_SelectTextureModal));
     }
 
     public static void OpenProjectSelector(string initialDirectory, Action<FileBrowserModalResult> onClose)
     {
-        Open(initialDirectory, onClose, FileBrowserMode.SelectProject,
-             SR.Popup_OpenProjectModal, "Open Project", SR.Message_NoImageSelected);
+        Open(initialDirectory, onClose, FileBrowserMode.Project, nameof(SR.Popup_OpenProjectModal));
     }
 
-    private static void Open(string initialDirectory, Action<FileBrowserModalResult> onClose,
-                           FileBrowserMode mode, ReadOnlySpan<byte> popupId, string windowTitle, ReadOnlySpan<byte> noSelectionMessage)
+    private static void Open(string initialDirectory, Action<FileBrowserModalResult> onClose, FileBrowserMode mode, string popupId)
     {
         if (!Directory.Exists(initialDirectory))
         {
@@ -103,13 +128,11 @@ public static class FileBrowserModal
 
 
         s_mode = mode;
-        s_popupId = System.Text.Encoding.UTF8.GetString(popupId);
-        s_windowTitle = windowTitle;
-        s_noSelectionMessage = System.Text.Encoding.UTF8.GetString(noSelectionMessage);
+        s_popupId = popupId;
         s_onClose = onClose;
         s_shouldOpen = true;
 
-        NavigateTo(initialDirectory);
+        NavigateTo(new DirectoryInfo(initialDirectory));
         s_backStack.Clear();
         s_forwardStack.Clear();
     }
@@ -117,6 +140,7 @@ public static class FileBrowserModal
     public static void Close(FileBrowserModalResult result)
     {
         s_onClose?.Invoke(result);
+        ImGui.GetIO().ConfigFlags &= ~ImGuiConfigFlags.NavEnableKeyboard;
         ImGui.CloseCurrentPopup();
     }
 
@@ -124,7 +148,8 @@ public static class FileBrowserModal
     {
         if (s_shouldOpen)
         {
-            ImGui.OpenPopup(s_popupId);
+            ImGui.OpenPopup(SR.GetResourceUtf8Bytes(s_popupId));
+            ImGui.GetIO().ConfigFlags |= ImGuiConfigFlags.NavEnableKeyboard;
             s_shouldOpen = false;
         }
 
@@ -135,12 +160,13 @@ public static class FileBrowserModal
         SysVec2 workCenter = workPos + (workSize * 0.5f);
 
         ImGui.SetNextWindowPos(workCenter, ImGuiCond.Always, new SysVec2(0.5f, 0.5f));
-        ImGui.SetNextWindowSizeConstraints(new SysVec2(600, 500), new SysVec2(workSize.X * 0.9f, workSize.Y * 0.9f));
+        ImGui.SetNextWindowSize(workSize * 0.9f, ImGuiCond.Appearing);
+        ImGui.SetNextWindowSizeConstraints(new SysVec2(600, 500), workSize * 0.9f);
 
         ImGuiWindowFlags modalFlags = ImGuiWindowFlags.Modal
                                       | ImGuiWindowFlags.NoMove;
 
-        if (ImGui.BeginPopupModal(s_popupId, null, modalFlags))
+        if (ImGui.BeginPopupModal(SR.GetResourceUtf8Bytes(s_popupId), null, modalFlags))
         {
             DrawNavigationBar();
             ImGui.Spacing();
@@ -152,9 +178,6 @@ public static class FileBrowserModal
             ImGui.Spacing();
 
             DrawSelected();
-            ImGui.Spacing();
-
-            DrawStatusBar();
             ImGui.Spacing();
 
             DrawActionButtons();
@@ -186,7 +209,7 @@ public static class FileBrowserModal
 
         // Up directory button
         ImGui.SameLine();
-        ImGui.BeginDisabled(string.IsNullOrEmpty(s_parentDirectory));
+        ImGui.BeginDisabled(s_parentDirectory == null);
         if (ImGui.Button(Fonts.UpIcon))
         {
             NavigateTo(s_parentDirectory);
@@ -200,33 +223,31 @@ public static class FileBrowserModal
         ImGui.Text(SR.Label_Location);
 
         ImGui.SameLine();
-        if (ImGui.BeginCombo("##volume_combo"u8, s_currentVolume, ImGuiComboFlags.WidthFitPreview))
+        if (ImGui.BeginCombo("##volume_combo"u8, s_currentVolume.Name, ImGuiComboFlags.WidthFitPreview))
         {
-            for (int i = 0; i < s_volumes.Length; i++)
+            foreach (DirectoryInfo volume in s_volumes)
             {
-                string volume = s_volumes[i];
-                bool isSelected = volume.Equals(s_currentVolume, StringComparison.OrdinalIgnoreCase);
+                bool isSelected = volume == s_currentVolume;
 
-                if (ImGui.Selectable(volume, isSelected))
+                if (ImGui.Selectable(volume.Name, isSelected))
                 {
                     NavigateTo(volume);
-                }
 
-                if (isSelected)
-                {
-                    ImGui.SetItemDefaultFocus();
+                    if (isSelected)
+                    {
+                        ImGui.SetItemDefaultFocus();
+                    }
                 }
-
             }
             ImGui.EndCombo();
         }
 
         ImGui.SameLine();
-        string potentialDirectory = s_currentDirectory;
-        if (ImGui.InputText("##current_directory"u8, ref potentialDirectory, 509, ImGuiInputTextFlags.EnterReturnsTrue | ImGuiInputTextFlags.EscapeClearsAll))
+        string relativePath = Path.GetRelativePath(s_currentVolume.FullName, s_currentDirectory.FullName);
+        if (ImGui.InputText("##current_directory"u8, ref relativePath, 509, ImGuiInputTextFlags.EnterReturnsTrue | ImGuiInputTextFlags.EscapeClearsAll))
         {
-            string newPath = Path.Combine(s_currentVolume, potentialDirectory);
-            NavigateTo(newPath);
+            string newPath = Path.Combine(s_currentVolume.FullName, relativePath);
+            NavigateTo(new DirectoryInfo(newPath));
             s_forwardStack.Clear();
         }
 
@@ -236,28 +257,33 @@ public static class FileBrowserModal
         if (ImGui.Button(SR.Button_Refresh))
         {
             RefreshItems();
-            s_selectedIndex = -1;
+        }
 
-            if (ImGui.IsItemHovered(ImGuiHoveredFlags.DelayNormal))
-            {
-                ImGui.SetTooltip(SR.FormatUtf8(nameof(SR.Button_Refresh_Tooltip), s_currentDirectory));
-            }
+        if (ImGui.IsItemHovered(ImGuiHoveredFlags.DelayNormal))
+        {
+            ImGui.SetTooltip(SR.FormatUtf8(nameof(SR.Button_Refresh_Tooltip), s_currentDirectory));
         }
 
         // Create new directory button
         ImGui.SameLine();
         if (ImGui.Button(SR.Button_NewDirectory))
         {
-            string currentDirectory = Path.Combine(s_currentVolume, s_currentDirectory);
-            CreateDirectoryModal.Open(currentDirectory, (result) =>
+            CreateDirectoryModal.Open(s_currentDirectory, (result) =>
             {
                 if (result.Status == ModalResult.Success)
                 {
                     try
                     {
-                        Directory.CreateDirectory(result.CreatedDirectory.Value.Path);
-                        NavigateTo(result.CreatedDirectory.Value.Path);
-                        s_forwardStack.Clear();
+                        FileSystemInfo newDirectory = Directory.CreateDirectory(result.CreatedDirectory.FullName);
+                        RefreshItems();
+                        for (int i = 0; i < s_items.Count; i++)
+                        {
+                            if (s_items[i].FullName == newDirectory.FullName)
+                            {
+                                SelectItem(i);
+                                break;
+                            }
+                        }
                     }
                     catch
                     {
@@ -265,11 +291,11 @@ public static class FileBrowserModal
                     }
                 }
             });
+        }
 
-            if (ImGui.IsItemHovered(ImGuiHoveredFlags.DelayNormal))
-            {
-                ImGui.SetTooltip(SR.Button_NewDirectory_Tooltip);
-            }
+        if (ImGui.IsItemHovered(ImGuiHoveredFlags.DelayNormal))
+        {
+            ImGui.SetTooltip(SR.Button_NewDirectory_Tooltip);
         }
 
     }
@@ -280,52 +306,50 @@ public static class FileBrowserModal
 
         if (ImGui.BeginChild("##quick_links"u8, childSize, ImGuiChildFlags.Borders))
         {
-            string userProfilePath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-            string downloadsPath = Path.Combine(userProfilePath, "Downloads");
-
             ImGui.PushStyleVar(ImGuiStyleVar.ButtonTextAlign, SysVec2.UnitY * 0.5f);
-            if (ImGui.Button(SR.Button_HomeDirectory, -SysVec2.UnitX))
+            if (s_homeDirectory.Exists && ImGui.Button(SR.Button_HomeDirectory, -SysVec2.UnitX))
             {
-                NavigateTo(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile));
+                NavigateTo(s_homeDirectory);
             }
 
-            if (ImGui.Button(SR.Button_DesktopDirectory, -SysVec2.UnitX))
+            if (s_desktopDirectory.Exists && ImGui.Button(SR.Button_DesktopDirectory, -SysVec2.UnitX))
             {
-                NavigateTo(Environment.GetFolderPath(Environment.SpecialFolder.Desktop));
+                NavigateTo(s_desktopDirectory);
             }
 
-            if (Path.Exists(downloadsPath) && ImGui.Button(SR.Button_DownloadsDirectory, -SysVec2.UnitX))
+            if (s_downloadsDirectory.Exists && ImGui.Button(SR.Button_DownloadsDirectory, -SysVec2.UnitX))
             {
-                NavigateTo(downloadsPath);
+                NavigateTo(s_downloadsDirectory);
             }
 
-            if (ImGui.Button(SR.Button_DocumentsDirectory, -SysVec2.UnitX))
+            if (s_documentsDirectory.Exists && ImGui.Button(SR.Button_DocumentsDirectory, -SysVec2.UnitX))
             {
-                NavigateTo(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments));
+                NavigateTo(s_documentsDirectory);
             }
 
-            if (ImGui.Button(SR.Button_PicturesDirectory, -SysVec2.UnitX))
+            if (s_picturesDirectory.Exists && ImGui.Button(SR.Button_PicturesDirectory, -SysVec2.UnitX))
             {
-                NavigateTo(Environment.GetFolderPath(Environment.SpecialFolder.MyPictures));
+                NavigateTo(s_picturesDirectory);
             }
 
-            if (ImGui.Button(SR.Button_MusicDirectory, -SysVec2.UnitX))
+            if (s_musicDirectory.Exists && ImGui.Button(SR.Button_MusicDirectory, -SysVec2.UnitX))
             {
-                NavigateTo(Environment.GetFolderPath(Environment.SpecialFolder.MyMusic));
+                NavigateTo(s_musicDirectory);
             }
 
-            if (ImGui.Button(SR.Button_VideoDirectory, -SysVec2.UnitX))
+            if (s_videoDirectory.Exists && ImGui.Button(SR.Button_VideoDirectory, -SysVec2.UnitX))
             {
-                NavigateTo(Environment.GetFolderPath(Environment.SpecialFolder.MyVideos));
+                NavigateTo(s_videoDirectory);
             }
+
             ImGui.PopStyleVar();
         }
+
         ImGui.EndChild();
     }
 
     private static void DrawFileList()
     {
-        // File/Directory List with improved styling
         SysVec2 childSize = new(0, -120);
 
         // Get the position of the modal window first
@@ -339,59 +363,247 @@ public static class FileBrowserModal
             // Store the relative position for the offset when drawing the selected label.
             s_fileBrowserListXOffset = childWindowPos.X - parentWindowPos.X;
 
-            if (ImGui.BeginTable("##file_table", 2, ImGuiTableFlags.RowBg | ImGuiTableFlags.ScrollY))
+            ImGuiTableFlags tableFlags = ImGuiTableFlags.RowBg
+                                         | ImGuiTableFlags.ScrollY
+                                         | ImGuiTableFlags.Resizable
+                                         | ImGuiTableFlags.Sortable;
+
+            if (ImGui.BeginTable("##file_table"u8, 5, tableFlags))
             {
-                ImGui.TableSetupColumn("Name", ImGuiTableColumnFlags.WidthStretch);
-                ImGui.TableSetupColumn("Type", ImGuiTableColumnFlags.WidthFixed, 80);
+                ImGui.TableSetupColumn("##icon"u8, ImGuiTableColumnFlags.WidthFixed | ImGuiTableColumnFlags.NoResize | ImGuiTableColumnFlags.NoSort, 0.0f, (uint)FileListColumn.Icon);
+                ImGui.TableSetupColumn("Name"u8, ImGuiTableColumnFlags.WidthStretch | ImGuiTableColumnFlags.DefaultSort, 0.0f, (uint)FileListColumn.Name);
+                ImGui.TableSetupColumn("Size"u8, ImGuiTableColumnFlags.WidthFixed | ImGuiTableColumnFlags.PreferSortDescending, 80.0f, (uint)FileListColumn.Size);
+                ImGui.TableSetupColumn("Type"u8, ImGuiTableColumnFlags.WidthFixed, 80.0f, (uint)FileListColumn.Type);
+                ImGui.TableSetupColumn("Modified"u8, ImGuiTableColumnFlags.WidthFixed | ImGuiTableColumnFlags.PreferSortDescending, 120.0f, (uint)FileListColumn.Modified);
                 ImGui.TableHeadersRow();
+
+                // Handle sorting
+                ImGuiTableSortSpecsPtr sortSpecPtr = ImGui.TableGetSortSpecs();
+                if (!sortSpecPtr.IsNull && sortSpecPtr.SpecsDirty)
+                {
+                    s_itemsNeedSort = true;
+                }
+
+                if (s_itemsNeedSort && s_items.Count > 1)
+                {
+                    SortFileList(sortSpecPtr);
+                    if (!sortSpecPtr.IsNull)
+                    {
+                        sortSpecPtr.SpecsDirty = false;
+                    }
+                    s_itemsNeedSort = false;
+                }
 
                 for (int i = 0; i < s_items.Count; i++)
                 {
-                    FileItem item = s_items[i];
+                    ImGui.PushID(i);
+
+                    FileSystemInfo item = s_items[i];
+
                     ImGui.TableNextRow();
+
+                    // Icon column
+                    ImGui.TableNextColumn();
+                    string icon = item is DirectoryInfo
+                                  ? Fonts.DirectoryIcon
+                                  : item.Extension.Equals(".ember", StringComparison.InvariantCultureIgnoreCase)
+                                    ? Fonts.FileEmberIcon
+                                    : Fonts.FileImageIcon;
+
+                    ImGui.Text(icon);
 
                     // Name column
                     ImGui.TableNextColumn();
-
-                    string icon = item.IsDirectory ? Fonts.DirectoryIcon : GetFileIcon(item);
-                    string displayName = $"{icon} {item.Name}";
-
-                    bool isSelected = s_selectedIndex == i;
+                    bool isSelected = s_selectedFileItem == item;
                     ImGuiSelectableFlags selectableFlags = ImGuiSelectableFlags.SpanAllColumns;
 
-                    if (ImGui.Selectable($"##{i}", isSelected, selectableFlags))
+                    if (ImGui.Selectable(item.Name, isSelected, selectableFlags))
                     {
                         SelectItem(i);
                     }
 
-                    // Handle double-click navigation for directories
-                    if (ImGui.IsItemHovered() && ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left) && item.IsDirectory)
+                    if (ImGui.IsItemHovered() && ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left))
                     {
-                        NavigateTo(item.Path);
-                        s_forwardStack.Clear();
+                        if (item is DirectoryInfo directory)
+                        {
+                            NavigateTo(directory);
+                        }
+                        else if (item is FileInfo && s_isValidSelection)
+                        {
+                            Close(new FileBrowserModalResult(ModalResult.Success, item));
+                        }
                     }
 
-                    ImGui.SameLine();
-                    ImGui.Text(displayName);
+                    // Size column
+                    ImGui.TableNextColumn();
+                    if (item is FileInfo fileInfo)
+                    {
+                        ImGui.Text($"{fileInfo.Length / 1024} KB");
+                    }
+                    else
+                    {
+                        ImGui.Text("--");
+                    }
 
                     // Type column
                     ImGui.TableNextColumn();
-                    ImGui.Text(item.IsDirectory ? "Folder" : GetFileTypeDescription(item));
+                    string type = item is DirectoryInfo
+                                  ? "Folder"
+                                  : item.Extension.Equals(".ember", StringComparison.InvariantCultureIgnoreCase)
+                                    ? "Ember Project File"
+                                    : "Image File";
+
+                    ImGui.Text(type);
+
+                    // Modified Column
+                    ImGui.TableNextColumn();
+                    ImGui.Text(item.LastWriteTime.ToString("MM/dd/yyyy"));
+
+                    ImGui.PopID();
                 }
 
                 ImGui.EndTable();
             }
-
-
         }
         ImGui.EndChild();
+    }
+
+    private static void SortFileList(ImGuiTableSortSpecsPtr sortSpecsPtr)
+    {
+        if (sortSpecsPtr.IsNull || sortSpecsPtr.SpecsCount == 0)
+        {
+            return;
+        }
+
+        // Get the primary sort specification
+        ImGuiTableColumnSortSpecsPtr columnSortSpecsPtr = sortSpecsPtr.Specs;
+        FileListColumn sortColumn = (FileListColumn)columnSortSpecsPtr.ColumnUserID;
+        bool ascending = columnSortSpecsPtr.SortDirection == ImGuiSortDirection.Ascending;
+
+        if (sortColumn == FileListColumn.Name)
+        {
+            // When sorting by name, keep directories and files separate.
+            List<FileSystemInfo> directories = [];
+            List<FileSystemInfo> files = [];
+            foreach (FileSystemInfo item in s_items)
+            {
+                if (item is DirectoryInfo)
+                {
+                    directories.Add(item);
+                }
+                else
+                {
+                    files.Add(item);
+                }
+            }
+
+            // Sort Directories
+            SortItems(directories, sortColumn, ascending);
+
+            // Sort files
+            SortItems(files, sortColumn, ascending);
+
+            // Combine back into s_items
+            s_items.Clear();
+
+
+            // If ascending then directories comes first
+            // if descending then directories come last
+            if (ascending)
+            {
+                s_items.AddRange(directories);
+                s_items.AddRange(files);
+            }
+            else
+            {
+                s_items.AddRange(files);
+                s_items.AddRange(directories);
+            }
+        }
+        else
+        {
+            SortItems(s_items, sortColumn, ascending);
+        }
+
+        // Update selected index if an item was selected
+        if (s_selectedFileItem != null)
+        {
+            SelectItem(s_items.IndexOf(s_selectedFileItem));
+        }
+    }
+
+    private static void SortItems(List<FileSystemInfo> items, FileListColumn sortColumn, bool ascending)
+    {
+        switch (sortColumn)
+        {
+            case FileListColumn.Name:
+                items.Sort((a, b) => ascending
+                                     ? string.Compare(a.Name, b.Name, StringComparison.OrdinalIgnoreCase)
+                                     : string.Compare(b.Name, a.Name, StringComparison.OrdinalIgnoreCase));
+                break;
+
+            case FileListColumn.Size:
+                items.Sort((a, b) =>
+                {
+                    // If both are directories, they are equal in terms of size
+                    // we're not calculating the size of directories here...
+                    if (a is DirectoryInfo && b is DirectoryInfo)
+                    {
+                        return 0;
+                    }
+
+                    // Directory compared to file
+                    if (a is DirectoryInfo && b is FileInfo)
+                    {
+                        // if ascending, directory before file
+                        return ascending ? -1 : 1;
+                    }
+
+                    // File compare to directory
+                    if (a is FileInfo && b is DirectoryInfo)
+                    {
+                        // if ascending, directory before file
+                        return ascending ? 1 : -1;
+                    }
+
+                    // File compared to file
+                    if (a is FileInfo aFile && b is FileInfo bFile)
+                    {
+                        return ascending
+                               ? aFile.Length.CompareTo(bFile.Length)
+                               : bFile.Length.CompareTo(aFile.Length);
+                    }
+
+                    return 0;
+                });
+                break;
+
+            case FileListColumn.Type:
+                items.Sort((a, b) => ascending
+                                     ? string.Compare(a.Extension, b.Extension, StringComparison.OrdinalIgnoreCase)
+                                     : string.Compare(b.Extension, a.Extension, StringComparison.OrdinalIgnoreCase));
+                break;
+
+            case FileListColumn.Modified:
+                items.Sort((a, b) => ascending
+                                     ? a.LastWriteTime.CompareTo(b.LastWriteTime)
+                                     : b.LastWriteTime.CompareTo(a.LastWriteTime));
+                break;
+
+            default:
+                items.Sort((a, b) => ascending
+                                     ? string.Compare(a.Name, b.Name, StringComparison.OrdinalIgnoreCase)
+                                     : string.Compare(b.Name, a.Name, StringComparison.OrdinalIgnoreCase));
+                break;
+
+        }
     }
 
     private static void DrawSelected()
     {
         // Set the cursor so the selected label left aligns with the file browser
         // child window
-        ImGui.SetCursorPosX(s_fileBrowserListXOffset );
+        ImGui.SetCursorPosX(s_fileBrowserListXOffset);
         ImGui.AlignTextToFramePadding();
         ImGui.Text(SR.Label_Selected);
 
@@ -399,63 +611,37 @@ public static class FileBrowserModal
         ImGui.Spacing();
 
         ImGui.SameLine();
-        string selected = s_selectedFileItem?.Path ?? string.Empty;
+        string selected = s_selectedFileItem?.FullName ?? string.Empty;
         ImGui.BeginDisabled();
         ImGui.SetNextItemWidth(-1);
-        ImGui.InputText("##currently_selected", ref selected, 512, ImGuiInputTextFlags.ReadOnly);
+        ImGui.InputText("##currently_selected"u8, ref selected, 512, ImGuiInputTextFlags.ReadOnly);
         ImGui.EndDisabled();
-    }
-
-    private static void DrawStatusBar()
-    {
-        // Status information
-        ImGui.BeginGroup();
-
-        // Show item count
-        int directoryCount = 0;
-        int fileCount = 0;
-        foreach (var item in s_items)
-        {
-            if (item.IsDirectory)
-                directoryCount++;
-            else
-                fileCount++;
-        }
-
-        ImGui.Text($"Items: {directoryCount} folders, {fileCount} files");
-
-        // Show current selection status
-        bool validSelection = IsValidSelection();
-        if (validSelection && s_selectedFileItem.HasValue)
-        {
-            ImGui.SameLine();
-            ImGui.Text(" | Selected:");
-            ImGui.SameLine();
-            ImGui.TextColored(SemanticColors.Success.Primary, Path.GetFileName(s_selectedFileItem.Value.Path));
-        }
-        else if (s_selectedFileItem.HasValue)
-        {
-            ImGui.SameLine();
-            ImGui.Text(" | Invalid selection");
-        }
-
-        ImGui.EndGroup();
     }
 
     private static void DrawActionButtons()
     {
-        // Action buttons
-        bool validSelection = IsValidSelection();
+        ImGuiStylePtr stylePtr = ImGui.GetStyle();
 
-        ImGui.BeginDisabled(!validSelection);
-        if (ImGui.Button(SR.Button_Select))
+        // Manually set button sizes here so we can right-align them in the content area
+        SysVec2 buttonSize = new(100.0f, 0);
+        float widthNeeded = buttonSize.X + stylePtr.ItemSpacing.X + buttonSize.X;
+
+        // Set the cursor position so that it is where the select button will be drawn
+        float cursorX = ImGui.GetCursorPosX() + ImGui.GetContentRegionAvail().X - widthNeeded;
+        ImGui.SetCursorPosX(cursorX);
+
+        // Select button
+        // Only enabled when the currently selected item is a valid selection
+        ImGui.BeginDisabled(!s_isValidSelection);
+        if (ImGui.Button(SR.Button_Select, buttonSize))
         {
             Close(new FileBrowserModalResult(ModalResult.Success, s_selectedFileItem));
         }
         ImGui.EndDisabled();
 
+        // Cancel button
         ImGui.SameLine();
-        if (ImGui.Button(SR.Button_Cancel))
+        if (ImGui.Button(SR.Button_Cancel, buttonSize))
         {
             Close(new FileBrowserModalResult(ModalResult.Cancel, null));
         }
@@ -464,81 +650,98 @@ public static class FileBrowserModal
     private static void NavigateBacK()
     {
         // Get the current path so we can add it to the forward stack
-        string previousPath = Path.Combine(s_currentVolume, s_currentDirectory);
+        DirectoryInfo previousDirectory = new DirectoryInfo(s_currentDirectory.FullName);
 
         // Check if the path we'll be navigating back to actually exists
-        string backPath = s_backStack.Pop();
-        if (Directory.Exists(backPath))
+        DirectoryInfo backDirectory = s_backStack.Pop();
+        if (backDirectory.Exists)
         {
             // The directory exists, so we can navigate to it
-            s_currentVolume = Path.GetPathRoot(backPath);
-            s_currentDirectory = backPath.Substring(s_currentVolume.Length);
-            s_parentDirectory = Directory.GetParent(backPath)?.FullName;
+            s_currentDirectory = backDirectory.Root;
+            s_currentDirectory = backDirectory;
+            s_parentDirectory = backDirectory.Parent;
 
             RefreshItems();
             SelectItem(-1);
 
-            s_forwardStack.Push(previousPath);
+            s_forwardStack.Push(previousDirectory);
         }
     }
 
     private static void NavigateForward()
     {
         // Get the current path so we can add it to the back stack
-        string previousPath = Path.Combine(s_currentVolume, s_currentDirectory);
+        DirectoryInfo previousDirectory = new DirectoryInfo(s_currentDirectory.FullName);
 
         // Check if the path we'll be navigating forward to actually exists
-        string forwardPath = s_forwardStack.Pop();
-        if (Directory.Exists(forwardPath))
+        DirectoryInfo forwardDirectory = s_forwardStack.Pop();
+        if (forwardDirectory.Exists)
         {
             // The directory exists, so we can navigate to it
-            s_currentVolume = Path.GetPathRoot(forwardPath);
-            s_currentDirectory = forwardPath.Substring(s_currentVolume.Length);
-            s_parentDirectory = Directory.GetParent(forwardPath)?.FullName;
+            s_currentVolume = forwardDirectory.Root;
+            s_currentDirectory = forwardDirectory;
+            s_parentDirectory = forwardDirectory.Parent;
 
             RefreshItems();
             SelectItem(-1);
 
-            s_backStack.Push(previousPath);
+            s_backStack.Push(previousDirectory);
         }
     }
 
-    private static void NavigateTo(string path)
+    private static void NavigateTo(DirectoryInfo to)
     {
-        // Get the current path so we can add it to the back stack
-        string previousPath = !string.IsNullOrEmpty(s_currentVolume) && !string.IsNullOrEmpty(s_currentDirectory)
-                              ? Path.Combine(s_currentVolume, s_currentDirectory)
-                              : null;
-
-        // Check if the path we'll be navigating to actually exists
-        if (Directory.Exists(path))
+        // If the directory doesn't exit, exit early.
+        if (!to.Exists)
         {
-            // The directory exists, so we can navigate to it
-            s_currentVolume = Path.GetPathRoot(path);
-            s_currentDirectory = path.Substring(s_currentVolume.Length);
-            s_parentDirectory = Directory.GetParent(path)?.FullName;
-
-            RefreshItems();
-            SelectItem(-1);
-
-            if (!string.IsNullOrEmpty(previousPath))
-            {
-                s_backStack.Push(previousPath);
-            }
+            return;
         }
+
+        // If there is a current directory, create a copy of it and add that
+        // to the back stack
+        if (s_currentDirectory is DirectoryInfo currentDirectory)
+        {
+            s_backStack.Push(new DirectoryInfo(currentDirectory.FullName));
+        }
+
+        // Get the volume and set the current directory
+        s_currentVolume = to.Root;
+        s_currentDirectory = to;
+        s_parentDirectory = to.Parent;
+
+        RefreshItems();
+        SelectItem(-1);
     }
 
     private static void SelectItem(int index)
     {
         if (index < 0 || index >= s_items.Count)
         {
-            s_selectedFileItem = null;
-            s_selectedIndex = -1;
+            if (s_mode == FileBrowserMode.Directory)
+            {
+                s_selectedFileItem = s_currentDirectory;
+            }
+            else
+            {
+                s_selectedFileItem = null;
+                s_isValidSelection = false;
+            }
         }
         else
         {
             s_selectedFileItem = s_items[index];
-            s_selectedIndex = index;
+
+            s_isValidSelection = s_mode switch
+            {
+                FileBrowserMode.Directory => s_selectedFileItem is DirectoryInfo,
+
+                FileBrowserMode.Texture => s_selectedFileItem is FileInfo textureFile
+                                           && s_validImageExtensions.Contains(textureFile.Extension.ToLowerInvariant()),
+
+                FileBrowserMode.Project => s_selectedFileItem is FileInfo projectFile
+                                           && projectFile.Extension.Equals(".ember", StringComparison.OrdinalIgnoreCase),
+                _ => false
+            };
         }
     }
 
@@ -546,43 +749,26 @@ public static class FileBrowserModal
     {
         s_items.Clear();
 
-        List<FileItem> directories = [];
-        List<FileItem> files = [];
+        List<DirectoryInfo> directories = [];
+        List<FileInfo> files = [];
 
         try
         {
-            string path = Path.Combine(s_currentVolume, s_currentDirectory);
+            directories.AddRange(s_currentDirectory.GetDirectories());
 
-            // Add directories
-            foreach (string dir in Directory.GetDirectories(path))
+            if (s_mode == FileBrowserMode.Project)
             {
-                FileItem fileItem = new(dir);
-                directories.Add(fileItem);
+                files.AddRange(s_currentDirectory.GetFiles("*.ember", SearchOption.TopDirectoryOnly));
+            }
+            else if (s_mode == FileBrowserMode.Texture)
+            {
+                for (int i = 0; i < s_validImageExtensions.Length; i++)
+                {
+                    string searchPattern = "*" + s_validImageExtensions[i];
+                    files.AddRange(s_currentDirectory.GetFiles(searchPattern, SearchOption.TopDirectoryOnly));
+                }
             }
 
-            // Add files based on mode
-            switch (s_mode)
-            {
-                case FileBrowserMode.SelectDirectory:
-                    // No files for directory selection
-                    break;
-
-                case FileBrowserMode.SelectTexture:
-                    foreach (string file in Directory.GetFiles(path, "*.png", SearchOption.TopDirectoryOnly))
-                    {
-                        FileItem fileItem = new(file);
-                        files.Add(fileItem);
-                    }
-                    break;
-
-                case FileBrowserMode.SelectProject:
-                    foreach (string file in Directory.GetFiles(path, "*.ember", SearchOption.TopDirectoryOnly))
-                    {
-                        FileItem fileItem = new(file);
-                        files.Add(fileItem);
-                    }
-                    break;
-            }
         }
         catch
         {
@@ -595,50 +781,5 @@ public static class FileBrowserModal
         s_items.AddRange(directories);
         s_items.AddRange(files);
         SelectItem(-1);
-    }
-
-    private static bool IsValidSelection()
-    {
-        if (!s_selectedFileItem.HasValue)
-            return false;
-
-        return s_mode switch
-        {
-            FileBrowserMode.SelectDirectory => s_selectedFileItem.Value.IsDirectory,
-            FileBrowserMode.SelectTexture => !s_selectedFileItem.Value.IsDirectory,
-            FileBrowserMode.SelectProject => !s_selectedFileItem.Value.IsDirectory,
-            _ => false
-        };
-    }
-
-    private static string GetFileIcon(FileItem item)
-    {
-        if (item.IsDirectory)
-            return Fonts.DirectoryIcon;
-
-        string extension = Path.GetExtension(item.Path).ToLowerInvariant();
-        return extension switch
-        {
-            ".png" or ".jpg" or ".jpeg" or ".gif" or ".bmp" => Fonts.ImageIcon,
-            ".ember" => Fonts.ImageIcon, // Use image icon for project files for now
-            _ => Fonts.ImageIcon
-        };
-    }
-
-    private static string GetFileTypeDescription(FileItem item)
-    {
-        if (item.IsDirectory)
-            return "Folder";
-
-        string extension = Path.GetExtension(item.Path).ToLowerInvariant();
-        return extension switch
-        {
-            ".png" => "PNG Image",
-            ".jpg" or ".jpeg" => "JPEG Image",
-            ".gif" => "GIF Image",
-            ".bmp" => "Bitmap Image",
-            ".ember" => "Project File",
-            _ => "File"
-        };
     }
 }
