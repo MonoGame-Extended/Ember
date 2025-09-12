@@ -11,8 +11,11 @@ using MonoGame.Extended.Particles.Primitives;
 
 namespace EmberExample;
 
+public record SampleEffect(string Name, string Path);
+
 public class Game1 : Game
 {
+
     private GraphicsDeviceManager _graphics;
     private SpriteBatch _spriteBatch;
     private ParticleEffect _particleEffect;
@@ -23,6 +26,7 @@ public class Game1 : Game
     private readonly Stopwatch _drawTimer = new();
 
     private readonly string _contentPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Content");
+    private SampleEffect[] _sampleEffects;
 
     public Game1()
     {
@@ -49,6 +53,16 @@ public class Game1 : Game
     protected override void LoadContent()
     {
         _spriteBatch = new SpriteBatch(GraphicsDevice);
+
+        _sampleEffects =
+        [
+            new SampleEffect("Smoke", Path.Combine(_contentPath, "smoke", "smoke.ember")),
+            new SampleEffect("Spark", Path.Combine(_contentPath, "spark", "spark.ember")),
+            new SampleEffect("Ring", Path.Combine(_contentPath, "ring", "ring.ember")),
+            new SampleEffect("Load Test", Path.Combine(_contentPath, "loadtest", "loadtest.ember")),
+
+            new SampleEffect("Fireball", Path.Combine(_contentPath, "fireball", "fireball.ember")),
+        ];
     }
 
     protected override void Update(GameTime gameTime)
@@ -100,45 +114,29 @@ public class Game1 : Game
 
         if (ImGui.Begin("Debug"u8, ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoTitleBar))
         {
-            // Buttons to choose different effect samples to show
-            if (ImGui.BeginTable("##sample_buttons"u8, 4, ImGuiTableFlags.SizingStretchProp))
+            ImGuiStylePtr stylePtr = ImGui.GetStyle();
+            System.Numerics.Vector2 buttonSize = new(120, 0);
+            float windowVisibleX2 = ImGui.GetCursorScreenPos().X + ImGui.GetContentRegionAvail().X;
+            for (int i = 0; i < _sampleEffects.Length; i++)
             {
-                ImGui.TableSetupColumn("##smoke_column"u8, ImGuiTableColumnFlags.WidthStretch, 1.0f);
-                ImGui.TableSetupColumn("##spark_column"u8, ImGuiTableColumnFlags.WidthStretch, 1.0f);
-                ImGui.TableSetupColumn("##ring_column"u8, ImGuiTableColumnFlags.WidthStretch, 1.0f);
-                ImGui.TableSetupColumn("##loadtest_column"u8, ImGuiTableColumnFlags.WidthStretch, 1.0f);
+                SampleEffect sampleEffect = _sampleEffects[i];
 
-                ImGui.TableNextRow();
+                ImGui.PushID(i);
 
-                ImGui.TableNextColumn();
-                if (ImGui.Button("Smoke"u8, new System.Numerics.Vector2(-1, 0)))
+                if (ImGui.Button(sampleEffect.Name, buttonSize))
                 {
-                    string fileName = Path.Combine(_contentPath, "smoke", "smoke.ember");
-                    LoadParticleEffect(fileName);
+                    LoadParticleEffect(sampleEffect.Path);
                 }
 
-                ImGui.TableNextColumn();
-                if (ImGui.Button("Spark"u8, new System.Numerics.Vector2(-1, 0)))
+                float lastButtonX2 = ImGui.GetItemRectMax().X;
+                float nextButtonX2 = lastButtonX2 + stylePtr.ItemSpacing.X + buttonSize.X;
+
+                if (i + 1 < _sampleEffects.Length && nextButtonX2 < windowVisibleX2)
                 {
-                    string fileName = Path.Combine(_contentPath, "spark", "spark.ember");
-                    LoadParticleEffect(fileName);
+                    ImGui.SameLine();
                 }
 
-                ImGui.TableNextColumn();
-                if (ImGui.Button("Ring"u8, new System.Numerics.Vector2(-1, 0)))
-                {
-                    string fileName = Path.Combine(_contentPath, "ring", "ring.ember");
-                    LoadParticleEffect(fileName);
-                }
-
-                ImGui.TableNextColumn();
-                if (ImGui.Button("LoadTest"u8, new System.Numerics.Vector2(-1, 0)))
-                {
-                    string fileName = Path.Combine(_contentPath, "loadtest", "loadtest.ember");
-                    LoadParticleEffect(fileName);
-                }
-
-                ImGui.EndTable();
+                ImGui.PopID();
             }
 
             ImGui.Spacing();

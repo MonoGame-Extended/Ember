@@ -1,0 +1,47 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ParticleEffect AutoTrigger="true" AutoTriggerFrequency="1" Name="fireball" Position="960,540" Rotation="0" Scale="1,1">
+  <Emitters>
+    <ParticleEmitter Name="fireball1" LifeSpan="1.2" Offset="0,0" LayerDepth="0" ReclaimFrequency="60" Capacity="10000" ModifierExecutionStrategy="Serial" RenderingOrder="FrontToBack">
+      <TextureRegion Name="fire.png" Bounds="0,0,8,8" />
+      <Parameters>
+        <Quantity Kind="Constant" Constant="25" />
+        <Speed Kind="Constant" Constant="50" />
+        <Color Kind="Random" RandomMin="12.711864,1,0.4627451" RandomMax="38.773586,0.972477,0.57254905" />
+        <Opacity Kind="Constant" Constant="1" />
+        <Scale Kind="Constant" Constant="5,5" />
+        <Rotation Kind="Random" RandomMin="-3" RandomMax="-1" />
+        <Mass Kind="Constant" Constant="1" />
+      </Parameters>
+      <Profile Type="CircleProfile" Radius="100" Radiate="None" />
+      <Modifiers>
+        <Modifier Name="AgeModifier" Frequency="120" Type="AgeModifier">
+          <Interpolators>
+            <Interpolator Name="ScaleInterpolator" Type="ScaleInterpolator" StartValue="5,5" EndValue="0,0" />
+            <Interpolator Name="VelocityInterpolator" Type="VelocityInterpolator" StartValue="-800,0" EndValue="-200,0" />
+            <Interpolator Name="HueInterpolator" Type="HueInterpolator" StartValue="0" EndValue="70" />
+          </Interpolators>
+        </Modifier>
+      </Modifiers>
+    </ParticleEmitter>
+    <ParticleEmitter Name="fireball2" LifeSpan="0.5" Offset="0,0" LayerDepth="0" ReclaimFrequency="60" Capacity="1000" ModifierExecutionStrategy="Serial" RenderingOrder="FrontToBack">
+      <TextureRegion Name="fire.png" Bounds="8,0,8,8" />
+      <Parameters>
+        <Quantity Kind="Constant" Constant="1" />
+        <Speed Kind="Constant" Constant="300" />
+        <Color Kind="Constant" Constant="0,1,0.5" />
+        <Opacity Kind="Constant" Constant="1" />
+        <Scale Kind="Constant" Constant="5,5" />
+        <Rotation Kind="Constant" Constant="0" />
+        <Mass Kind="Random" RandomMin="0" RandomMax="5" />
+      </Parameters>
+      <Profile Type="RingProfile" Radius="100" Radiate="None" />
+      <Modifiers>
+        <Modifier Name="AgeModifier" Frequency="300" Type="AgeModifier">
+          <Interpolators>
+            <Interpolator Name="ScaleInterpolator" Type="ScaleInterpolator" StartValue="5,5" EndValue="0,0" />
+          </Interpolators>
+        </Modifier>
+      </Modifiers>
+    </ParticleEmitter>
+  </Emitters>
+</ParticleEffect>
