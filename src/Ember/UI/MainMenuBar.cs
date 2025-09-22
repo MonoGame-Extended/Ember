@@ -11,8 +11,11 @@ namespace Ember.UI;
 
 public static class MainMenuBar
 {
+    private static bool _openProject;
+
     public static void Draw()
     {
+        _openProject = false;
         if (ImGui.BeginMainMenuBar())
         {
             DrawFileMenu();
@@ -20,6 +23,13 @@ public static class MainMenuBar
             DrawThemeMenu();
             ImGui.EndMainMenuBar();
         }
+
+        if (_openProject)
+        {
+            ImGui.OpenPopup("open_project");
+        }
+
+        OpenProjectPopup();
     }
 
     private static void DrawFileMenu()
@@ -39,13 +49,14 @@ public static class MainMenuBar
 
             if (ImGui.MenuItem(SR.Menu_File_OpenExistingProject))
             {
-                FileBrowserModal.OpenProjectSelector(EmberContext.ProjectDirectory, result =>
-                {
-                    if (result.Status == ModalResult.Success)
-                    {
-                        EmberContext.OpenProject(result.SelectedItem.FullName);
-                    }
-                });
+                _openProject = true;
+                // FileBrowserModal.OpenProjectSelector(EmberContext.ProjectDirectory, result =>
+                // {
+                //     if (result.Status == ModalResult.Success)
+                //     {
+                //         EmberContext.OpenProject(result.SelectedItem.FullName);
+                //     }
+                // });
             }
 
             if (ImGui.MenuItem(SR.Menu_File_SaveProject))
@@ -89,6 +100,31 @@ public static class MainMenuBar
                 }
             }
             ImGui.EndMenu();
+        }
+    }
+
+    private static void OpenProjectPopup()
+    {
+
+        ImGuiViewportPtr viewportPtr = ImGui.GetMainViewport();
+        SysVec2 workCenter = viewportPtr.WorkPos + (viewportPtr.WorkSize * 0.5f);
+
+        ImGui.SetNextWindowPos(workCenter, ImGuiCond.Always, new SysVec2(0.5f));
+        ImGui.SetNextWindowSize(viewportPtr.WorkSize * 0.9f, ImGuiCond.Appearing);
+        ImGui.SetNextWindowSizeConstraints(new SysVec2(600, 500), viewportPtr.WorkSize * 0.9f);
+
+        ImGuiWindowFlags modalFlags = ImGuiWindowFlags.Modal
+                                      | ImGuiWindowFlags.NoMove
+                                      | ImGuiWindowFlags.NoTitleBar;
+
+        if (ImGui.BeginPopupModal("open_project", modalFlags))
+        {
+            FileDialog dialog = FileDialog.GetFileDialog("mainmenubar", null, ".ember", false);
+            if (dialog.Draw())
+            {
+                EmberContext.OpenProject(dialog.SelectedItem.FullName);
+            }
+            ImGui.EndPopup();
         }
     }
 }

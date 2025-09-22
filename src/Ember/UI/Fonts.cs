@@ -26,6 +26,7 @@ public static class Fonts
     public const string ChevronRightIcon = "\uf054";
     public const string FileEmberIcon = "\uf7e4";
     public const string FileImageIcon = "\uf1c5";
+    public const string SquarePlusIcon = "\uf0fe";
 
     public static unsafe void Load()
     {
