@@ -85,8 +85,10 @@ public static class SelectedEmitterPropertiesChildWindow
 
         ImGui.TableNextColumn();
         ImGui.SetNextItemWidth(-1);
-        if (ImGui.InputText("##selected_emitter_name_value"u8, ref emitter.Name, 256, ImGuiInputTextFlags.EnterReturnsTrue | ImGuiInputTextFlags.AutoSelectAll))
+        string emitterName = emitter.Name;
+        if (ImGui.InputText("##selected_emitter_name_value"u8, ref emitterName, 256, ImGuiInputTextFlags.EnterReturnsTrue | ImGuiInputTextFlags.AutoSelectAll))
         {
+            emitter.Name = emitterName;
             EmberContext.HasUnsavedChanges = true;
         }
     }
@@ -268,8 +270,10 @@ public static class SelectedEmitterPropertiesChildWindow
 
         ImGui.TableNextColumn();
         ImGui.SetNextItemWidth(-1);
-        if (ImGui.DragFloat("##emitter_lifespan_property_value"u8, ref emitter.LifeSpan, 0.1f, 0.0f, float.MaxValue, "%.2f"))
+        float emitterLifeSpan = emitter.LifeSpan;
+        if (ImGui.DragFloat("##emitter_lifespan_property_value"u8, ref emitterLifeSpan, 0.1f, 0.0f, float.MaxValue, "%.2f"))
         {
+            emitter.LifeSpan = emitterLifeSpan;
             EmberContext.HasUnsavedChanges = true;
         }
     }

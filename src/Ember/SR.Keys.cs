@@ -276,8 +276,10 @@ internal static partial class SR
     internal static ReadOnlySpan<byte> ReleaseParameter_Quantity_Name => GetResourceUtf8Bytes(nameof(ReleaseParameter_Quantity_Name));
     internal static ReadOnlySpan<byte> ReleaseParameter_Rotation_Description => GetResourceUtf8Bytes(nameof(ReleaseParameter_Rotation_Description));
     internal static ReadOnlySpan<byte> ReleaseParameter_Rotation_Name => GetResourceUtf8Bytes(nameof(ReleaseParameter_Rotation_Name));
-    internal static ReadOnlySpan<byte> ReleaseParameter_Scale_Description => GetResourceUtf8Bytes(nameof(ReleaseParameter_Scale_Description));
-    internal static ReadOnlySpan<byte> ReleaseParameter_Scale_Name => GetResourceUtf8Bytes(nameof(ReleaseParameter_Scale_Name));
+    internal static ReadOnlySpan<byte> ReleaseParameter_ScaleX_Description => GetResourceUtf8Bytes(nameof(ReleaseParameter_ScaleX_Description));
+    internal static ReadOnlySpan<byte> ReleaseParameter_ScaleX_Name => GetResourceUtf8Bytes(nameof(ReleaseParameter_ScaleX_Name));
+    internal static ReadOnlySpan<byte> ReleaseParameter_ScaleY_Description => GetResourceUtf8Bytes(nameof(ReleaseParameter_ScaleY_Description));
+    internal static ReadOnlySpan<byte> ReleaseParameter_ScaleY_Name => GetResourceUtf8Bytes(nameof(ReleaseParameter_ScaleY_Name));
     internal static ReadOnlySpan<byte> ReleaseParameter_Speed_Description => GetResourceUtf8Bytes(nameof(ReleaseParameter_Speed_Description));
     internal static ReadOnlySpan<byte> ReleaseParameter_Speed_Name => GetResourceUtf8Bytes(nameof(ReleaseParameter_Speed_Name));
 
@@ -346,12 +348,18 @@ internal static partial class SR
     // VortexModifier
     internal static ReadOnlySpan<byte> VortexModifier_Description => GetResourceUtf8Bytes(nameof(VortexModifier_Description));
     internal static ReadOnlySpan<byte> VortexModifier_Name => GetResourceUtf8Bytes(nameof(VortexModifier_Name));
-    internal static ReadOnlySpan<byte> VortexModifier_Property_Mass_Description => GetResourceUtf8Bytes(nameof(VortexModifier_Property_Mass_Description));
-    internal static ReadOnlySpan<byte> VortexModifier_Property_Mass_Name => GetResourceUtf8Bytes(nameof(VortexModifier_Property_Mass_Name));
-    internal static ReadOnlySpan<byte> VortexModifier_Property_MaxSpeed_Description => GetResourceUtf8Bytes(nameof(VortexModifier_Property_MaxSpeed_Description));
-    internal static ReadOnlySpan<byte> VortexModifier_Property_MaxSpeed_Name => GetResourceUtf8Bytes(nameof(VortexModifier_Property_MaxSpeed_Name));
     internal static ReadOnlySpan<byte> VortexModifier_Property_Position_Description => GetResourceUtf8Bytes(nameof(VortexModifier_Property_Position_Description));
     internal static ReadOnlySpan<byte> VortexModifier_Property_Position_Name => GetResourceUtf8Bytes(nameof(VortexModifier_Property_Position_Name));
+    internal static ReadOnlySpan<byte> VortexModifier_Property_Strength_Description => GetResourceUtf8Bytes(nameof(VortexModifier_Property_Strength_Description));
+    internal static ReadOnlySpan<byte> VortexModifier_Property_Strength_Name => GetResourceUtf8Bytes(nameof(VortexModifier_Property_Strength_Name));
+    internal static ReadOnlySpan<byte> VortexModifier_Property_OuterRadius_Description => GetResourceUtf8Bytes(nameof(VortexModifier_Property_OuterRadius_Description));
+    internal static ReadOnlySpan<byte> VortexModifier_Property_OuterRadius_Name => GetResourceUtf8Bytes(nameof(VortexModifier_Property_OuterRadius_Name));
+    internal static ReadOnlySpan<byte> VortexModifier_Property_InnerRadius_Description => GetResourceUtf8Bytes(nameof(VortexModifier_Property_InnerRadius_Description));
+    internal static ReadOnlySpan<byte> VortexModifier_Property_InnerRadius_Name => GetResourceUtf8Bytes(nameof(VortexModifier_Property_InnerRadius_Name));
+    internal static ReadOnlySpan<byte> VortexModifier_Property_MaxVelocity_Description => GetResourceUtf8Bytes(nameof(VortexModifier_Property_MaxVelocity_Description));
+    internal static ReadOnlySpan<byte> VortexModifier_Property_MaxVelocity_Name => GetResourceUtf8Bytes(nameof(VortexModifier_Property_MaxVelocity_Name));
+    internal static ReadOnlySpan<byte> VortexModifier_Property_RotationAngle_Description => GetResourceUtf8Bytes(nameof(VortexModifier_Property_RotationAngle_Description));
+    internal static ReadOnlySpan<byte> VortexModifier_Property_RotationAngle_Name => GetResourceUtf8Bytes(nameof(VortexModifier_Property_RotationAngle_Name));
 
     // Windows
     internal static ReadOnlySpan<byte> Window_Modifiers => GetResourceUtf8Bytes(nameof(Window_Modifiers));

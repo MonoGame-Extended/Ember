@@ -3,32 +3,14 @@
 // See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using Hexa.NET.ImGui;
 using MonoGame.Extended;
 using MonoGame.Extended.Particles;
-using MonoGame.Extended.Particles.Data;
 
 namespace Ember.UI.ChildWindows;
 
 public static class SelectedEmitterReleaseParametersChildWindow
 {
-    private static readonly Dictionary<ParticleValueKind, DisplayAttribute> s_valueKinds = [];
-
-    static SelectedEmitterReleaseParametersChildWindow()
-    {
-        // TODO: Hardcoding these for now. What I'd like to eventually do is move this to using the actual
-        //       DisplayAttribute on the classes in MGE and then use reflection once to read them here and
-        //       store them.  Then ultimately do the same thing for all class, properties, and fields throughout
-        //       the particle system implementation in MGE, so that it could allow users to easily add new
-        //       types from their own libraries.  Need to really think on this design more though before
-        //       implementing it since it's going to rely on reflection further down in the actual draw calls.
-
-        s_valueKinds[ParticleValueKind.Constant] = new DisplayAttribute() { Name = nameof(SR.ParticleValueKind_Constant_Name), Description = nameof(SR.ParticleValueKind_Constant_Description) };
-        s_valueKinds[ParticleValueKind.Random] = new DisplayAttribute() { Name = nameof(SR.ParticleValueKind_Random_Name), Description = nameof(SR.ParticleValueKind_Random_Description) };
-    }
-
     public static void Draw()
     {
         if (ImGui.CollapsingHeader(SR.CollapsingHeader_SelectedEmitterReleaseParameters, ImGuiTreeNodeFlags.DefaultOpen))
@@ -52,27 +34,76 @@ public static class SelectedEmitterReleaseParametersChildWindow
         }
 
         ImGui.BeginDisabled(EmberContext.IsLocked(emitter));
-        if (ImGui.BeginTable("##selected_emitter_release_parameters_properties_table"u8, 4, ImGuiTableFlags.SizingStretchProp))
+        if (ImGui.BeginTable("##selected_emitter_release_parameters_properties_table"u8, 2, ImGuiTableFlags.SizingStretchProp))
         {
             ImGui.TableSetupColumn("##selected_emitter_release_parameters_label_column"u8, ImGuiTableColumnFlags.WidthStretch, 1.0f);
-            ImGui.TableSetupColumn("##selected_emitter_release_parameters_kind_column"u8, ImGuiTableColumnFlags.WidthStretch, 1.0f);
-            ImGui.TableSetupColumn("##selected_emitter_release_parameters_value_column"u8, ImGuiTableColumnFlags.WidthStretch, 2.0f);
+            ImGui.TableSetupColumn("##selected_emitter_release_parameters_value_column"u8, ImGuiTableColumnFlags.WidthStretch, 1.0f);
 
-            DrawEmitterReleaseParameterRow(SR.ReleaseParameter_Quantity_Name, SR.ReleaseParameter_Quantity_Description, ref emitter.Parameters.Quantity);
-            DrawEmitterReleaseParameterRow(SR.ReleaseParameter_Speed_Name, SR.ReleaseParameter_Speed_Description, ref emitter.Parameters.Speed);
-            DrawEmitterReleaseParameterRow(SR.ReleaseParameter_Color_Name, SR.ReleaseParameter_Color_Description, ref emitter.Parameters.Color);
-            DrawEmitterReleaseParameterRow(SR.ReleaseParameter_Opacity_Name, SR.ReleaseParameter_Opacity_Description, ref emitter.Parameters.Opacity);
-            DrawEmitterReleaseParameterRow(SR.ReleaseParameter_Scale_Name, SR.ReleaseParameter_Scale_Description, ref emitter.Parameters.Scale);
-            DrawEmitterReleaseParameterRow(SR.ReleaseParameter_Rotation_Name, SR.ReleaseParameter_Rotation_Description, ref emitter.Parameters.Rotation);
-            DrawEmitterReleaseParameterRow(SR.ReleaseParameter_Mass_Name, SR.ReleaseParameter_Mass_Description, ref emitter.Parameters.Mass);
+            Interval<int> quantity = emitter.Parameters.Quantity;
+            if (DrawEmitterReleaseParameterRow(SR.ReleaseParameter_Quantity_Name, SR.ReleaseParameter_Quantity_Description, ref quantity))
+            {
+                emitter.Parameters.Quantity = quantity;
+                EmberContext.HasUnsavedChanges = true;
+            }
+
+            Interval<float> speed = emitter.Parameters.Speed;
+            if (DrawEmitterReleaseParameterRow(SR.ReleaseParameter_Speed_Name, SR.ReleaseParameter_Speed_Description, ref speed))
+            {
+                emitter.Parameters.Speed = speed;
+                EmberContext.HasUnsavedChanges = true;
+            }
+
+            Interval<HslColor> color = emitter.Parameters.Color;
+            if (DrawEmitterReleaseParameterRow(SR.ReleaseParameter_Color_Name, SR.ReleaseParameter_Color_Description, ref color))
+            {
+                emitter.Parameters.Color = color;
+                EmberContext.HasUnsavedChanges = true;
+            }
+
+            Interval<float> opacity = emitter.Parameters.Opacity;
+            if (DrawEmitterReleaseParameterRow(SR.ReleaseParameter_Opacity_Name, SR.ReleaseParameter_Opacity_Description, ref opacity))
+            {
+                emitter.Parameters.Opacity = opacity;
+                EmberContext.HasUnsavedChanges = true;
+            }
+
+            Interval<float> scaleX = emitter.Parameters.ScaleX;
+            if (DrawEmitterReleaseParameterRow(SR.ReleaseParameter_ScaleX_Name, SR.ReleaseParameter_ScaleX_Description, ref scaleX))
+            {
+                emitter.Parameters.ScaleX = scaleX;
+                EmberContext.HasUnsavedChanges = true;
+            }
+
+            Interval<float> scaleY = emitter.Parameters.ScaleY;
+            if (DrawEmitterReleaseParameterRow(SR.ReleaseParameter_ScaleY_Name, SR.ReleaseParameter_ScaleY_Description, ref scaleY))
+            {
+                emitter.Parameters.ScaleY = scaleY;
+                EmberContext.HasUnsavedChanges = true;
+            }
+
+            Interval<float> rotation = emitter.Parameters.Rotation;
+            if (DrawEmitterReleaseParameterRow(SR.ReleaseParameter_Rotation_Name, SR.ReleaseParameter_Rotation_Description, ref rotation))
+            {
+                emitter.Parameters.Rotation = rotation;
+                EmberContext.HasUnsavedChanges = true;
+            }
+
+            Interval<float> mass = emitter.Parameters.Mass;
+            if (DrawEmitterReleaseParameterRow(SR.ReleaseParameter_Mass_Name, SR.ReleaseParameter_Mass_Description, ref mass))
+            {
+                emitter.Parameters.Mass = mass;
+                EmberContext.HasUnsavedChanges = true;
+            }
 
             ImGui.EndTable();
         }
         ImGui.EndDisabled();
     }
 
-    private static void DrawEmitterReleaseParameterRow(ReadOnlySpan<byte> label, ReadOnlySpan<byte> description, ref ParticleInt32Parameter parameter)
+    private static bool DrawEmitterReleaseParameterRow(ReadOnlySpan<byte> label, ReadOnlySpan<byte> description, ref Interval<int> parameter)
     {
+        bool valueChanged = false;
+
         ImGui.PushID(label);
         ImGuiStylePtr style = ImGui.GetStyle();
 
@@ -87,69 +118,42 @@ public static class SelectedEmitterReleaseParametersChildWindow
         }
 
         ImGui.TableNextColumn();
-        ImGui.SetNextItemWidth(-1);
-        ReadOnlySpan<byte> preview = SR.GetResourceUtf8Bytes(s_valueKinds[parameter.Kind].Name);
-        if (ImGui.BeginCombo("##parameter_kind"u8, preview))
+
+        float availWidth = ImGui.GetContentRegionAvail().X;
+        float toWidth = ImGui.CalcTextSize(" to ").X;
+        float spacing = style.ItemSpacing.X * 2.0f;
+
+        float dragWidth = (availWidth - toWidth - spacing) * 0.5f;
+
+        ImGui.SetNextItemWidth(dragWidth);
+        int min = parameter.Min;
+        if (ImGui.DragInt("##min_value"u8, ref min, 1, 0, parameter.Max))
         {
-            foreach (var kvp in s_valueKinds)
-            {
-                ParticleValueKind kind = kvp.Key;
-                DisplayAttribute display = kvp.Value;
-
-                bool isSelected = kind == parameter.Kind;
-
-                if (ImGui.Selectable(SR.GetResourceUtf8Bytes(display.Name), isSelected))
-                {
-                    parameter.Kind = kind;
-                    EmberContext.HasUnsavedChanges = true;
-                }
-
-                if (ImGui.IsItemHovered(ImGuiHoveredFlags.DelayNormal))
-                {
-                    ImGui.SetTooltip(SR.GetResourceUtf8Bytes(display.Description));
-                }
-
-                if (isSelected)
-                {
-                    ImGui.SetItemDefaultFocus();
-                }
-            }
-
-            ImGui.EndCombo();
+            parameter = new(min, parameter.Max);
+            valueChanged = true;
         }
 
-        if (parameter.Kind == ParticleValueKind.Constant)
+        ImGui.SameLine();
+        ImGui.Text(SR.Label_To);
+
+        ImGui.SameLine();
+        ImGui.SetNextItemWidth(dragWidth);
+        int max = parameter.Max;
+        if (ImGui.DragInt("##max_value"u8, ref max, 1, parameter.Min, int.MaxValue))
         {
-            ImGui.TableNextColumn();
-            ImGui.SetNextItemWidth(-1);
-            ImGui.DragInt("##constant_value"u8, ref parameter.Constant, 1, 0, int.MaxValue);
-        }
-        else
-        {
-            ImGui.TableNextColumn();
-
-            float availWidth = ImGui.GetContentRegionAvail().X;
-            float toWidth = ImGui.CalcTextSize(" to ").X;
-            float spacing = style.ItemSpacing.X * 2.0f;
-
-            float dragWidth = (availWidth - toWidth - spacing) * 0.5f;
-
-            ImGui.SetNextItemWidth(dragWidth);
-            ImGui.DragInt("##random_min_value"u8, ref parameter.RandomMin, 1, 0, parameter.RandomMax);
-
-            ImGui.SameLine();
-            ImGui.Text(SR.Label_To);
-
-            ImGui.SameLine();
-            ImGui.SetNextItemWidth(dragWidth);
-            ImGui.DragInt("##random_max_value"u8, ref parameter.RandomMax, 1, parameter.RandomMin, int.MaxValue);
+            parameter = new(parameter.Min, max);
+            valueChanged = true;
         }
 
         ImGui.PopID();
+
+        return valueChanged;
     }
 
-    private static void DrawEmitterReleaseParameterRow(ReadOnlySpan<byte> label, ReadOnlySpan<byte> description, ref ParticleFloatParameter parameter)
+    private static bool DrawEmitterReleaseParameterRow(ReadOnlySpan<byte> label, ReadOnlySpan<byte> description, ref Interval<float> parameter)
     {
+        bool valueChanged = false;
+
         ImGui.PushID(label);
         ImGuiStylePtr style = ImGui.GetStyle();
 
@@ -164,172 +168,42 @@ public static class SelectedEmitterReleaseParametersChildWindow
         }
 
         ImGui.TableNextColumn();
-        ImGui.SetNextItemWidth(-1);
-        ReadOnlySpan<byte> preview = SR.GetResourceUtf8Bytes(s_valueKinds[parameter.Kind].Name);
-        if (ImGui.BeginCombo("##parameter_kind"u8, preview))
+
+        float availWidth = ImGui.GetContentRegionAvail().X;
+        float toWidth = ImGui.CalcTextSize(SR.Label_To).X;
+        float spacing = style.ItemSpacing.X * 2.0f;
+
+        float dragWidth = (availWidth - toWidth - spacing) * 0.5f;
+
+        ImGui.SetNextItemWidth(dragWidth);
+        float min = parameter.Min;
+        if (ImGui.DragFloat("##min_value"u8, ref min, 0.1f, 0, parameter.Max, "%.2f"u8))
         {
-            foreach (var kvp in s_valueKinds)
-            {
-                ParticleValueKind kind = kvp.Key;
-                DisplayAttribute display = kvp.Value;
-
-                bool isSelected = kind == parameter.Kind;
-
-                if (ImGui.Selectable(SR.GetResourceUtf8Bytes(display.Name), isSelected))
-                {
-                    parameter.Kind = kind;
-                    EmberContext.HasUnsavedChanges = true;
-                }
-
-                if (ImGui.IsItemHovered(ImGuiHoveredFlags.DelayNormal))
-                {
-                    ImGui.SetTooltip(SR.GetResourceUtf8Bytes(display.Description));
-                }
-
-                if (isSelected)
-                {
-                    ImGui.SetItemDefaultFocus();
-                }
-            }
-
-            ImGui.EndCombo();
+            parameter = new(min, parameter.Max);
+            valueChanged = true;
         }
 
-        if (parameter.Kind == ParticleValueKind.Constant)
+        ImGui.SameLine();
+        ImGui.Text(SR.Label_To);
+
+        ImGui.SameLine();
+        ImGui.SetNextItemWidth(dragWidth);
+        float max = parameter.Max;
+        if (ImGui.DragFloat("##max_value"u8, ref max, 1, parameter.Min, float.MaxValue, "%.2f"u8))
         {
-            ImGui.TableNextColumn();
-            ImGui.SetNextItemWidth(-1);
-            ImGui.DragFloat("##constant_value"u8, ref parameter.Constant, 0.1f, 0, float.MaxValue, "%.2f"u8);
-        }
-        else
-        {
-            ImGui.TableNextColumn();
-
-            float availWidth = ImGui.GetContentRegionAvail().X;
-            float toWidth = ImGui.CalcTextSize(SR.Label_To).X;
-            float spacing = style.ItemSpacing.X * 2.0f;
-
-            float dragWidth = (availWidth - toWidth - spacing) * 0.5f;
-
-            ImGui.SetNextItemWidth(dragWidth);
-            ImGui.DragFloat("##random_min_value"u8, ref parameter.RandomMin, 0.1f, 0, parameter.RandomMax, "%.2f"u8);
-
-            ImGui.SameLine();
-            ImGui.Text(SR.Label_To);
-
-            ImGui.SameLine();
-            ImGui.SetNextItemWidth(dragWidth);
-            ImGui.DragFloat("##random_max_value"u8, ref parameter.RandomMax, 1, parameter.RandomMin, float.MaxValue, "%.2f"u8);
+            parameter = new(parameter.Min, max);
+            valueChanged = true;
         }
 
         ImGui.PopID();
+
+        return valueChanged;
     }
 
-    private static void DrawEmitterReleaseParameterRow(ReadOnlySpan<byte> label, ReadOnlySpan<byte> description, ref ParticleVector2Parameter parameter)
+    private static bool DrawEmitterReleaseParameterRow(ReadOnlySpan<byte> label, ReadOnlySpan<byte> description, ref Interval<HslColor> parameter)
     {
-        ImGui.PushID(label);
-        ImGuiStylePtr style = ImGui.GetStyle();
+        bool valueChanged = false;
 
-
-        ImGui.TableNextRow();
-        ImGui.TableNextColumn();
-        ImGui.AlignTextToFramePadding();
-        ImGui.Text(label);
-
-        if (ImGui.IsItemHovered())
-        {
-            ImGui.SetTooltip(description);
-        }
-
-        ImGui.TableNextColumn();
-        ImGui.SetNextItemWidth(-1);
-        ReadOnlySpan<byte> preview = SR.GetResourceUtf8Bytes(s_valueKinds[parameter.Kind].Name);
-        if (ImGui.BeginCombo("##parameter_kind"u8, preview))
-        {
-            foreach (var kvp in s_valueKinds)
-            {
-                ParticleValueKind kind = kvp.Key;
-                DisplayAttribute display = kvp.Value;
-
-                bool isSelected = kind == parameter.Kind;
-
-                if (ImGui.Selectable(SR.GetResourceUtf8Bytes(display.Name), isSelected))
-                {
-                    parameter.Kind = kind;
-                    EmberContext.HasUnsavedChanges = true;
-                }
-
-                if (ImGui.IsItemHovered(ImGuiHoveredFlags.DelayNormal))
-                {
-                    ImGui.SetTooltip(SR.GetResourceUtf8Bytes(display.Description));
-                }
-
-                if (isSelected)
-                {
-                    ImGui.SetItemDefaultFocus();
-                }
-            }
-
-            ImGui.EndCombo();
-        }
-
-
-        if (parameter.Kind == ParticleValueKind.Constant)
-        {
-            ImGui.TableNextColumn();
-
-            float availWidth = ImGui.GetContentRegionAvail().X;
-            float spacing = style.ItemSpacing.X;
-            float dragWidth = (availWidth - spacing) * 0.5f;
-
-            ImGui.SetNextItemWidth(dragWidth);
-            ImGui.DragFloat("##constant_x_value"u8, ref parameter.Constant.X, 0.1f, 0.0f, float.MaxValue, "X: %.2f"u8);
-
-            ImGui.SameLine();
-            ImGui.SetNextItemWidth(dragWidth);
-            ImGui.DragFloat("##constant_y_value"u8, ref parameter.Constant.Y, 0.1f, 0.0f, float.MaxValue, "Y: %.2f"u8);
-
-        }
-        else
-        {
-            ImGui.TableNextColumn();
-
-            float availWidth = ImGui.GetContentRegionAvail().X;
-            float toWidth = ImGui.CalcTextSize(SR.Label_To).X;
-            float spacing = style.ItemSpacing.X * 2.0f;
-            float dragWidth = (availWidth - toWidth - spacing) * 0.5f;
-
-            ImGui.SetNextItemWidth(dragWidth);
-            ImGui.DragFloat("##random_min_x_value"u8, ref parameter.RandomMin.X, 0.1f, 0.0f, parameter.RandomMax.X, "X: %.2f"u8);
-
-            ImGui.SameLine();
-            ImGui.Text(SR.Label_To);
-
-            ImGui.SameLine();
-            ImGui.SetNextItemWidth(dragWidth);
-            ImGui.DragFloat("##random_max_x_value"u8, ref parameter.RandomMax.X, 0.1f, parameter.RandomMin.X, float.MaxValue, "X: %.2f"u8);
-
-            ImGui.TableNextRow();
-            ImGui.TableNextColumn();
-            ImGui.TableNextColumn();
-            ImGui.TableNextColumn();
-
-            ImGui.SetNextItemWidth(dragWidth);
-            ImGui.DragFloat("##random_min_y_value"u8, ref parameter.RandomMin.Y, 0.1f, 0.0f, parameter.RandomMax.Y, "Y: %.2f"u8);
-
-            ImGui.SameLine();
-            ImGui.Text(SR.Label_To);
-
-            ImGui.SameLine();
-            ImGui.SetNextItemWidth(dragWidth);
-            ImGui.DragFloat("##random_max_y_value"u8, ref parameter.RandomMax.Y, 0.1f, parameter.RandomMin.Y, float.MaxValue, "Y: %.2f"u8);
-        }
-
-        ImGui.PopID();
-    }
-
-    private static void DrawEmitterReleaseParameterRow(ReadOnlySpan<byte> label, ReadOnlySpan<byte> description, ref ParticleColorParameter parameter)
-    {
         ImGui.PushID(label);
         ImGuiStylePtr style = ImGui.GetStyle();
 
@@ -344,124 +218,62 @@ public static class SelectedEmitterReleaseParametersChildWindow
         }
 
         ImGui.TableNextColumn();
-        ImGui.SetNextItemWidth(-1);
-        ReadOnlySpan<byte> preview = SR.GetResourceUtf8Bytes(s_valueKinds[parameter.Kind].Name);
-        if (ImGui.BeginCombo("##parameter_kind"u8, preview))
+
+        float availableWidth = ImGui.GetContentRegionAvail().X;
+        float toWidth = ImGui.CalcTextSize(SR.Label_To).X;
+        float spacing = style.ItemSpacing.X * 2.0f;
+        float buttonWidth = (availableWidth - toWidth - spacing) * 0.5f;
+        SysVec2 buttonSize = new SysVec2(buttonWidth, ImGui.GetFrameHeight());
+
+        XnaColor rgbMin = HslColor.ToRgb(parameter.Min);
+        SysVec4 colorMin = new SysVec4(rgbMin.R / 255.0f, rgbMin.G / 255.0f, rgbMin.B / 255.0f, 1.0f);
+
+        if (ImGui.ColorButton("##min_value_button"u8, colorMin, ImGuiColorEditFlags.None, buttonSize))
         {
-            foreach (var kvp in s_valueKinds)
-            {
-                ParticleValueKind kind = kvp.Key;
-                DisplayAttribute display = kvp.Value;
-
-                bool isSelected = kind == parameter.Kind;
-
-                if (ImGui.Selectable(SR.GetResourceUtf8Bytes(display.Name), isSelected))
-                {
-                    parameter.Kind = kind;
-                    EmberContext.HasUnsavedChanges = true;
-                }
-
-                if (ImGui.IsItemHovered(ImGuiHoveredFlags.DelayNormal))
-                {
-                    ImGui.SetTooltip(SR.GetResourceUtf8Bytes(display.Description));
-                }
-
-                if (isSelected)
-                {
-                    ImGui.SetItemDefaultFocus();
-                }
-            }
-
-            ImGui.EndCombo();
+            ImGui.OpenPopup("##min_value_color_picker"u8);
         }
 
-
-        if (parameter.Kind == ParticleValueKind.Constant)
+        if (ImGui.BeginPopup("##min_value_color_picker"u8))
         {
-            ImGui.TableNextColumn();
-
-            HslColor hslColor = new HslColor(parameter.Constant.X, parameter.Constant.Y, parameter.Constant.Z);
-            XnaColor rgbColor = HslColor.ToRgb(hslColor);
-            SysVec4 color = new SysVec4(rgbColor.R / 255.0f, rgbColor.G / 255.0f, rgbColor.B / 255.0f, 1.0f);
-
-            SysVec2 contentRegionAvail = ImGui.GetContentRegionAvail();
-            SysVec2 buttonSize = new SysVec2(contentRegionAvail.X, ImGui.GetFrameHeight());
-
-            if (ImGui.ColorButton("##constant_value_button"u8, color, ImGuiColorEditFlags.None, buttonSize))
+            float[] rgb = [colorMin.X, colorMin.Y, colorMin.Z];
+            if (ImGui.ColorPicker3("##min_value"u8, rgb))
             {
-                ImGui.OpenPopup("##constant_value_color_picker"u8);
+                XnaColor newRgb = new XnaColor(rgb[0], rgb[1], rgb[2]);
+                HslColor newHsl = HslColor.FromRgb(newRgb);
+                parameter = new(newHsl, parameter.Max);
+                valueChanged = true;
             }
 
-            if (ImGui.BeginPopup("##constant_value_color_picker"u8))
-            {
-                float[] rgb = [color.X, color.Y, color.Z];
-                if (ImGui.ColorPicker3("##constant_value"u8, rgb))
-                {
-                    XnaColor newColor = new XnaColor(rgb[0], rgb[1], rgb[2]);
-                    HslColor newHslColor = HslColor.FromRgb(newColor);
-                    parameter.Constant = new SysVec3(newHslColor.H, newHslColor.S, newHslColor.L);
-                }
-                ImGui.EndPopup();
-            }
-
+            ImGui.EndPopup();
         }
-        else
+
+        ImGui.SameLine();
+        ImGui.Text(SR.Label_To);
+
+        XnaColor rgbMax = HslColor.ToRgb(parameter.Max);
+        SysVec4 colorMax = new SysVec4(rgbMax.R / 255.0f, rgbMax.G / 255.0f, rgbMax.B / 255.0f, 1.0f);
+        ImGui.SameLine();
+        if (ImGui.ColorButton("##max_value_button"u8, colorMax, ImGuiColorEditFlags.None, buttonSize))
         {
-            ImGui.TableNextColumn();
-
-            float availableWidth = ImGui.GetContentRegionAvail().X;
-            float toWidth = ImGui.CalcTextSize(SR.Label_To).X;
-            float spacing = style.ItemSpacing.X * 2.0f;
-            float buttonWidth = (availableWidth - toWidth - spacing) * 0.5f;
-            SysVec2 buttonSize = new SysVec2(buttonWidth, ImGui.GetFrameHeight());
-
-            HslColor hslMin = new HslColor(parameter.RandomMin.X, parameter.RandomMin.Y, parameter.RandomMin.Z);
-            XnaColor rgbMin = HslColor.ToRgb(hslMin);
-            SysVec4 colorMin = new SysVec4(rgbMin.R / 255.0f, rgbMin.G / 255.0f, rgbMin.B / 255.0f, 1.0f);
-
-            if (ImGui.ColorButton("##random_min_value_button"u8, colorMin, ImGuiColorEditFlags.None, buttonSize))
-            {
-                ImGui.OpenPopup("##random_min_value_color_picker"u8);
-            }
-
-            if (ImGui.BeginPopup("##random_min_value_color_picker"u8))
-            {
-                float[] rgb = [colorMin.X, colorMin.Y, colorMin.Z];
-                if (ImGui.ColorPicker3("##random_min_value"u8, rgb))
-                {
-                    XnaColor newRgb = new XnaColor(rgb[0], rgb[1], rgb[2]);
-                    HslColor newHsl = HslColor.FromRgb(newRgb);
-                    parameter.RandomMin = new XnaVec3(newHsl.H, newHsl.S, newHsl.L);
-                }
-
-                ImGui.EndPopup();
-            }
-
-            ImGui.SameLine();
-            ImGui.Text(SR.Label_To);
-
-            HslColor hslMax = new HslColor(parameter.RandomMax.X, parameter.RandomMax.Y, parameter.RandomMax.Z);
-            XnaColor rgbMax = HslColor.ToRgb(hslMax);
-            SysVec4 colorMax = new SysVec4(rgbMax.R / 255.0f, rgbMax.G / 255.0f, rgbMax.B / 255.0f, 1.0f);
-            ImGui.SameLine();
-            if (ImGui.ColorButton("##random_max_value_button"u8, colorMax, ImGuiColorEditFlags.None, buttonSize))
-            {
-                ImGui.OpenPopup("##random_max_value_color_picker"u8);
-            }
-
-            if (ImGui.BeginPopup("##random_max_value_color_picker"u8))
-            {
-                float[] rgb = [colorMax.X, colorMax.Y, colorMax.Z];
-                if (ImGui.ColorPicker3("##random_max_value"u8, rgb))
-                {
-                    XnaColor newRgb = new XnaColor(rgb[0], rgb[1], rgb[2]);
-                    HslColor newHsl = HslColor.FromRgb(newRgb);
-                    parameter.RandomMax = new XnaVec3(newHsl.H, newHsl.S, newHsl.L);
-                }
-
-                ImGui.EndPopup();
-            }
+            ImGui.OpenPopup("##max_value_color_picker"u8);
         }
+
+        if (ImGui.BeginPopup("##max_value_color_picker"u8))
+        {
+            float[] rgb = [colorMax.X, colorMax.Y, colorMax.Z];
+            if (ImGui.ColorPicker3("##max_value"u8, rgb))
+            {
+                XnaColor newRgb = new XnaColor(rgb[0], rgb[1], rgb[2]);
+                HslColor newHsl = HslColor.FromRgb(newRgb);
+                parameter = new(parameter.Min, newHsl);
+                valueChanged = true;
+            }
+
+            ImGui.EndPopup();
+        }
+
         ImGui.PopID();
+
+        return valueChanged;
     }
 }

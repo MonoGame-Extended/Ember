@@ -10,6 +10,7 @@ using Hexa.NET.ImGui;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
+using MonoGame.Extended;
 using MonoGame.Extended.Particles;
 using MonoGame.Extended.Particles.Modifiers;
 using MonoGame.Extended.Particles.Modifiers.Containers;
@@ -376,13 +377,13 @@ public static class EmberContext
         if (modifierType == typeof(RectangleLoopContainerModifier)) return new RectangleLoopContainerModifier() { Width = 100, Height = 100 };
         if (modifierType == typeof(RectangleContainerModifier)) return new RectangleContainerModifier { Width = 100, Height = 100 };
         if (modifierType == typeof(LinearGravityModifier)) return new LinearGravityModifier() { Direction = Vector2.UnitY, Strength = 100.0f };
-        if (modifierType == typeof(VortexModifier)) return new VortexModifier() { Mass = 100.0f, Position = new Vector2(100.0f, 100.0f), MaxSpeed = 100.0f };
+        if (modifierType == typeof(VortexModifier)) return new VortexModifier() {  };
         if (modifierType == typeof(OpacityFastFadeModifier)) return new OpacityFastFadeModifier();
         if (modifierType == typeof(AgeModifier)) return new AgeModifier() { Interpolators = new List<Interpolator>() { new ScaleInterpolator() { StartValue = Vector2.Zero, EndValue = Vector2.One } } };
         if (modifierType == typeof(CircleContainerModifier)) return new CircleContainerModifier() { Radius = 100.0f };
         if (modifierType == typeof(DragModifier)) return new DragModifier();
         if (modifierType == typeof(RotationModifier)) return new RotationModifier() { RotationRate = MathF.PI / 4.0f };
-        if (modifierType == typeof(VelocityColorModifier)) return new VelocityColorModifier() { VelocityThreshold = 100.0f, StationaryColor = new Vector3(0, 0, 1.0f), VelocityColor = new Vector3(0, 1.0f, 0.5f) };
+        if (modifierType == typeof(VelocityColorModifier)) return new VelocityColorModifier() { VelocityThreshold = 100.0f, StationaryColor = new HslColor(0, 0, 1.0f), VelocityColor = new HslColor(0, 1.0f, 0.5f) };
         if (modifierType == typeof(VelocityModifier)) return new VelocityModifier() { VelocityThreshold = 100.0f, Interpolators = new List<Interpolator>() { new ScaleInterpolator() { StartValue = Vector2.Zero, EndValue = Vector2.One } } };
 
         throw new InvalidOperationException($"Unknown modifier type '{modifierType.Name}'");
@@ -462,7 +463,7 @@ public static class EmberContext
 
     private static Interpolator CreateInterpolator(Type interpolatorType)
     {
-        if (interpolatorType == typeof(ColorInterpolator)) return new ColorInterpolator() { StartValue = new Vector3(0.0f, 0.0f, 0.0f), EndValue = new Vector3(0.0f, 0.0f, 1.0f) };
+        if (interpolatorType == typeof(ColorInterpolator)) return new ColorInterpolator() { StartValue = new HslColor(0.0f, 0.0f, 0.0f), EndValue = new HslColor(0.0f, 0.0f, 1.0f) };
         if (interpolatorType == typeof(HueInterpolator)) return new HueInterpolator() { StartValue = 0.0f, EndValue = 1.0f };
         if (interpolatorType == typeof(OpacityInterpolator)) return new OpacityInterpolator() { StartValue = 0.0f, EndValue = 1.0f };
         if (interpolatorType == typeof(RotationInterpolator)) return new RotationInterpolator() { StartValue = 0.0f, EndValue = MathF.PI / 2.0f };

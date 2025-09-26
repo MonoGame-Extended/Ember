@@ -127,28 +127,83 @@ public static class SelectedEmitterProfileChildWindow
         switch (emitter.Profile)
         {
             case BoxFillProfile boxFill:
-                DrawFloatProperty(SR.BoxFillProfile_Property_Width_Name, "##box_fill_width"u8, ref boxFill.Width, 0.1f, 0.0f, float.MaxValue);
-                DrawFloatProperty(SR.BoxFillProfile_Property_Height_Name, "##box_fill_height"u8, ref boxFill.Height, 0.1f, 0.0f, float.MaxValue);
+                float boxFillWidth = boxFill.Width;
+                if (DrawFloatProperty(SR.BoxFillProfile_Property_Width_Name, "##box_fill_width"u8, ref boxFillWidth, 0.1f, 0.0f, float.MaxValue))
+                {
+                    boxFill.Width = boxFillWidth;
+                    EmberContext.HasUnsavedChanges = true;
+                }
+
+                float boxFillHeight = boxFill.Height;
+                if (DrawFloatProperty(SR.BoxFillProfile_Property_Height_Name, "##box_fill_height"u8, ref boxFillHeight, 0.1f, 0.0f, float.MaxValue))
+                {
+                    boxFill.Height = boxFillHeight;
+                    EmberContext.HasUnsavedChanges = true;
+                }
                 break;
 
             case BoxProfile box:
-                DrawFloatProperty(SR.BoxProfile_Property_Width_Name, "##box_width"u8, ref box.Width, 0.1f, 0.0f, float.MaxValue);
-                DrawFloatProperty(SR.BoxProfile_Property_Height_Name, "##box_height"u8, ref box.Height, 0.1f, 0.0f, float.MaxValue);
+                float boxWidth = box.Width;
+                if (DrawFloatProperty(SR.BoxProfile_Property_Width_Name, "##box_width"u8, ref boxWidth, 0.1f, 0.0f, float.MaxValue))
+                {
+                    box.Width = boxWidth;
+                    EmberContext.HasUnsavedChanges = true;
+                }
+
+                float boxHeight = box.Height;
+                if (DrawFloatProperty(SR.BoxProfile_Property_Height_Name, "##box_height"u8, ref boxHeight, 0.1f, 0.0f, float.MaxValue))
+                {
+                    box.Height = boxHeight;
+                    EmberContext.HasUnsavedChanges = true;
+                }
                 break;
 
             case BoxUniformProfile boxUniform:
-                DrawFloatProperty(SR.BoxUniformProfile_Property_Width_Name, "##box_uniform_width"u8, ref boxUniform.Width, 0.1f, 0.0f, float.MaxValue);
-                DrawFloatProperty(SR.BoxUniformProfile_Property_Height_Name, "##box_uniform_height"u8, ref boxUniform.Height, 0.1f, 0.0f, float.MaxValue);
+                float boxUniformWidth = boxUniform.Width;
+                if (DrawFloatProperty(SR.BoxUniformProfile_Property_Width_Name, "##box_uniform_width"u8, ref boxUniformWidth, 0.1f, 0.0f, float.MaxValue))
+                {
+                    boxUniform.Width = boxUniformWidth;
+                    EmberContext.HasUnsavedChanges = true;
+                }
+
+                float boxUniformHeight = boxUniform.Height;
+                if (DrawFloatProperty(SR.BoxUniformProfile_Property_Height_Name, "##box_uniform_height"u8, ref boxUniformHeight, 0.1f, 0.0f, float.MaxValue))
+                {
+                    boxUniform.Height = boxUniformHeight;
+                    EmberContext.HasUnsavedChanges = true;
+                }
                 break;
 
             case CircleProfile circle:
-                DrawFloatProperty(SR.CircleProfile_Property_Radius_Name, "##circle_radius"u8, ref circle.Radius, 0.1f, 0.0f, float.MaxValue);
-                DrawRadiationProperty(SR.CircleProfile_Property_Radiate_Name, "##circle_radiate"u8, ref circle.Radiate);
+                float circleRadius = circle.Radius;
+                if (DrawFloatProperty(SR.CircleProfile_Property_Radius_Name, "##circle_radius"u8, ref circleRadius, 0.1f, 0.0f, float.MaxValue))
+                {
+                    circle.Radius = circleRadius;
+                    EmberContext.HasUnsavedChanges = true;
+                }
+
+                CircleRadiation circleRadiate = circle.Radiate;
+                if (DrawRadiationProperty(SR.CircleProfile_Property_Radiate_Name, "##circle_radiate"u8, ref circleRadiate))
+                {
+                    circle.Radiate = circleRadiate;
+                    EmberContext.HasUnsavedChanges = true;
+                }
                 break;
 
             case LineProfile line:
-                DrawVector2Property(SR.LineProfile_Property_Axis_Name, "##line_axis_x"u8, "##line_axis_y"u8, ref line.Axis, 0.1f, float.MinValue, float.MaxValue);
-                DrawFloatProperty(SR.LineProfile_Property_Length_Name, "##line_length"u8, ref line.Length, 0.1f, 0.0f, float.MaxValue);
+                XnaVec2 lineAxis = line.Axis;
+                if (DrawVector2Property(SR.LineProfile_Property_Axis_Name, "##line_axis_x"u8, "##line_axis_y"u8, ref lineAxis, 0.1f, float.MinValue, float.MaxValue))
+                {
+                    line.Axis = lineAxis;
+                    EmberContext.HasUnsavedChanges = true;
+                }
+
+                float lineLength = line.Length;
+                if (DrawFloatProperty(SR.LineProfile_Property_Length_Name, "##line_length"u8, ref lineLength, 0.1f, 0.0f, float.MaxValue))
+                {
+                    line.Length = lineLength;
+                    EmberContext.HasUnsavedChanges = true;
+                }
                 break;
 
             case PointProfile point:
@@ -156,18 +211,40 @@ public static class SelectedEmitterProfileChildWindow
                 break;
 
             case RingProfile ring:
-                DrawFloatProperty(SR.RingProfile_Property_Radius_Name, "##ring_radius"u8, ref ring.Radius, 0.1f, 0.0f, float.MaxValue);
-                DrawRadiationProperty(SR.RingProfile_Property_Radiate_Name, "##ring_radiate"u8, ref ring.Radiate);
+                float ringRadius = ring.Radius;
+                if (DrawFloatProperty(SR.RingProfile_Property_Radius_Name, "##ring_radius"u8, ref ringRadius, 0.1f, 0.0f, float.MaxValue))
+                {
+                    ring.Radius = ringRadius;
+                    EmberContext.HasUnsavedChanges = true;
+                }
+
+                CircleRadiation ringRadiate = ring.Radiate;
+                if (DrawRadiationProperty(SR.RingProfile_Property_Radiate_Name, "##ring_radiate"u8, ref ringRadiate))
+                {
+                    ring.Radiate = ringRadiate;
+                    EmberContext.HasUnsavedChanges = true;
+                }
                 break;
 
             case SprayProfile spray:
-                DrawVector2Property(SR.SprayProfile_Property_Direction_Name, "##spray_direction_x"u8, "##spray_direction_y"u8, ref spray.Direction, 0.1f, float.MinValue, float.MaxValue);
-                DrawFloatProperty(SR.SprayProfile_Property_Spread_Name, "##spray_spread"u8, ref spray.Spread, 0.1f, 0.0f, float.MaxValue);
+                XnaVec2 sprayDirection = spray.Direction;
+                if (DrawVector2Property(SR.SprayProfile_Property_Direction_Name, "##spray_direction_x"u8, "##spray_direction_y"u8, ref sprayDirection, 0.1f, float.MinValue, float.MaxValue))
+                {
+                    spray.Direction = sprayDirection;
+                    EmberContext.HasUnsavedChanges = true;
+                }
+
+                float spraySpread = spray.Spread;
+                if (DrawFloatProperty(SR.SprayProfile_Property_Spread_Name, "##spray_spread"u8, ref spraySpread, 0.1f, 0.0f, float.MaxValue))
+                {
+                    spray.Spread = spraySpread;
+                    EmberContext.HasUnsavedChanges = true;
+                }
                 break;
         }
     }
 
-    private static void DrawFloatProperty(ReadOnlySpan<byte> label, ReadOnlySpan<byte> id, ref float value, float step, float min, float max)
+    private static bool DrawFloatProperty(ReadOnlySpan<byte> label, ReadOnlySpan<byte> id, ref float value, float step, float min, float max)
     {
         ImGui.TableNextRow();
         ImGui.TableNextColumn();
@@ -177,14 +254,13 @@ public static class SelectedEmitterProfileChildWindow
         ImGui.TableNextColumn();
         ImGui.SetNextItemWidth(-1);
 
-        if (ImGui.DragFloat(id, ref value, step, min, max, "%.2f"u8))
-        {
-            EmberContext.HasUnsavedChanges = true;
-        }
+        return ImGui.DragFloat(id, ref value, step, min, max, "%.2f"u8);
     }
 
-    private static void DrawVector2Property(ReadOnlySpan<byte> label, ReadOnlySpan<byte> idX, ReadOnlySpan<byte> idY, ref XnaVec2 value, float step, float min, float max)
+    private static bool DrawVector2Property(ReadOnlySpan<byte> label, ReadOnlySpan<byte> idX, ReadOnlySpan<byte> idY, ref XnaVec2 value, float step, float min, float max)
     {
+        bool result = false;
+
         ImGuiStylePtr stylePtr = ImGui.GetStyle();
 
         ImGui.TableNextRow();
@@ -200,19 +276,23 @@ public static class SelectedEmitterProfileChildWindow
 
         if (ImGui.DragFloat(idX, ref value.X, step, min, max, "X: %.2F"u8))
         {
-            EmberContext.HasUnsavedChanges = true;
+            result = true;
         }
 
         ImGui.SameLine();
         ImGui.SetNextItemWidth(dragWidth);
         if (ImGui.DragFloat(idY, ref value.Y, step, min, max, "Y: %.2f"u8))
         {
-            EmberContext.HasUnsavedChanges = true;
+            result = true;
         }
+
+        return result;
     }
 
-    private static void DrawRadiationProperty(ReadOnlySpan<byte> label, ReadOnlySpan<byte> id, ref CircleRadiation value)
+    private static bool DrawRadiationProperty(ReadOnlySpan<byte> label, ReadOnlySpan<byte> id, ref CircleRadiation value)
     {
+        bool result = false;
+
         ImGui.TableNextRow();
         ImGui.TableNextColumn();
         ImGui.AlignTextToFramePadding();
@@ -233,7 +313,7 @@ public static class SelectedEmitterProfileChildWindow
                 if (ImGui.Selectable(SR.GetResourceUtf8Bytes(display.Name), isSelected))
                 {
                     value = radiation;
-                    EmberContext.HasUnsavedChanges = true;
+                    result = true;
                 }
 
                 if (ImGui.IsItemHovered(ImGuiHoveredFlags.DelayNormal))
@@ -249,6 +329,8 @@ public static class SelectedEmitterProfileChildWindow
 
             ImGui.EndCombo();
         }
+
+        return result;
     }
 
 }

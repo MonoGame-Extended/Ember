@@ -52,19 +52,58 @@ public static class SelectedModifierPropertiesChildWindow
                     break;
 
                 case CircleContainerModifier circleContainer:
-                    DrawBoolProperty(SR.CircleContainerModifier_Property_Inside_Name, SR.CircleContainerModifier_Property_Inside_Description, ref circleContainer.Inside);
-                    DrawFloatProperty(SR.CircleContainerModifier_Property_Radius_Name, SR.CircleContainerModifier_Property_Radius_Description, ref circleContainer.Radius, 0.1f, 0.0f, float.MaxValue);
-                    DrawFloatProperty(SR.CircleContainerModifier_Property_RestitutionCoefficient_Name, SR.CircleContainerModifier_Property_RestitutionCoefficient_Description, ref circleContainer.RestitutionCoefficient, 0.1f, 0.0f, float.MaxValue);
+                    bool circleContainerInside = circleContainer.Inside;
+                    if (DrawBoolProperty(SR.CircleContainerModifier_Property_Inside_Name, SR.CircleContainerModifier_Property_Inside_Description, ref circleContainerInside))
+                    {
+                        circleContainer.Inside = circleContainerInside;
+                        EmberContext.HasUnsavedChanges = true;
+                    }
+
+                    float circleContainerRadius = circleContainer.Radius;
+                    if (DrawFloatProperty(SR.CircleContainerModifier_Property_Radius_Name, SR.CircleContainerModifier_Property_Radius_Description, ref circleContainerRadius, 0.1f, 0.0f, float.MaxValue))
+                    {
+                        circleContainer.Radius = circleContainerRadius;
+                        EmberContext.HasUnsavedChanges = true;
+                    }
+
+                    float circleContainerRestitutionCoefficient = circleContainer.RestitutionCoefficient;
+                    if (DrawFloatProperty(SR.CircleContainerModifier_Property_RestitutionCoefficient_Name, SR.CircleContainerModifier_Property_RestitutionCoefficient_Description, ref circleContainerRestitutionCoefficient, 0.1f, 0.0f, float.MaxValue))
+                    {
+                        circleContainer.RestitutionCoefficient = circleContainerRestitutionCoefficient;
+                        EmberContext.HasUnsavedChanges = true;
+                    }
                     break;
 
                 case DragModifier drag:
-                    DrawFloatProperty(SR.DragModifier_Property_Density_Name, SR.DragModifier_Property_Density_Description, ref drag.Density, 0.1f, 0.0f, float.MaxValue);
-                    DrawFloatProperty(SR.DragModifier_Property_DragCoefficient_Name, SR.DragModifier_Property_DragCoefficient_Description, ref drag.DragCoefficient, 0.1f, 0.0f, float.MaxValue);
+                    float dragDensity = drag.Density;
+                    if (DrawFloatProperty(SR.DragModifier_Property_Density_Name, SR.DragModifier_Property_Density_Description, ref dragDensity, 0.1f, 0.0f, float.MaxValue))
+                    {
+                        drag.Density = dragDensity;
+                        EmberContext.HasUnsavedChanges = true;
+                    }
+
+                    float dragDragCoefficient = drag.DragCoefficient;
+                    if (DrawFloatProperty(SR.DragModifier_Property_DragCoefficient_Name, SR.DragModifier_Property_DragCoefficient_Description, ref dragDragCoefficient, 0.1f, 0.0f, float.MaxValue))
+                    {
+                        drag.DragCoefficient = dragDragCoefficient;
+                        EmberContext.HasUnsavedChanges = true;
+                    }
                     break;
 
                 case LinearGravityModifier gravity:
-                    DrawVector2Property(SR.LinearGravityModifier_Property_Direction_Name, SR.LinearGravityModifier_Property_Direction_Description, ref gravity.Direction, 0.1f, float.MinValue, float.MaxValue);
-                    DrawFloatProperty(SR.LinearGravityModifier_Property_Strength_Name, SR.LinearGravityModifier_Property_Strength_Description, ref gravity.Strength, 0.1f, 0.0f, float.MaxValue);
+                    XnaVec2 gravityDirection = gravity.Direction;
+                    if (DrawVector2Property(SR.LinearGravityModifier_Property_Direction_Name, SR.LinearGravityModifier_Property_Direction_Description, ref gravityDirection, 0.1f, float.MinValue, float.MaxValue))
+                    {
+                        gravity.Direction = gravityDirection;
+                        EmberContext.HasUnsavedChanges = true;
+                    }
+
+                    float gravityStrength = gravity.Strength;
+                    if (DrawFloatProperty(SR.LinearGravityModifier_Property_Strength_Name, SR.LinearGravityModifier_Property_Strength_Description, ref gravityStrength, 0.1f, 0.0f, float.MaxValue))
+                    {
+                        gravity.Strength = gravityStrength;
+                        EmberContext.HasUnsavedChanges = true;
+                    }
                     break;
 
                 case OpacityFastFadeModifier:
@@ -72,34 +111,127 @@ public static class SelectedModifierPropertiesChildWindow
                     break;
 
                 case RectangleContainerModifier rectContainer:
-                    DrawIntProperty(SR.RectangleContainerModifier_Property_Width_Name, SR.RectangleContainerModifier_Property_Width_Description, ref rectContainer.Width, 1, 0, int.MaxValue);
-                    DrawIntProperty(SR.RectangleContainerModifier_Property_Height_Name, SR.RectangleContainerModifier_Property_Height_Description, ref rectContainer.Height, 1, 0, int.MaxValue);
-                    DrawFloatProperty(SR.RectangleContainerModifier_Property_RestitutionCoefficient_Name, SR.RectangleContainerModifier_Property_RestitutionCoefficient_Description, ref rectContainer.RestitutionCoefficient, 0.1f, 0.0f, float.MaxValue);
+                    int rectContainerWidth = rectContainer.Width;
+                    if (DrawIntProperty(SR.RectangleContainerModifier_Property_Width_Name, SR.RectangleContainerModifier_Property_Width_Description, ref rectContainerWidth, 1, 0, int.MaxValue))
+                    {
+                        rectContainer.Width = rectContainerWidth;
+                        EmberContext.HasUnsavedChanges = true;
+                    }
+
+                    int rectContainerHeight = rectContainer.Height;
+                    if (DrawIntProperty(SR.RectangleContainerModifier_Property_Height_Name, SR.RectangleContainerModifier_Property_Height_Description, ref rectContainerHeight, 1, 0, int.MaxValue))
+                    {
+                        rectContainer.Height = rectContainerHeight;
+                        EmberContext.HasUnsavedChanges = true;
+                    }
+
+                    float rectContainerRestitutionCoefficient = rectContainer.RestitutionCoefficient;
+                    if (DrawFloatProperty(SR.RectangleContainerModifier_Property_RestitutionCoefficient_Name, SR.RectangleContainerModifier_Property_RestitutionCoefficient_Description, ref rectContainerRestitutionCoefficient, 0.1f, 0.0f, float.MaxValue))
+                    {
+                        rectContainer.RestitutionCoefficient = rectContainerRestitutionCoefficient;
+                        EmberContext.HasUnsavedChanges = true;
+                    }
                     break;
 
                 case RectangleLoopContainerModifier rectLoop:
-                    DrawIntProperty(SR.RectangleLoopContainerModifier_Property_Width_Name, SR.RectangleLoopContainerModifier_Property_Width_Description, ref rectLoop.Width, 1, 0, int.MaxValue);
-                    DrawIntProperty(SR.RectangleLoopContainerModifier_Property_Height_Name, SR.RectangleLoopContainerModifier_Property_Height_Description, ref rectLoop.Height, 1, 0, int.MaxValue);
+                    int rectLoopWidth = rectLoop.Width;
+                    if (DrawIntProperty(SR.RectangleLoopContainerModifier_Property_Width_Name, SR.RectangleLoopContainerModifier_Property_Width_Description, ref rectLoopWidth, 1, 0, int.MaxValue))
+                    {
+                        rectLoop.Width = rectLoopWidth;
+                        EmberContext.HasUnsavedChanges = true;
+                    }
+
+                    int rectLoopHeight = rectLoop.Height;
+                    if (DrawIntProperty(SR.RectangleLoopContainerModifier_Property_Height_Name, SR.RectangleLoopContainerModifier_Property_Height_Description, ref rectLoopHeight, 1, 0, int.MaxValue))
+                    {
+                        rectLoop.Height = rectLoopHeight;
+                        EmberContext.HasUnsavedChanges = true;
+                    }
                     break;
 
                 case RotationModifier rotation:
-                    DrawFloatProperty(SR.RotationModifier_Property_RotationRate_Name, SR.RotationModifier_Property_RotationRate_Description, ref rotation.RotationRate, 0.1f, float.MinValue, float.MaxValue);
+                    float rotationRotationRate = rotation.RotationRate;
+                    if (DrawFloatProperty(SR.RotationModifier_Property_RotationRate_Name, SR.RotationModifier_Property_RotationRate_Description, ref rotationRotationRate, 0.1f, float.MinValue, float.MaxValue))
+                    {
+                        rotation.RotationRate = rotationRotationRate;
+                        EmberContext.HasUnsavedChanges = true;
+                    }
                     break;
 
                 case VelocityColorModifier velocityColor:
-                    DrawColorProperty(SR.VelocityColorModifier_Property_StationaryColor_Name, SR.VelocityColorModifier_Property_StationaryColor_Description, ref velocityColor.StationaryColor);
-                    DrawColorProperty(SR.VelocityColorModifier_Property_VelocityColor_Name, SR.VelocityColorModifier_Property_VelocityColor_Description, ref velocityColor.VelocityColor);
-                    DrawFloatProperty(SR.VelocityColorModifier_Property_VelocityThreshold_Name, SR.VelocityColorModifier_Property_VelocityThreshold_Description, ref velocityColor.VelocityThreshold, 0.1f, 0.0f, float.MaxValue);
+                    HslColor velocityColorStationaryColor = velocityColor.StationaryColor;
+                    if (DrawColorProperty(SR.VelocityColorModifier_Property_StationaryColor_Name, SR.VelocityColorModifier_Property_StationaryColor_Description, ref velocityColorStationaryColor))
+                    {
+                        velocityColor.StationaryColor = velocityColorStationaryColor;
+                        EmberContext.HasUnsavedChanges = true;
+                    }
+
+                    HslColor velocityColorVelocityColor = velocityColor.VelocityColor;
+                    if (DrawColorProperty(SR.VelocityColorModifier_Property_VelocityColor_Name, SR.VelocityColorModifier_Property_VelocityColor_Description, ref velocityColorVelocityColor))
+                    {
+                        velocityColor.VelocityColor = velocityColorVelocityColor;
+                        EmberContext.HasUnsavedChanges = true;
+                    }
+
+                    float velocityColorVelocityThreshold = velocityColor.VelocityThreshold;
+                    if (DrawFloatProperty(SR.VelocityColorModifier_Property_VelocityThreshold_Name, SR.VelocityColorModifier_Property_VelocityThreshold_Description, ref velocityColorVelocityThreshold, 0.1f, 0.0f, float.MaxValue))
+                    {
+                        velocityColor.VelocityThreshold = velocityColorVelocityThreshold;
+                        EmberContext.HasUnsavedChanges = true;
+                    }
                     break;
 
                 case VelocityModifier velocity:
-                    DrawFloatProperty(SR.VelocityModifier_Property_VelocityThreshold_Name, SR.VelocityModifier_Property_VelocityThreshold_Description, ref velocity.VelocityThreshold, 0.1f, 0.0f, float.MaxValue);
+                    float velocityVelocityThreshold = velocity.VelocityThreshold;
+                    if (DrawFloatProperty(SR.VelocityModifier_Property_VelocityThreshold_Name, SR.VelocityModifier_Property_VelocityThreshold_Description, ref velocityVelocityThreshold, 0.1f, 0.0f, float.MaxValue))
+                    {
+                        velocity.VelocityThreshold = velocityVelocityThreshold;
+                        EmberContext.HasUnsavedChanges = true;
+                    }
                     break;
 
                 case VortexModifier vortex:
-                    DrawVector2Property(SR.VortexModifier_Property_Position_Name, SR.VortexModifier_Property_Position_Description, ref vortex.Position, 0.1f, float.MinValue, float.MaxValue);
-                    DrawFloatProperty(SR.VortexModifier_Property_Mass_Name, SR.VortexModifier_Property_Mass_Description, ref vortex.Mass, 0.1f, float.MinValue, float.MaxValue);
-                    DrawFloatProperty(SR.VortexModifier_Property_MaxSpeed_Name, SR.VortexModifier_Property_MaxSpeed_Description, ref vortex.MaxSpeed, 0.1f, float.MinValue, float.MaxValue);
+                    XnaVec2 vortexPosition = vortex.Position;
+                    if (DrawVector2Property(SR.VortexModifier_Property_Position_Name, SR.VortexModifier_Property_Position_Description, ref vortexPosition, 0.1f, float.MinValue, float.MaxValue))
+                    {
+                        vortex.Position = vortexPosition;
+                        EmberContext.HasUnsavedChanges = true;
+                    }
+
+                    float vortexStrength = vortex.Strength;
+                    if (DrawFloatProperty(SR.VortexModifier_Property_Strength_Name, SR.VortexModifier_Property_Strength_Description, ref vortexStrength, 0.1f, float.MinValue, float.MaxValue))
+                    {
+                        vortex.Strength = vortexStrength;
+                        EmberContext.HasUnsavedChanges = true;
+                    }
+
+                    float vortexOuterRadius = vortex.OuterRadius;
+                    if (DrawFloatProperty(SR.VortexModifier_Property_OuterRadius_Name, SR.VortexModifier_Property_OuterRadius_Description, ref vortexOuterRadius, 0.1f, float.MinValue, float.MaxValue))
+                    {
+                        vortex.OuterRadius = vortexOuterRadius;
+                        EmberContext.HasUnsavedChanges = true;
+                    }
+
+                    float vortexInnerRadius = vortex.InnerRadius;
+                    if (DrawFloatProperty(SR.VortexModifier_Property_InnerRadius_Name, SR.VortexModifier_Property_InnerRadius_Description, ref vortexInnerRadius, 0.1f, float.MinValue, float.MaxValue))
+                    {
+                        vortex.InnerRadius = vortexInnerRadius;
+                        EmberContext.HasUnsavedChanges = true;
+                    }
+
+                    float vortexMaxVelocity = vortex.MaxVelocity;
+                    if (DrawFloatProperty(SR.VortexModifier_Property_MaxVelocity_Name, SR.VortexModifier_Property_MaxVelocity_Description, ref vortexMaxVelocity, 0.1f, float.MinValue, float.MaxValue))
+                    {
+                        vortex.MaxVelocity = vortexMaxVelocity;
+                        EmberContext.HasUnsavedChanges = true;
+                    }
+
+                    float vortexRotationAngle = vortex.RotationAngle;
+                    if (DrawFloatProperty(SR.VortexModifier_Property_RotationAngle_Name, SR.VortexModifier_Property_RotationAngle_Description, ref vortexRotationAngle, 0.1f, float.MinValue, float.MaxValue))
+                    {
+                        vortex.RotationAngle = vortexRotationAngle;
+                        EmberContext.HasUnsavedChanges = true;
+                    }
                     break;
             }
 
@@ -123,8 +255,10 @@ public static class SelectedModifierPropertiesChildWindow
 
         ImGui.TableNextColumn();
         ImGui.SetNextItemWidth(-1);
-        if (ImGui.InputText("##selected_modifier_name_value"u8, ref modifier.Name, 256, ImGuiInputTextFlags.EnterReturnsTrue | ImGuiInputTextFlags.AutoSelectAll))
+        string modifierName = modifier.Name;
+        if (ImGui.InputText("##selected_modifier_name_value"u8, ref modifierName, 256, ImGuiInputTextFlags.EnterReturnsTrue | ImGuiInputTextFlags.AutoSelectAll))
         {
+            modifier.Name = modifierName;
             EmberContext.HasUnsavedChanges = true;
         }
     }
@@ -144,16 +278,18 @@ public static class SelectedModifierPropertiesChildWindow
 
         ImGui.TableNextColumn();
         ImGui.SetNextItemWidth(-1);
-        float frequency = modifier.Frequency;
-        if (ImGui.DragFloat(SR.Modifier_Property_Frequency_Description, ref frequency, 0.1f, 0.0f, float.MaxValue, "%.2f"))
+        float modifierFrequency = modifier.Frequency;
+        if (ImGui.DragFloat(SR.Modifier_Property_Frequency_Description, ref modifierFrequency, 0.1f, 0.0f, float.MaxValue, "%.2f"))
         {
-            modifier.Frequency = frequency;
+            modifier.Frequency = modifierFrequency;
             EmberContext.HasUnsavedChanges = true;
         }
     }
 
-    private static void DrawBoolProperty(ReadOnlySpan<byte> label, ReadOnlySpan<byte> description, ref bool value)
+    private static bool DrawBoolProperty(ReadOnlySpan<byte> label, ReadOnlySpan<byte> description, ref bool value)
     {
+        bool valueChanged = false;
+
         ImGui.PushID(label);
 
         ImGui.TableNextRow();
@@ -171,14 +307,18 @@ public static class SelectedModifierPropertiesChildWindow
 
         if (ImGui.Checkbox("##value"u8, ref value))
         {
-            EmberContext.HasUnsavedChanges = true;
+            valueChanged = true;
         }
 
         ImGui.PopID();
+
+        return valueChanged;
     }
 
-    private static void DrawIntProperty(ReadOnlySpan<byte> label, ReadOnlySpan<byte> description, ref int value, int step, int min, int max)
+    private static bool DrawIntProperty(ReadOnlySpan<byte> label, ReadOnlySpan<byte> description, ref int value, int step, int min, int max)
     {
+        bool valueChanged = false;
+
         ImGui.PushID(label);
 
         ImGui.TableNextRow();
@@ -196,14 +336,18 @@ public static class SelectedModifierPropertiesChildWindow
 
         if (ImGui.DragInt("##value"u8, ref value, step, min, max))
         {
-            EmberContext.HasUnsavedChanges = true;
+            valueChanged = true;
         }
 
         ImGui.PopID();
+
+        return valueChanged;
     }
 
-    private static void DrawFloatProperty(ReadOnlySpan<byte> label, ReadOnlySpan<byte> description, ref float value, float step, float min, float max)
+    private static bool DrawFloatProperty(ReadOnlySpan<byte> label, ReadOnlySpan<byte> description, ref float value, float step, float min, float max)
     {
+        bool valueChanged = false;
+
         ImGui.PushID(label);
 
         ImGui.TableNextRow();
@@ -221,14 +365,18 @@ public static class SelectedModifierPropertiesChildWindow
 
         if (ImGui.DragFloat("##value"u8, ref value, step, min, max, "%.2f"u8))
         {
-            EmberContext.HasUnsavedChanges = true;
+            valueChanged = true;
         }
 
         ImGui.PopID();
+
+        return valueChanged;
     }
 
-    private static void DrawVector2Property(ReadOnlySpan<byte> label, ReadOnlySpan<byte> description, ref XnaVec2 value, float step, float min, float max)
+    private static bool DrawVector2Property(ReadOnlySpan<byte> label, ReadOnlySpan<byte> description, ref XnaVec2 value, float step, float min, float max)
     {
+        bool valueChanged = false;
+
         ImGui.PushID(label);
 
         ImGuiStylePtr stylePtr = ImGui.GetStyle();
@@ -251,21 +399,25 @@ public static class SelectedModifierPropertiesChildWindow
 
         if (ImGui.DragFloat("##x"u8, ref value.X, step, min, max, "X: %.2F"u8))
         {
-            EmberContext.HasUnsavedChanges = true;
+            valueChanged = true;
         }
 
         ImGui.SameLine();
         ImGui.SetNextItemWidth(dragWidth);
         if (ImGui.DragFloat("##y"u8, ref value.Y, step, min, max, "Y: %.2f"u8))
         {
-            EmberContext.HasUnsavedChanges = true;
+            valueChanged = true;
         }
 
         ImGui.PopID();
+
+        return valueChanged;
     }
 
-    private static void DrawColorProperty(ReadOnlySpan<byte> label, ReadOnlySpan<byte> description, ref XnaVec3 value)
+    private static bool DrawColorProperty(ReadOnlySpan<byte> label, ReadOnlySpan<byte> description, ref HslColor value)
     {
+        bool valueChanged = false;
+
         ImGui.PushID(label);
 
         ImGui.TableNextRow();
@@ -280,8 +432,7 @@ public static class SelectedModifierPropertiesChildWindow
 
         ImGui.TableNextColumn();
 
-        HslColor hslColor = new(value.X, value.Y, value.Z);
-        XnaColor rgbColor = HslColor.ToRgb(hslColor);
+        XnaColor rgbColor = HslColor.ToRgb(value);
         SysVec4 color = new(rgbColor.R / 255.0f, rgbColor.G / 255.0f, rgbColor.B / 255.0f, 1.0f);
 
         float availWidth = ImGui.GetContentRegionAvail().X;
@@ -298,17 +449,15 @@ public static class SelectedModifierPropertiesChildWindow
             if (ImGui.ColorPicker3("##value", ref rgb))
             {
                 XnaColor newColor = new(rgb.X, rgb.Y, rgb.Z);
-                HslColor newHslColor = HslColor.FromRgb(newColor);
-                value.X = newHslColor.H;
-                value.Y = newHslColor.S;
-                value.Z = newHslColor.L;
-
-                EmberContext.HasUnsavedChanges = true;
+                value = HslColor.FromRgb(newColor);
+                valueChanged = true;
             }
 
             ImGui.EndPopup();
         }
 
         ImGui.PopID();
+
+        return valueChanged;
     }
 }

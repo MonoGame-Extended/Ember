@@ -48,33 +48,99 @@ public static class SelectedInterpolatorPropertiesChildWindow
             switch (interpolator)
             {
                 case ColorInterpolator colorInterpolator:
-                    DrawColorProperty(SR.Interpolator_Property_StartValue_Name, SR.ColorInterpolator_Property_StartValue_Description, ref colorInterpolator.StartValue);
-                    DrawColorProperty(SR.Interpolator_Property_EndValue_Name, SR.ColorInterpolator_Property_EndValue_Description, ref colorInterpolator.EndValue);
+                    HslColor colorInterpolatorStartValue = colorInterpolator.StartValue;
+                    if (DrawColorProperty(SR.Interpolator_Property_StartValue_Name, SR.ColorInterpolator_Property_StartValue_Description, ref colorInterpolatorStartValue))
+                    {
+                        colorInterpolator.StartValue = colorInterpolator.StartValue;
+                        EmberContext.HasUnsavedChanges = true;
+                    }
+
+                    HslColor colorInterpolatorEndValue = colorInterpolator.EndValue;
+                    if (DrawColorProperty(SR.Interpolator_Property_EndValue_Name, SR.ColorInterpolator_Property_EndValue_Description, ref colorInterpolatorEndValue))
+                    {
+                        colorInterpolator.EndValue = colorInterpolatorEndValue;
+                        EmberContext.HasUnsavedChanges = true;
+                    }
                     break;
 
                 case HueInterpolator hueInterpolator:
-                    DrawFloatProperty(SR.Interpolator_Property_StartValue_Name, SR.HueInterpolator_Property_StartValue_Description, ref hueInterpolator.StartValue, 0.01f, 0.0f, 1.0f);
-                    DrawFloatProperty(SR.Interpolator_Property_EndValue_Name, SR.HueInterpolator_Property_EndValue_Description, ref hueInterpolator.EndValue, 0.01f, 0.0f, 1.0f);
+                    float hueInterpolatorStartValue = hueInterpolator.StartValue;
+                    if (DrawFloatProperty(SR.Interpolator_Property_StartValue_Name, SR.HueInterpolator_Property_StartValue_Description, ref hueInterpolatorStartValue, 0.01f, 0.0f, 1.0f))
+                    {
+                        hueInterpolator.StartValue = hueInterpolatorStartValue;
+                        EmberContext.HasUnsavedChanges = true;
+                    }
+
+                    float hueInterpolatorEndValue = hueInterpolator.EndValue;
+                    if (DrawFloatProperty(SR.Interpolator_Property_EndValue_Name, SR.HueInterpolator_Property_EndValue_Description, ref hueInterpolatorEndValue, 0.01f, 0.0f, 1.0f))
+                    {
+                        hueInterpolator.EndValue = hueInterpolatorEndValue;
+                        EmberContext.HasUnsavedChanges = true;
+                    }
                     break;
 
                 case OpacityInterpolator opacityInterpolator:
-                    DrawFloatProperty(SR.Interpolator_Property_StartValue_Name, SR.OpacityInterpolator_Property_StartValue_Description, ref opacityInterpolator.StartValue, 0.01f, 0.0f, 1.0f);
-                    DrawFloatProperty(SR.Interpolator_Property_EndValue_Name, SR.OpacityInterpolator_Property_EndValue_Description, ref opacityInterpolator.EndValue, 0.01f, 0.0f, 1.0f);
+                    float opacityInterpolatorStartValue = opacityInterpolator.StartValue;
+                    if (DrawFloatProperty(SR.Interpolator_Property_StartValue_Name, SR.OpacityInterpolator_Property_StartValue_Description, ref opacityInterpolatorStartValue, 0.01f, 0.0f, 1.0f))
+                    {
+                        opacityInterpolator.StartValue = opacityInterpolatorStartValue;
+                        EmberContext.HasUnsavedChanges = true;
+                    }
+
+                    float opacityInterpolatorEndValue = opacityInterpolator.EndValue;
+                    if (DrawFloatProperty(SR.Interpolator_Property_EndValue_Name, SR.OpacityInterpolator_Property_EndValue_Description, ref opacityInterpolatorEndValue, 0.01f, 0.0f, 1.0f))
+                    {
+                        opacityInterpolator.EndValue = opacityInterpolatorEndValue;
+                        EmberContext.HasUnsavedChanges = true;
+                    }
                     break;
 
                 case RotationInterpolator rotationInterpolator:
-                    DrawFloatProperty(SR.Interpolator_Property_StartValue_Name, SR.RotationInterpolator_Property_StartValue_Description, ref rotationInterpolator.StartValue, 0.01f, -MathF.PI * 2.0f, MathF.PI * 2.0f);
-                    DrawFloatProperty(SR.Interpolator_Property_EndValue_Name, SR.RotationInterpolator_Property_EndValue_Description, ref rotationInterpolator.EndValue, 0.01f, -MathF.PI * 2.0f, MathF.PI * 2.0f);
+                    float rotationInterpolatorStartValue = rotationInterpolator.StartValue;
+                    if (DrawFloatProperty(SR.Interpolator_Property_StartValue_Name, SR.RotationInterpolator_Property_StartValue_Description, ref rotationInterpolatorStartValue, 0.01f, -MathF.PI * 2.0f, MathF.PI * 2.0f))
+                    {
+                        rotationInterpolator.StartValue = rotationInterpolatorStartValue;
+                        EmberContext.HasUnsavedChanges = true;
+                    }
+
+                    float rotationInterpolatorEndValue = rotationInterpolator.EndValue;
+                    if (DrawFloatProperty(SR.Interpolator_Property_EndValue_Name, SR.RotationInterpolator_Property_EndValue_Description, ref rotationInterpolatorEndValue, 0.01f, -MathF.PI * 2.0f, MathF.PI * 2.0f))
+                    {
+                        rotationInterpolator.EndValue = rotationInterpolatorEndValue;
+                        EmberContext.HasUnsavedChanges = true;
+                    }
                     break;
 
                 case ScaleInterpolator scaleInterpolator:
-                    DrawVector2Property(SR.Interpolator_Property_StartValue_Name, SR.ScaleInterpolator_Property_StartValue_Description, ref scaleInterpolator.StartValue, 0.01f, 0.0f, 10.0f);
-                    DrawVector2Property(SR.Interpolator_Property_EndValue_Name, SR.ScaleInterpolator_Property_EndValue_Description, ref scaleInterpolator.EndValue, 0.01f, 0.0f, 10.0f);
+                    XnaVec2 scaleInterpolatorStartValue = scaleInterpolator.StartValue;
+                    if (DrawVector2Property(SR.Interpolator_Property_StartValue_Name, SR.ScaleInterpolator_Property_StartValue_Description, ref scaleInterpolatorStartValue, 0.01f, 0.0f, 10.0f))
+                    {
+                        scaleInterpolator.StartValue = scaleInterpolatorStartValue;
+                        EmberContext.HasUnsavedChanges = true;
+                    }
+
+                    XnaVec2 scaleInterpolatorEndValue = scaleInterpolator.EndValue;
+                    if (DrawVector2Property(SR.Interpolator_Property_EndValue_Name, SR.ScaleInterpolator_Property_EndValue_Description, ref scaleInterpolatorEndValue, 0.01f, 0.0f, 10.0f))
+                    {
+                        scaleInterpolator.EndValue = scaleInterpolatorEndValue;
+                        EmberContext.HasUnsavedChanges = true;
+                    }
                     break;
 
                 case VelocityInterpolator velocityInterpolator:
-                    DrawVector2Property(SR.Interpolator_Property_StartValue_Name, SR.VelocityInterpolator_Property_StartValue_Description, ref velocityInterpolator.StartValue, 1.0f, -1000.0f, 1000.0f);
-                    DrawVector2Property(SR.Interpolator_Property_EndValue_Name, SR.VelocityInterpolator_Property_EndValue_Description, ref velocityInterpolator.EndValue, 1.0f, -1000.0f, 1000.0f);
+                    XnaVec2 velocityInterpolatorStartValue = velocityInterpolator.StartValue;
+                    if (DrawVector2Property(SR.Interpolator_Property_StartValue_Name, SR.VelocityInterpolator_Property_StartValue_Description, ref velocityInterpolatorStartValue, 1.0f, -1000.0f, 1000.0f))
+                    {
+                        velocityInterpolator.StartValue = velocityInterpolatorStartValue;
+                        EmberContext.HasUnsavedChanges = true;
+                    }
+
+                    XnaVec2 velocityInterpolatorEndValue = velocityInterpolator.EndValue;
+                    if (DrawVector2Property(SR.Interpolator_Property_EndValue_Name, SR.VelocityInterpolator_Property_EndValue_Description, ref velocityInterpolatorEndValue, 1.0f, -1000.0f, 1000.0f))
+                    {
+                        velocityInterpolator.EndValue = velocityInterpolatorEndValue;
+                        EmberContext.HasUnsavedChanges = true;
+                    }
                     break;
             }
 
@@ -98,14 +164,18 @@ public static class SelectedInterpolatorPropertiesChildWindow
 
         ImGui.TableNextColumn();
         ImGui.SetNextItemWidth(-1);
-        if (ImGui.InputText("##selected_interpolator_name_value"u8, ref interpolator.Name, 256, ImGuiInputTextFlags.EnterReturnsTrue | ImGuiInputTextFlags.AutoSelectAll))
+        string interpolatorName = interpolator.Name;
+        if (ImGui.InputText("##selected_interpolator_name_value"u8, ref interpolatorName, 256, ImGuiInputTextFlags.EnterReturnsTrue | ImGuiInputTextFlags.AutoSelectAll))
         {
+            interpolator.Name = interpolatorName;
             EmberContext.HasUnsavedChanges = true;
         }
     }
 
-    private static void DrawFloatProperty(ReadOnlySpan<byte> label, ReadOnlySpan<byte> description, ref float value, float step, float min, float max)
+    private static bool DrawFloatProperty(ReadOnlySpan<byte> label, ReadOnlySpan<byte> description, ref float value, float step, float min, float max)
     {
+        bool valueChanged = false;
+
         ImGui.PushID(label);
 
         ImGui.TableNextRow();
@@ -123,14 +193,18 @@ public static class SelectedInterpolatorPropertiesChildWindow
 
         if (ImGui.DragFloat("##value"u8, ref value, step, min, max, "%.2f"u8))
         {
-            EmberContext.HasUnsavedChanges = true;
+            valueChanged = true;
         }
 
         ImGui.PopID();
+
+        return valueChanged;
     }
 
-    private static void DrawVector2Property(ReadOnlySpan<byte> label, ReadOnlySpan<byte> description, ref XnaVec2 value, float step, float min, float max)
+    private static bool DrawVector2Property(ReadOnlySpan<byte> label, ReadOnlySpan<byte> description, ref XnaVec2 value, float step, float min, float max)
     {
+        bool valueChanged = false;
+
         ImGui.PushID(label);
 
         ImGuiStylePtr stylePtr = ImGui.GetStyle();
@@ -153,21 +227,25 @@ public static class SelectedInterpolatorPropertiesChildWindow
 
         if (ImGui.DragFloat("##x"u8, ref value.X, step, min, max, "X: %.2F"u8))
         {
-            EmberContext.HasUnsavedChanges = true;
+            valueChanged = true;
         }
 
         ImGui.SameLine();
         ImGui.SetNextItemWidth(dragWidth);
         if (ImGui.DragFloat("##y"u8, ref value.Y, step, min, max, "Y: %.2f"u8))
         {
-            EmberContext.HasUnsavedChanges = true;
+            valueChanged = true;
         }
 
         ImGui.PopID();
+
+        return valueChanged;
     }
 
-    private static void DrawColorProperty(ReadOnlySpan<byte> label, ReadOnlySpan<byte> description, ref XnaVec3 value)
+    private static bool DrawColorProperty(ReadOnlySpan<byte> label, ReadOnlySpan<byte> description, ref HslColor value)
     {
+        bool valueChanged = false;
+
         ImGui.PushID(label);
 
         ImGui.TableNextRow();
@@ -182,8 +260,7 @@ public static class SelectedInterpolatorPropertiesChildWindow
 
         ImGui.TableNextColumn();
 
-        HslColor hslColor = new(value.X, value.Y, value.Z);
-        XnaColor rgbColor = HslColor.ToRgb(hslColor);
+        XnaColor rgbColor = HslColor.ToRgb(value);
         SysVec4 color = new(rgbColor.R / 255.0f, rgbColor.G / 255.0f, rgbColor.B / 255.0f, 1.0f);
 
         float availWidth = ImGui.GetContentRegionAvail().X;
@@ -200,17 +277,15 @@ public static class SelectedInterpolatorPropertiesChildWindow
             if (ImGui.ColorPicker3("##value", ref rgb))
             {
                 XnaColor newColor = new(rgb.X, rgb.Y, rgb.Z);
-                HslColor newHslColor = HslColor.FromRgb(newColor);
-                value.X = newHslColor.H;
-                value.Y = newHslColor.S;
-                value.Z = newHslColor.L;
-
-                EmberContext.HasUnsavedChanges = true;
+                value = HslColor.FromRgb(newColor);
+                valueChanged = true;
             }
 
             ImGui.EndPopup();
         }
 
         ImGui.PopID();
+
+        return valueChanged;
     }
 }
