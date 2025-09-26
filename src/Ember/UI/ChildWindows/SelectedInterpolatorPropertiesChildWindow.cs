@@ -51,7 +51,7 @@ public static class SelectedInterpolatorPropertiesChildWindow
                     HslColor colorInterpolatorStartValue = colorInterpolator.StartValue;
                     if (DrawColorProperty(SR.Interpolator_Property_StartValue_Name, SR.ColorInterpolator_Property_StartValue_Description, ref colorInterpolatorStartValue))
                     {
-                        colorInterpolator.StartValue = colorInterpolator.StartValue;
+                        colorInterpolator.StartValue = colorInterpolatorStartValue;
                         EmberContext.HasUnsavedChanges = true;
                     }
 
