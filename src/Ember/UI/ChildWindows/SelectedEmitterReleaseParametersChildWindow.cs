@@ -11,6 +11,10 @@ namespace Ember.UI.ChildWindows;
 
 public static class SelectedEmitterReleaseParametersChildWindow
 {
+    private static HslColor _userFromColor;
+    private static HslColor _userToColor;
+    private static bool _initialized = false;
+
     public static void Draw()
     {
         if (ImGui.CollapsingHeader(SR.CollapsingHeader_SelectedEmitterReleaseParameters, ImGuiTreeNodeFlags.DefaultOpen))
@@ -207,6 +211,13 @@ public static class SelectedEmitterReleaseParametersChildWindow
         ImGui.PushID(label);
         ImGuiStylePtr style = ImGui.GetStyle();
 
+        if (!_initialized)
+        {
+            _userFromColor = parameter.Min;
+            _userToColor = parameter.Max;
+            _initialized = true;
+        }
+
         ImGui.TableNextRow();
         ImGui.TableNextColumn();
         ImGui.AlignTextToFramePadding();
@@ -225,22 +236,23 @@ public static class SelectedEmitterReleaseParametersChildWindow
         float buttonWidth = (availableWidth - toWidth - spacing) * 0.5f;
         SysVec2 buttonSize = new SysVec2(buttonWidth, ImGui.GetFrameHeight());
 
-        XnaColor rgbMin = HslColor.ToRgb(parameter.Min);
-        SysVec4 colorMin = new SysVec4(rgbMin.R / 255.0f, rgbMin.G / 255.0f, rgbMin.B / 255.0f, 1.0f);
+        XnaColor rgbFrom = HslColor.ToRgb(_userFromColor);
+        SysVec4 colorFrom = new SysVec4(rgbFrom.R / 255.0f, rgbFrom.G / 255.0f, rgbFrom.B / 255.0f, 1.0f);
 
-        if (ImGui.ColorButton("##min_value_button"u8, colorMin, ImGuiColorEditFlags.None, buttonSize))
+        if (ImGui.ColorButton("##from_value_button"u8, colorFrom, ImGuiColorEditFlags.None, buttonSize))
         {
-            ImGui.OpenPopup("##min_value_color_picker"u8);
+            ImGui.OpenPopup("##from_value_color_picker"u8);
         }
 
-        if (ImGui.BeginPopup("##min_value_color_picker"u8))
+        if (ImGui.BeginPopup("##from_value_color_picker"u8))
         {
-            float[] rgb = [colorMin.X, colorMin.Y, colorMin.Z];
-            if (ImGui.ColorPicker3("##min_value"u8, rgb))
+            float[] rgb = [colorFrom.X, colorFrom.Y, colorFrom.Z];
+            if (ImGui.ColorPicker3("##from_value"u8, rgb))
             {
                 XnaColor newRgb = new XnaColor(rgb[0], rgb[1], rgb[2]);
                 HslColor newHsl = HslColor.FromRgb(newRgb);
-                parameter = new(newHsl, parameter.Max);
+                _userFromColor = newHsl;
+                parameter = Interval<HslColor>.Hull(_userFromColor, _userToColor);
                 valueChanged = true;
             }
 
@@ -250,22 +262,23 @@ public static class SelectedEmitterReleaseParametersChildWindow
         ImGui.SameLine();
         ImGui.Text(SR.Label_To);
 
-        XnaColor rgbMax = HslColor.ToRgb(parameter.Max);
-        SysVec4 colorMax = new SysVec4(rgbMax.R / 255.0f, rgbMax.G / 255.0f, rgbMax.B / 255.0f, 1.0f);
+        XnaColor rgbTo = HslColor.ToRgb(_userToColor);
+        SysVec4 colorTo = new SysVec4(rgbTo.R / 255.0f, rgbTo.G / 255.0f, rgbTo.B / 255.0f, 1.0f);
         ImGui.SameLine();
-        if (ImGui.ColorButton("##max_value_button"u8, colorMax, ImGuiColorEditFlags.None, buttonSize))
+        if (ImGui.ColorButton("##to_value_button"u8, colorTo, ImGuiColorEditFlags.None, buttonSize))
         {
-            ImGui.OpenPopup("##max_value_color_picker"u8);
+            ImGui.OpenPopup("##to_value_color_picker"u8);
         }
 
-        if (ImGui.BeginPopup("##max_value_color_picker"u8))
+        if (ImGui.BeginPopup("##to_value_color_picker"u8))
         {
-            float[] rgb = [colorMax.X, colorMax.Y, colorMax.Z];
-            if (ImGui.ColorPicker3("##max_value"u8, rgb))
+            float[] rgb = [colorTo.X, colorTo.Y, colorTo.Z];
+            if (ImGui.ColorPicker3("##to_value"u8, rgb))
             {
                 XnaColor newRgb = new XnaColor(rgb[0], rgb[1], rgb[2]);
                 HslColor newHsl = HslColor.FromRgb(newRgb);
-                parameter = new(parameter.Min, newHsl);
+                _userToColor = newHsl;
+                parameter = Interval<HslColor>.Hull(_userFromColor, _userToColor);
                 valueChanged = true;
             }
 
@@ -275,5 +288,10 @@ public static class SelectedEmitterReleaseParametersChildWindow
         ImGui.PopID();
 
         return valueChanged;
+    }
+
+    private static Interval<HslColor> CreateOrderedInterval(HslColor from, HslColor to)
+    {
+        return from.CompareTo(to) > 0 ? new Interval<HslColor>(to, from) : new Interval<HslColor>(from, to);
     }
 }
