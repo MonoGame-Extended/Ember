@@ -131,7 +131,8 @@ public static class SelectedEmitterReleaseParametersChildWindow
 
         ImGui.SetNextItemWidth(dragWidth);
         int min = parameter.Min;
-        if (ImGui.DragInt("##min_value"u8, ref min, 1, 0, parameter.Max))
+        bool minChanged = ImGui.DragInt("##min_value"u8, ref min, 1, 0, parameter.Max);
+        if(minChanged || ImGui.IsItemDeactivatedAfterEdit())
         {
             parameter = new(min, parameter.Max);
             valueChanged = true;
@@ -143,7 +144,8 @@ public static class SelectedEmitterReleaseParametersChildWindow
         ImGui.SameLine();
         ImGui.SetNextItemWidth(dragWidth);
         int max = parameter.Max;
-        if (ImGui.DragInt("##max_value"u8, ref max, 1, parameter.Min, int.MaxValue))
+        bool maxChanged = ImGui.DragInt("##max_value"u8, ref max, 1, parameter.Min, int.MaxValue);
+        if(maxChanged || ImGui.IsItemDeactivatedAfterEdit())
         {
             parameter = new(parameter.Min, max);
             valueChanged = true;
@@ -181,7 +183,8 @@ public static class SelectedEmitterReleaseParametersChildWindow
 
         ImGui.SetNextItemWidth(dragWidth);
         float min = parameter.Min;
-        if (ImGui.DragFloat("##min_value"u8, ref min, 0.1f, 0, parameter.Max, "%.2f"u8))
+        bool minChanged = ImGui.DragFloat("##min_value"u8, ref min, 0.1f, 0, parameter.Max, "%.2f"u8);
+        if( minChanged || ImGui.IsItemDeactivatedAfterEdit())
         {
             parameter = new(min, parameter.Max);
             valueChanged = true;
@@ -193,7 +196,8 @@ public static class SelectedEmitterReleaseParametersChildWindow
         ImGui.SameLine();
         ImGui.SetNextItemWidth(dragWidth);
         float max = parameter.Max;
-        if (ImGui.DragFloat("##max_value"u8, ref max, 1, parameter.Min, float.MaxValue, "%.2f"u8))
+        bool maxChanged = ImGui.DragFloat("##max_value"u8, ref max, 1, parameter.Min, float.MaxValue, "%.2f"u8);
+        if(maxChanged || ImGui.IsItemDeactivatedAfterEdit())
         {
             parameter = new(parameter.Min, max);
             valueChanged = true;
