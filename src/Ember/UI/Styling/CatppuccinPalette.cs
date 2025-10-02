@@ -3,7 +3,6 @@
 // See LICENSE file in the project root for full license information.
 
 using System;
-using System.Numerics;
 
 namespace Ember.UI.Styling;
 
@@ -14,39 +13,39 @@ namespace Ember.UI.Styling;
 public struct CatppuccinPalette
 {
     // Base colors (backgrounds)
-    public Vector4 Base;
-    public Vector4 Mantle;
-    public Vector4 Crust;
+    public SysVec4 Base;
+    public SysVec4 Mantle;
+    public SysVec4 Crust;
 
     // Surface hierarchy
-    public Vector4 Surface0;
-    public Vector4 Surface1;
-    public Vector4 Surface2;
+    public SysVec4 Surface0;
+    public SysVec4 Surface1;
+    public SysVec4 Surface2;
 
     // Overlay hierarchy
-    public Vector4 Overlay0;
-    public Vector4 Overlay1;
-    public Vector4 Overlay2;
+    public SysVec4 Overlay0;
+    public SysVec4 Overlay1;
+    public SysVec4 Overlay2;
 
     // Text hierarchy
-    public Vector4 Text;
-    public Vector4 Subtext1;
-    public Vector4 Subtext0;
+    public SysVec4 Text;
+    public SysVec4 Subtext1;
+    public SysVec4 Subtext0;
 
     // Accent colors
-    public Vector4 Rosewater;
-    public Vector4 Blue;
-    public Vector4 Lavender;
-    public Vector4 Sapphire;
-    public Vector4 Sky;
-    public Vector4 Teal;
-    public Vector4 Green;
-    public Vector4 Yellow;
-    public Vector4 Peach;
-    public Vector4 Maroon;
-    public Vector4 Red;
-    public Vector4 Mauve;
-    public Vector4 Pink;
+    public SysVec4 Rosewater;
+    public SysVec4 Blue;
+    public SysVec4 Lavender;
+    public SysVec4 Sapphire;
+    public SysVec4 Sky;
+    public SysVec4 Teal;
+    public SysVec4 Green;
+    public SysVec4 Yellow;
+    public SysVec4 Peach;
+    public SysVec4 Maroon;
+    public SysVec4 Red;
+    public SysVec4 Mauve;
+    public SysVec4 Pink;
 
     /// <summary>
     /// Gets the color palette for the specified Catppuccin variant.

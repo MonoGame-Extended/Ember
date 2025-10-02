@@ -15,6 +15,7 @@ namespace Ember.UI.ChildWindows;
 
 public static class SelectedEmitterPropertiesChildWindow
 {
+    private static bool _openTextureSelector;
     private static readonly Dictionary<ParticleRenderingOrder, DisplayAttribute> s_renderingOrders = [];
 
     static SelectedEmitterPropertiesChildWindow()
@@ -32,6 +33,7 @@ public static class SelectedEmitterPropertiesChildWindow
 
     public static void Draw()
     {
+        _openTextureSelector = false;
         if (ImGui.CollapsingHeader(SR.CollapsingHeader_SelectedEmitterProperties, ImGuiTreeNodeFlags.DefaultOpen))
         {
             ImGuiChildFlags childFlags = ImGuiChildFlags.Borders | ImGuiChildFlags.AutoResizeY;
@@ -42,6 +44,13 @@ public static class SelectedEmitterPropertiesChildWindow
             }
             ImGui.EndChild();
         }
+
+        if (_openTextureSelector)
+        {
+            ImGui.OpenPopup("texture_selector"u8);
+        }
+
+        OpenTextureSelectorPopup();
     }
 
     private static void DrawContent()
@@ -118,13 +127,14 @@ public static class SelectedEmitterPropertiesChildWindow
             // Show button with texture name
             if (ImGui.Button(textureName, new SysVec2(-1, 0)))
             {
-                FileBrowserModal.OpenTextureSelector(EmberContext.ProjectDirectory, result =>
-                {
-                    if (result.Status == ModalResult.Success)
-                    {
-                        EmberContext.AddTexture(result.SelectedItem.FullName);
-                    }
-                });
+                _openTextureSelector = true;
+                // FileBrowserModal.OpenTextureSelector(EmberContext.ProjectDirectory, result =>
+                // {
+                //     if (result.Status == ModalResult.Success)
+                //     {
+                //         EmberContext.AddTexture(result.SelectedItem.FullName);
+                //     }
+                // });
             }
 
             // Show tooltip with image preview when hovering
@@ -177,13 +187,14 @@ public static class SelectedEmitterPropertiesChildWindow
             // No texture is assigned, show placeholder button
             if (ImGui.Button(SR.Button_SelectTexture, new SysVec2(-1, 0)))
             {
-                FileBrowserModal.OpenTextureSelector(EmberContext.ProjectDirectory, result =>
-                {
-                    if (result.Status == ModalResult.Success)
-                    {
-                        EmberContext.AddTexture(result.SelectedItem.FullName);
-                    }
-                });
+                _openTextureSelector = true;
+                // FileBrowserModal.OpenTextureSelector(EmberContext.ProjectDirectory, result =>
+                // {
+                //     if (result.Status == ModalResult.Success)
+                //     {
+                //         EmberContext.AddTexture(result.SelectedItem.FullName);
+                //     }
+                // });
             }
         }
     }
@@ -321,6 +332,31 @@ public static class SelectedEmitterPropertiesChildWindow
             }
 
             ImGui.EndCombo();
+        }
+    }
+
+    private static void OpenTextureSelectorPopup()
+    {
+
+        ImGuiViewportPtr viewportPtr = ImGui.GetMainViewport();
+        SysVec2 workCenter = viewportPtr.WorkPos + (viewportPtr.WorkSize * 0.5f);
+
+        ImGui.SetNextWindowPos(workCenter, ImGuiCond.Always, new SysVec2(0.5f));
+        ImGui.SetNextWindowSize(viewportPtr.WorkSize * 0.9f, ImGuiCond.Appearing);
+        ImGui.SetNextWindowSizeConstraints(new SysVec2(600, 500), viewportPtr.WorkSize * 0.9f);
+
+        ImGuiWindowFlags modalFlags = ImGuiWindowFlags.Modal
+                                      | ImGuiWindowFlags.NoMove
+                                      | ImGuiWindowFlags.NoTitleBar;
+
+        if (ImGui.BeginPopupModal("texture_selector"u8, modalFlags))
+        {
+            FileDialog dialog = FileDialog.GetFileDialog("selected_emitter_properties", null, ".png", false);
+            if (dialog.Draw())
+            {
+                EmberContext.AddTexture(dialog.SelectedItem.FullName);
+            }
+            ImGui.EndPopup();
         }
     }
 }

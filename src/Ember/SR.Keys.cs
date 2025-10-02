@@ -159,6 +159,19 @@ internal static partial class SR
     internal static ReadOnlySpan<byte> Menu_File_OpenExistingProject => GetResourceUtf8Bytes(nameof(Menu_File_OpenExistingProject));
     internal static ReadOnlySpan<byte> Menu_File_SaveProject => GetResourceUtf8Bytes(nameof(Menu_File_SaveProject));
 
+    // Menu > Preferences
+    internal static ReadOnlySpan<byte> Menu_Preferences => GetResourceUtf8Bytes(nameof(Menu_Preferences));
+    internal static ReadOnlySpan<byte> Menu_Preferences_BackgroundColor => GetResourceUtf8Bytes(nameof(Menu_Preferences_BackgroundColor));
+    internal static ReadOnlySpan<byte> Menu_Preferences_BackgroundColor_Black => GetResourceUtf8Bytes(nameof(Menu_Preferences_BackgroundColor_Black));
+    internal static ReadOnlySpan<byte> Menu_Preferences_BackgroundColor_Black75 => GetResourceUtf8Bytes(nameof(Menu_Preferences_BackgroundColor_Black75));
+    internal static ReadOnlySpan<byte> Menu_Preferences_BackgroundColor_Black50 => GetResourceUtf8Bytes(nameof(Menu_Preferences_BackgroundColor_Black50));
+    internal static ReadOnlySpan<byte> Menu_Preferences_BackgroundColor_Black25 => GetResourceUtf8Bytes(nameof(Menu_Preferences_BackgroundColor_Black25));
+    internal static ReadOnlySpan<byte> Menu_Preferences_BackgroundColor_White => GetResourceUtf8Bytes(nameof(Menu_Preferences_BackgroundColor_White));
+    internal static ReadOnlySpan<byte> Menu_Preferences_BackgroundColor_CornflowerBlue => GetResourceUtf8Bytes(nameof(Menu_Preferences_BackgroundColor_CornflowerBlue));
+    internal static ReadOnlySpan<byte> Menu_Preferences_Theme => GetResourceUtf8Bytes(nameof(Menu_Preferences_Theme));
+    internal static ReadOnlySpan<byte> Menu_Preferences_Theme_Light => GetResourceUtf8Bytes(nameof(Menu_Preferences_Theme_Light));
+    internal static ReadOnlySpan<byte> Menu_Preferences_Theme_Dark => GetResourceUtf8Bytes(nameof(Menu_Preferences_Theme_Dark));
+
     // Menu > Theme
     internal static ReadOnlySpan<byte> Menu_Theme => GetResourceUtf8Bytes(nameof(Menu_Theme));
 

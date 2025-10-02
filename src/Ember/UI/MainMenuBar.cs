@@ -2,7 +2,6 @@
 // Licensed under the MIT license.
 // See LICENSE file in the project root for full license information.
 
-using System;
 using Ember.UI.Modals;
 using Ember.UI.Styling;
 using Hexa.NET.ImGui;
@@ -11,6 +10,12 @@ namespace Ember.UI;
 
 public static class MainMenuBar
 {
+    private static readonly XnaColor s_colorBlack = XnaColor.Black;
+    private static readonly XnaColor s_colorBlack75 = new XnaColor(64, 64, 64);
+    private static readonly XnaColor s_colorBlack50 = new XnaColor(128, 128, 128);
+    private static readonly XnaColor s_colorBlack25 = new XnaColor(192, 192, 192);
+    private static readonly XnaColor s_colorWhite = XnaColor.White;
+    private static readonly XnaColor s_colorCornflowerBlue = XnaColor.CornflowerBlue;
     private static bool _openProject;
 
     public static void Draw()
@@ -19,14 +24,13 @@ public static class MainMenuBar
         if (ImGui.BeginMainMenuBar())
         {
             DrawFileMenu();
-            DrawEditMenu();
-            DrawThemeMenu();
+            DrawPreferencesMenu();
             ImGui.EndMainMenuBar();
         }
 
         if (_openProject)
         {
-            ImGui.OpenPopup("open_project");
+            ImGui.OpenPopup("open_project"u8);
         }
 
         OpenProjectPopup();
@@ -50,13 +54,6 @@ public static class MainMenuBar
             if (ImGui.MenuItem(SR.Menu_File_OpenExistingProject))
             {
                 _openProject = true;
-                // FileBrowserModal.OpenProjectSelector(EmberContext.ProjectDirectory, result =>
-                // {
-                //     if (result.Status == ModalResult.Success)
-                //     {
-                //         EmberContext.OpenProject(result.SelectedItem.FullName);
-                //     }
-                // });
             }
 
             if (ImGui.MenuItem(SR.Menu_File_SaveProject))
@@ -73,31 +70,64 @@ public static class MainMenuBar
         }
     }
 
-    private static void DrawEditMenu()
+    private static void DrawPreferencesMenu()
     {
-        if (ImGui.BeginMenu(SR.Menu_Edit))
+        if (ImGui.BeginMenu(SR.Menu_Preferences))
         {
-            if (ImGui.MenuItem(SR.Menu_Edit_Preferences))
+            if (ImGui.BeginMenu(SR.Menu_Preferences_BackgroundColor))
             {
-                PreferencesWindow.Open();
+                bool selected = EmberContext.ClearColor == s_colorBlack;
+                if (ImGui.MenuItem(SR.Menu_Preferences_BackgroundColor_Black, selected))
+                {
+                    EmberContext.ClearColor = s_colorBlack;
+                }
+
+                selected = EmberContext.ClearColor == s_colorBlack75;
+                if (ImGui.MenuItem(SR.Menu_Preferences_BackgroundColor_Black75, selected))
+                {
+                    EmberContext.ClearColor = s_colorBlack75;
+                }
+
+                selected = EmberContext.ClearColor == s_colorBlack50;
+                if (ImGui.MenuItem(SR.Menu_Preferences_BackgroundColor_Black50, selected))
+                {
+                    EmberContext.ClearColor = s_colorBlack50;
+                }
+
+                selected = EmberContext.ClearColor == s_colorBlack25;
+                if (ImGui.MenuItem(SR.Menu_Preferences_BackgroundColor_Black25, selected))
+                {
+                    EmberContext.ClearColor = s_colorBlack25;
+                }
+
+                selected = EmberContext.ClearColor == s_colorWhite;
+                if (ImGui.MenuItem(SR.Menu_Preferences_BackgroundColor_White, selected))
+                {
+                    EmberContext.ClearColor = s_colorWhite;
+                }
+
+                selected = EmberContext.ClearColor == s_colorCornflowerBlue;
+                if (ImGui.MenuItem(SR.Menu_Preferences_BackgroundColor_CornflowerBlue, selected))
+                {
+                    EmberContext.ClearColor = s_colorCornflowerBlue;
+                }
+                ImGui.EndMenu();
             }
 
-            ImGui.EndMenu();
-        }
-    }
-
-    private static unsafe void DrawThemeMenu()
-    {
-        if (ImGui.BeginMenu(SR.Menu_Theme))
-        {
-
-            foreach (CatppuccinVariant variant in Enum.GetValues<CatppuccinVariant>())
+            if (ImGui.BeginMenu(SR.Menu_Preferences_Theme))
             {
-                bool isSelected = CatppuccinTheme.CurrentVariant == variant;
-                if (ImGui.MenuItem(variant.ToString(), (byte*)0, isSelected))
+                bool selected = CatppuccinTheme.CurrentVariant == CatppuccinVariant.Latte;
+                if (ImGui.MenuItem(SR.Menu_Preferences_Theme_Light, selected))
                 {
-                    CatppuccinTheme.Apply(variant);
+                    CatppuccinTheme.Apply(CatppuccinVariant.Latte);
                 }
+
+                selected = CatppuccinTheme.CurrentVariant == CatppuccinVariant.Frappe;
+                if (ImGui.MenuItem(SR.Menu_Preferences_Theme_Dark, selected))
+                {
+                    CatppuccinTheme.Apply(CatppuccinVariant.Frappe);
+                }
+                ImGui.EndMenu();
             }
             ImGui.EndMenu();
         }
@@ -117,9 +147,9 @@ public static class MainMenuBar
                                       | ImGuiWindowFlags.NoMove
                                       | ImGuiWindowFlags.NoTitleBar;
 
-        if (ImGui.BeginPopupModal("open_project", modalFlags))
+        if (ImGui.BeginPopupModal("open_project"u8, modalFlags))
         {
-            FileDialog dialog = FileDialog.GetFileDialog("mainmenubar", null, ".ember", false);
+            FileDialog dialog = FileDialog.GetFileDialog("main-menu-bar", null, ".ember", false);
             if (dialog.Draw())
             {
                 EmberContext.OpenProject(dialog.SelectedItem.FullName);

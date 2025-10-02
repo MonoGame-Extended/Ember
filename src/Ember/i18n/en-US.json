@@ -131,6 +131,20 @@
     "Menu_File_Exit": "Exit",
     "Menu_File_OpenExistingProject": "Open Existing Project...",
     "Menu_File_SaveProject": "Save Project",
+
+    "Menu_Preferences": "Preferences",
+    "Menu_Preferences_BackgroundColor": "Background Color",
+    "Menu_Preferences_BackgroundColor_Black": "Black",
+    "Menu_Preferences_BackgroundColor_Black75": "75% Black",
+    "Menu_Preferences_BackgroundColor_Black50": "50% Black",
+    "Menu_Preferences_BackgroundColor_Black25": "25% Black",
+    "Menu_Preferences_BackgroundColor_White": "White",
+    "Menu_Preferences_BackgroundColor_CornflowerBlue": "Cornflower Blue",
+    "Menu_Preferences_Theme": "Theme",
+    "Menu_Preferences_Theme_Light": "Light",
+    "Menu_Preferences_Theme_Dark": "Dark",
+
+
     "Menu_Theme": "Theme",
 
     "Message_CurrentDirectory": "Current Directory: {0}",

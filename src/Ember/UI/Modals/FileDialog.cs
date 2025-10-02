@@ -238,26 +238,26 @@ public class FileDialog
 
         // Refresh current directory button
         ImGui.SameLine();
-        if (ImGui.Button(SR.Button_Refresh))
+        if (ImGui.Button("\uf021"u8))
         {
             RefreshItems();
         }
 
         if (ImGui.IsItemHovered(ImGuiHoveredFlags.DelayNormal))
         {
-            ImGui.SetTooltip(SR.FormatUtf8(nameof(SR.Button_Refresh_Tooltip), _currentDirectory));
+            ImGui.SetTooltip($"Refresh: '{_currentDirectory}'");
         }
 
         // Create new directory button
         ImGui.SameLine();
-        if (ImGui.Button(SR.Button_NewDirectory))
+        if (ImGui.Button("\uf0fe"u8))
         {
             ImGui.OpenPopup($"{_internalId}_create_directory");
         }
 
         if (ImGui.IsItemHovered(ImGuiHoveredFlags.DelayNormal))
         {
-            ImGui.SetTooltip(SR.Button_NewDirectory_Tooltip);
+            ImGui.SetTooltip("Create a new folder"u8);
         }
 
         ImGui.Spacing();
@@ -267,37 +267,37 @@ public class FileDialog
         {
             ImGui.PushStyleVar(ImGuiStyleVar.ButtonTextAlign, new SysVec2(0, 0.5f));
 
-            if (s_homeDirectory.Exists && ImGui.Button(SR.Button_HomeDirectory, -SysVec2.UnitX))
+            if (s_homeDirectory.Exists && ImGui.Button("\uf015 Home"u8, -SysVec2.UnitX))
             {
                 NavigateTo(s_homeDirectory);
             }
 
-            if (s_desktopDirectory.Exists && ImGui.Button(SR.Button_DesktopDirectory, -SysVec2.UnitX))
+            if (s_desktopDirectory.Exists && ImGui.Button("\uf390 Desktop"u8, -SysVec2.UnitX))
             {
                 NavigateTo(s_desktopDirectory);
             }
 
-            if (s_downloadsDirectory.Exists && ImGui.Button(SR.Button_DownloadsDirectory, -SysVec2.UnitX))
+            if (s_downloadsDirectory.Exists && ImGui.Button("\uf019 Downloads"u8, -SysVec2.UnitX))
             {
                 NavigateTo(s_downloadsDirectory);
             }
 
-            if (s_documentsDirectory.Exists && ImGui.Button(SR.Button_DocumentsDirectory, -SysVec2.UnitX))
+            if (s_documentsDirectory.Exists && ImGui.Button("\uf15b Documents"u8, -SysVec2.UnitX))
             {
                 NavigateTo(s_documentsDirectory);
             }
 
-            if (s_picturesDirectory.Exists && ImGui.Button(SR.Button_PicturesDirectory, -SysVec2.UnitX))
+            if (s_picturesDirectory.Exists && ImGui.Button("\uf302 Pictures"u8, -SysVec2.UnitX))
             {
                 NavigateTo(s_picturesDirectory);
             }
 
-            if (s_musicDirectory.Exists && ImGui.Button(SR.Button_MusicDirectory, -SysVec2.UnitX))
+            if (s_musicDirectory.Exists && ImGui.Button("\uf001 Music"u8, -SysVec2.UnitX))
             {
                 NavigateTo(s_musicDirectory);
             }
 
-            if (s_videoDirectory.Exists && ImGui.Button(SR.Button_VideoDirectory, -SysVec2.UnitX))
+            if (s_videoDirectory.Exists && ImGui.Button("\uf008 Videos"u8, -SysVec2.UnitX))
             {
                 NavigateTo(s_videoDirectory);
             }
@@ -423,7 +423,7 @@ public class FileDialog
         // Selected Label
         ImGui.SetCursorPosX(selectedLabelPosX);
         ImGui.AlignTextToFramePadding();
-        ImGui.Text(SR.Label_Selected);
+        ImGui.Text("Selected"u8);
 
         ImGui.SameLine();
         ImGui.Spacing();
@@ -451,7 +451,7 @@ public class FileDialog
         // Select Button
         // Only enabled when the currently selected item is a valid selection
         ImGui.BeginDisabled(!_isValidSelection);
-        if (ImGui.Button(SR.Button_Select, buttonSize))
+        if (ImGui.Button("Select"u8, buttonSize))
         {
             result = true;
             RemoveFileDialog(this);
@@ -461,7 +461,7 @@ public class FileDialog
 
         // Cancel Button
         ImGui.SameLine();
-        if (ImGui.Button(SR.Button_Cancel, buttonSize))
+        if (ImGui.Button("Cancel"u8, buttonSize))
         {
             RemoveFileDialog(this);
             ImGui.CloseCurrentPopup();
@@ -488,7 +488,7 @@ public class FileDialog
 
         if (ImGui.BeginPopupModal($"{_internalId}_create_directory", null, modalFlags))
         {
-            ImGui.Text(SR.Popup_CreateDirectoryModal_EnterDirectoryName_Label);
+            ImGui.Text("Enter directory name"u8);
             ImGui.Spacing();
 
             // Focus the text input when the modal opens
@@ -505,12 +505,12 @@ public class FileDialog
             ImGui.Spacing();
             if (!isDirectoryNameValid)
             {
-                ImGui.TextDisabled(SR.Popup_CreateDirectoryModal_InvalidDirectoryName_Label);
+                ImGui.TextDisabled("Invalid directory name"u8);
                 ImGui.Spacing();
             }
 
             ImGui.BeginDisabled(!isDirectoryNameValid);
-            if (ImGui.Button(SR.Popup_CreateDirectoryModal_CreateDirectory_Label))
+            if (ImGui.Button("Create Directory"u8))
             {
                 try
                 {
@@ -527,7 +527,7 @@ public class FileDialog
             ImGui.EndDisabled();
 
             ImGui.SameLine();
-            if (ImGui.Button(SR.Button_Cancel))
+            if (ImGui.Button("Cancel"u8))
             {
                 ImGui.CloseCurrentPopup();
             }

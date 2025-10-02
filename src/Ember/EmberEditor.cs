@@ -120,7 +120,6 @@ public class EmberEditor : Game
         ImGuiRenderer.BeforeLayout(gameTime);
 
         MainMenuBar.Draw();
-        PreferencesWindow.Draw();
         DockSpace.Draw();
 
         if (EmberContext.ParticleEffect != null)
@@ -130,7 +129,7 @@ public class EmberEditor : Game
         }
 
         CreateNewProjectModal.Draw();
-        FileBrowserModal.Draw();
+        // FileBrowserModal.Draw();
 
         OverwriteExistingFileModal.Draw();
         ChooseModifierModal.Draw();

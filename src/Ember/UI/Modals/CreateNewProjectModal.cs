@@ -76,15 +76,17 @@ public static class CreateNewProjectModal
             ImGui.SetNextItemWidth(-60);
             ImGui.InputText("##project_location"u8, ref s_projectDirectory, 512, ImGuiInputTextFlags.ReadOnly);
             ImGui.SameLine();
+            bool chooseDirectory = false;
             if (ImGui.Button("..."u8))
             {
-                FileBrowserModal.OpenDirectorySelector(s_projectDirectory, result =>
-                {
-                    if (result.Status == ModalResult.Success)
-                    {
-                        s_projectDirectory = result.SelectedItem.FullName;
-                    }
-                });
+                chooseDirectory = true;
+                // FileBrowserModal.OpenDirectorySelector(s_projectDirectory, result =>
+                // {
+                //     if (result.Status == ModalResult.Success)
+                //     {
+                //         s_projectDirectory = result.SelectedItem.FullName;
+                //     }
+                // });
             }
 
             ImGui.Spacing();
@@ -126,9 +128,42 @@ public static class CreateNewProjectModal
                 Close(new CreateNewProjectModalResult(ModalResult.Cancel, null, null, false));
             }
 
-            FileBrowserModal.Draw();
+            if (chooseDirectory)
+            {
+                ImGui.OpenPopup("choose_directory"u8);
+            }
+
+            OpenChooseDirectoryPopup();
+
+            // FileBrowserModal.Draw();
 
             ImGui.EndPopup();
         }
     }
+
+    private static void OpenChooseDirectoryPopup()
+    {
+
+        ImGuiViewportPtr viewportPtr = ImGui.GetMainViewport();
+        SysVec2 workCenter = viewportPtr.WorkPos + (viewportPtr.WorkSize * 0.5f);
+
+        ImGui.SetNextWindowPos(workCenter, ImGuiCond.Always, new SysVec2(0.5f));
+        ImGui.SetNextWindowSize(viewportPtr.WorkSize * 0.9f, ImGuiCond.Appearing);
+        ImGui.SetNextWindowSizeConstraints(new SysVec2(600, 500), viewportPtr.WorkSize * 0.9f);
+
+        ImGuiWindowFlags modalFlags = ImGuiWindowFlags.Modal
+                                      | ImGuiWindowFlags.NoMove
+                                      | ImGuiWindowFlags.NoTitleBar;
+
+        if (ImGui.BeginPopupModal("choose_directory"u8, modalFlags))
+        {
+            FileDialog dialog = FileDialog.GetDirectoryDialog("create_new_project_modal", null);
+            if (dialog.Draw())
+            {
+                s_projectDirectory = dialog.SelectedItem.FullName;
+            }
+            ImGui.EndPopup();
+        }
+    }
+
 }
