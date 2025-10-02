@@ -192,7 +192,7 @@ public static class SelectedEmitterProfileChildWindow
 
             case LineProfile line:
                 XnaVec2 lineAxis = line.Axis;
-                if (DrawVector2Property(SR.LineProfile_Property_Axis_Name, "##line_axis_x"u8, "##line_axis_y"u8, ref lineAxis, 0.1f, float.MinValue, float.MaxValue))
+                if (DrawVector2Property(SR.LineProfile_Property_Axis_Name, "##line_axis_x"u8, "##line_axis_y"u8, ref lineAxis, 1f, -1f, 1f))
                 {
                     line.Axis = lineAxis;
                     EmberContext.HasUnsavedChanges = true;
