@@ -1,6 +1,6 @@
 namespace Ember.Architecture;
 
-public enum ModalResult
+public enum ModalResults
 {
     None,
     Ok,

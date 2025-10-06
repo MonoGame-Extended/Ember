@@ -349,14 +349,14 @@ public static class SelectedEmitterPropertiesChildWindow
                                       | ImGuiWindowFlags.NoMove
                                       | ImGuiWindowFlags.NoTitleBar;
 
-        if (ImGui.BeginPopupModal("texture_selector"u8, modalFlags))
-        {
-            FileDialog dialog = FileDialog.GetFileDialog("selected_emitter_properties", null, ".png", false);
-            if (dialog.Draw())
-            {
-                EmberContext.AddTexture(dialog.SelectedItem.FullName);
-            }
-            ImGui.EndPopup();
-        }
+        // if (ImGui.BeginPopupModal("texture_selector"u8, modalFlags))
+        // {
+        //     FileDialog dialog = FileDialog.CreateFileDialog("selected_emitter_properties", null, ".png", false);
+        //     if (dialog.Draw())
+        //     {
+        //         EmberContext.AddTexture(dialog.SelectedItem.FullName);
+        //     }
+        //     ImGui.EndPopup();
+        // }
     }
 }

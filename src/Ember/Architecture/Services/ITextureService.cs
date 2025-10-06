@@ -10,14 +10,21 @@ namespace Ember.Architecture.Services;
 public interface ITextureService : IDisposable
 {
     /// <summary>
-    /// Adds a texture file to the project, copying it if necessary.
+    /// Checks whether a texture with the specified file name exists in the cache.
     /// </summary>
-    /// <param name="filePath">The absolute or relative path to the texture file.</param>
-    /// <param name="onOverwriteConfirm">Callback invoked when a file would be overwritten, allowing user confirmation.</param>
-    void AddTexture(string filePath, Action<string, Action> onOverwriteConfirm = null);
+    /// <param name="fileName">The file name to check.</param>
+    /// <returns><see langword="true"/> if the texture exists in the cache; otherwise, <see langword="false"/>.</returns>
+    bool TextureExists(string fileName);
 
     /// <summary>
-    /// Loads a texture from the project directory into the cache.
+    /// Adds a texture file to the project, copying it to the working directory if necessary and loading it into the cache.
+    /// </summary>
+    /// <param name="filePath">The absolute or relative path to the texture file to add.</param>
+    /// <param name="overwrite">Whether to overwrite an existing texture with the same file name.</param>
+    void AddTexture(string filePath, bool overwrite = false);
+
+    /// <summary>
+    /// Loads a texture from the working directory into the cache.
     /// </summary>
     /// <param name="fileName">The file name of the texture to load.</param>
     /// <returns>The loaded <see cref="Texture2D"/>.</returns>
@@ -37,7 +44,7 @@ public interface ITextureService : IDisposable
     IEnumerable<string> GetTextureNames();
 
     /// <summary>
-    /// Clears all cached textures and unloads them from the content manager.
+    /// Clears all cached textures and disposes their resources.
     /// </summary>
     void Clear();
 }

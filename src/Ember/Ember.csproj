@@ -28,6 +28,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Hexa.NET.ImGui.Backends" Version="1.0.17.4" />
+    <PackageReference Include="Hexa.NET.ImGui.Backends.SDL2" Version="1.0.17.4" />
+    <PackageReference Include="Hexa.NET.SDL2" Version="1.2.16" />
     <ProjectReference Include="..\..\external\monogame-extended\source\MonoGame.Extended\MonoGame.Extended.csproj" />
     <PackageReference Include="Hexa.NET.ImGui" Version="2.2.8.5" />
     <PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.*" />
@@ -42,6 +45,10 @@
     <Using Include="System.Numerics.Vector2" Alias="SysVec2" />
     <Using Include="System.Numerics.Vector3" Alias="SysVec3" />
     <Using Include="System.Numerics.Vector4" Alias="SysVec4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ImGuiFileDialog\ImGuiFileDialog.csproj" />
   </ItemGroup>
 
 </Project>

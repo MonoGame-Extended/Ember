@@ -155,15 +155,15 @@ public static class CreateNewProjectModal
                                       | ImGuiWindowFlags.NoMove
                                       | ImGuiWindowFlags.NoTitleBar;
 
-        if (ImGui.BeginPopupModal("choose_directory"u8, modalFlags))
-        {
-            FileDialog dialog = FileDialog.GetDirectoryDialog("create_new_project_modal", null);
-            if (dialog.Draw())
-            {
-                s_projectDirectory = dialog.SelectedItem.FullName;
-            }
-            ImGui.EndPopup();
-        }
+        // if (ImGui.BeginPopupModal("choose_directory"u8, modalFlags))
+        // {
+        //     FileDialog dialog = FileDialog.CreateDirectoryDialog("create_new_project_modal", null);
+        //     if (dialog.Draw())
+        //     {
+        //         s_projectDirectory = dialog.SelectedItem.FullName;
+        //     }
+        //     ImGui.EndPopup();
+        // }
     }
 
 }

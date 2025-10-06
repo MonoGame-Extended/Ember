@@ -6,6 +6,7 @@ using System;
 using System.Globalization;
 using System.Reflection;
 using System.Text;
+using Ember.Architecture;
 using Ember.Graphics;
 using Ember.UI;
 using Ember.UI.Modals;

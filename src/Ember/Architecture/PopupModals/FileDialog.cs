@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using Hexa.NET.ImGui;
 
-namespace Ember.UI.Modals;
+namespace Ember.Architecture.PopupModals;
 
 public class FileDialog
 {
@@ -58,7 +58,7 @@ public class FileDialog
     // State tracking
     private bool _directoriesOnly;
     private bool _isValidSelection;
-    private string _internalId;
+    private object _internalId;
     private string _newDirectoryName = string.Empty;
 
     static FileDialog()
@@ -95,7 +95,12 @@ public class FileDialog
         return GetFileDialog(requestor, startPath, string.Empty, true);
     }
 
-    public static FileDialog GetFileDialog(object requestor, string startPath, string searchFilter, bool directoriesOnly)
+    public static FileDialog GetFileDialog(object requestor, string startPath, string searchFilter = null)
+    {
+        return GetFileDialog(requestor, startPath, searchFilter, false);
+    }
+
+    private static FileDialog GetFileDialog(object requestor, string startPath, string searchFilter, bool directoriesOnly)
     {
         ArgumentNullException.ThrowIfNull(requestor);
 
@@ -103,7 +108,7 @@ public class FileDialog
         if (!s_fileDialogs.TryGetValue(requestor, out FileDialog fileDialog))
         {
             fileDialog = new FileDialog();
-            fileDialog._internalId = requestor.GetHashCode().ToString();
+            fileDialog._internalId = requestor;
 
             if (string.IsNullOrEmpty(startPath))
             {
@@ -122,7 +127,6 @@ public class FileDialog
             }
 
             fileDialog._directoriesOnly = directoriesOnly;
-            fileDialog._internalId = $"{requestor.GetType().Name}_{nameof(FileDialog)}";
 
             if (!string.IsNullOrEmpty(searchFilter))
             {
