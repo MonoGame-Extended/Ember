@@ -7,9 +7,8 @@ using System.Globalization;
 using System.Reflection;
 using System.Text;
 using Ember.Architecture;
+using Ember.Architecture.Views;
 using Ember.Graphics;
-using Ember.UI;
-using Ember.UI.Modals;
 using Ember.UI.Styling;
 using Hexa.NET.ImGui;
 using Microsoft.Xna.Framework;
@@ -35,6 +34,9 @@ public class EmberEditor : Game
     // Input
     private static MouseState s_previousMouseState;
     private static MouseState s_currentMouseState;
+
+    private MainView _mainView;
+    private EditorContext _context;
 
     public EmberEditor()
     {
@@ -73,8 +75,10 @@ public class EmberEditor : Game
         // Set the styling and theme for ImGui
         CatppuccinTheme.Apply(CatppuccinVariant.Mocha);
 
-        // Initialize the editor context
-        EmberContext.Initialize(this);
+        _context = new(this);
+
+        _mainView = new MainView(_context);
+
     }
 
     protected override void LoadContent()
@@ -87,8 +91,12 @@ public class EmberEditor : Game
         s_previousMouseState = s_currentMouseState;
         s_currentMouseState = Mouse.GetState();
 
+        if (_context.IsProjectPaused)
+        {
+            return;
+        }
         // Emit particles on click
-        if (EmberContext.ParticleEffect is ParticleEffect particleEffect)
+        if (_context.ParticleEffect is ParticleEffect particleEffect)
         {
             ImGuiIOPtr ioPtr = ImGui.GetIO();
 
@@ -111,7 +119,7 @@ public class EmberEditor : Game
     {
         GraphicsDevice.Clear(EmberContext.ClearColor);
 
-        if (EmberContext.ParticleEffect is ParticleEffect particleEffect)
+        if (_context.ParticleEffect is ParticleEffect particleEffect)
         {
             _spriteBatch.Begin(samplerState: SamplerState.PointWrap, blendState: BlendState.AlphaBlend);
             _spriteBatch.Draw(particleEffect);
@@ -119,24 +127,7 @@ public class EmberEditor : Game
         }
 
         ImGuiRenderer.BeforeLayout(gameTime);
-
-        MainMenuBar.Draw();
-        DockSpace.Draw();
-
-        if (EmberContext.ParticleEffect != null)
-        {
-            PropertiesWindow.Draw();
-            ModifiersWindow.Draw();
-        }
-
-        CreateNewProjectModal.Draw();
-        // FileBrowserModal.Draw();
-
-        OverwriteExistingFileModal.Draw();
-        ChooseModifierModal.Draw();
-        ChooseInterpolatorModal.Draw();
-        UnsavedChangesModal.Draw();
-
+        _mainView.Draw();
         ImGuiRenderer.AfterLayout();
 
         s_frameRate = ImGui.GetIO().Framerate;

@@ -43,61 +43,61 @@ public static class SelectedEmitterReleaseParametersChildWindow
             ImGui.TableSetupColumn("##selected_emitter_release_parameters_label_column"u8, ImGuiTableColumnFlags.WidthStretch, 1.0f);
             ImGui.TableSetupColumn("##selected_emitter_release_parameters_value_column"u8, ImGuiTableColumnFlags.WidthStretch, 1.0f);
 
-            Interval<int> quantity = emitter.Parameters.Quantity;
-            if (DrawEmitterReleaseParameterRow(SR.ReleaseParameter_Quantity_Name, SR.ReleaseParameter_Quantity_Description, ref quantity))
-            {
-                emitter.Parameters.Quantity = quantity;
-                EmberContext.HasUnsavedChanges = true;
-            }
+            // Interval<int> quantity = emitter.Parameters.Quantity;
+            // if (DrawEmitterReleaseParameterRow(SR.ReleaseParameter_Quantity_Name, SR.ReleaseParameter_Quantity_Description, ref quantity))
+            // {
+            //     emitter.Parameters.Quantity = quantity;
+            //     EmberContext.HasUnsavedChanges = true;
+            // }
 
-            Interval<float> speed = emitter.Parameters.Speed;
-            if (DrawEmitterReleaseParameterRow(SR.ReleaseParameter_Speed_Name, SR.ReleaseParameter_Speed_Description, ref speed))
-            {
-                emitter.Parameters.Speed = speed;
-                EmberContext.HasUnsavedChanges = true;
-            }
+            // Interval<float> speed = emitter.Parameters.Speed;
+            // if (DrawEmitterReleaseParameterRow(SR.ReleaseParameter_Speed_Name, SR.ReleaseParameter_Speed_Description, ref speed))
+            // {
+            //     emitter.Parameters.Speed = speed;
+            //     EmberContext.HasUnsavedChanges = true;
+            // }
 
-            Interval<HslColor> color = emitter.Parameters.Color;
-            if (DrawEmitterReleaseParameterRow(SR.ReleaseParameter_Color_Name, SR.ReleaseParameter_Color_Description, ref color))
-            {
-                emitter.Parameters.Color = color;
-                EmberContext.HasUnsavedChanges = true;
-            }
+            // Interval<HslColor> color = emitter.Parameters.Color;
+            // if (DrawEmitterReleaseParameterRow(SR.ReleaseParameter_Color_Name, SR.ReleaseParameter_Color_Description, ref color))
+            // {
+            //     emitter.Parameters.Color = color;
+            //     EmberContext.HasUnsavedChanges = true;
+            // }
 
-            Interval<float> opacity = emitter.Parameters.Opacity;
-            if (DrawEmitterReleaseParameterRow(SR.ReleaseParameter_Opacity_Name, SR.ReleaseParameter_Opacity_Description, ref opacity))
-            {
-                emitter.Parameters.Opacity = opacity;
-                EmberContext.HasUnsavedChanges = true;
-            }
+            // Interval<float> opacity = emitter.Parameters.Opacity;
+            // if (DrawEmitterReleaseParameterRow(SR.ReleaseParameter_Opacity_Name, SR.ReleaseParameter_Opacity_Description, ref opacity))
+            // {
+            //     emitter.Parameters.Opacity = opacity;
+            //     EmberContext.HasUnsavedChanges = true;
+            // }
 
-            Interval<float> scaleX = emitter.Parameters.ScaleX;
-            if (DrawEmitterReleaseParameterRow(SR.ReleaseParameter_ScaleX_Name, SR.ReleaseParameter_ScaleX_Description, ref scaleX))
-            {
-                emitter.Parameters.ScaleX = scaleX;
-                EmberContext.HasUnsavedChanges = true;
-            }
+            // Interval<float> scaleX = emitter.Parameters.ScaleX;
+            // if (DrawEmitterReleaseParameterRow(SR.ReleaseParameter_ScaleX_Name, SR.ReleaseParameter_ScaleX_Description, ref scaleX))
+            // {
+            //     emitter.Parameters.ScaleX = scaleX;
+            //     EmberContext.HasUnsavedChanges = true;
+            // }
 
-            Interval<float> scaleY = emitter.Parameters.ScaleY;
-            if (DrawEmitterReleaseParameterRow(SR.ReleaseParameter_ScaleY_Name, SR.ReleaseParameter_ScaleY_Description, ref scaleY))
-            {
-                emitter.Parameters.ScaleY = scaleY;
-                EmberContext.HasUnsavedChanges = true;
-            }
+            // Interval<float> scaleY = emitter.Parameters.ScaleY;
+            // if (DrawEmitterReleaseParameterRow(SR.ReleaseParameter_ScaleY_Name, SR.ReleaseParameter_ScaleY_Description, ref scaleY))
+            // {
+            //     emitter.Parameters.ScaleY = scaleY;
+            //     EmberContext.HasUnsavedChanges = true;
+            // }
 
-            Interval<float> rotation = emitter.Parameters.Rotation;
-            if (DrawEmitterReleaseParameterRow(SR.ReleaseParameter_Rotation_Name, SR.ReleaseParameter_Rotation_Description, ref rotation))
-            {
-                emitter.Parameters.Rotation = rotation;
-                EmberContext.HasUnsavedChanges = true;
-            }
+            // Interval<float> rotation = emitter.Parameters.Rotation;
+            // if (DrawEmitterReleaseParameterRow(SR.ReleaseParameter_Rotation_Name, SR.ReleaseParameter_Rotation_Description, ref rotation))
+            // {
+            //     emitter.Parameters.Rotation = rotation;
+            //     EmberContext.HasUnsavedChanges = true;
+            // }
 
-            Interval<float> mass = emitter.Parameters.Mass;
-            if (DrawEmitterReleaseParameterRow(SR.ReleaseParameter_Mass_Name, SR.ReleaseParameter_Mass_Description, ref mass))
-            {
-                emitter.Parameters.Mass = mass;
-                EmberContext.HasUnsavedChanges = true;
-            }
+            // Interval<float> mass = emitter.Parameters.Mass;
+            // if (DrawEmitterReleaseParameterRow(SR.ReleaseParameter_Mass_Name, SR.ReleaseParameter_Mass_Description, ref mass))
+            // {
+            //     emitter.Parameters.Mass = mass;
+            //     EmberContext.HasUnsavedChanges = true;
+            // }
 
             ImGui.EndTable();
         }

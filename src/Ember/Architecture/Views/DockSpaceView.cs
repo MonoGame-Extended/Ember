@@ -24,10 +24,10 @@ public sealed class DockSpaceView
         ImGuiViewportPtr viewportPtr = GetMainViewport();
 
         SysVec2 pos = viewportPtr.WorkPos;
-        pos.Y += GetFrameHeight() * 2;
+        pos.Y += GetFrameHeight();
 
         SysVec2 size = viewportPtr.WorkSize;
-        size.Y -= GetFrameHeight() * 2;
+        size.Y -= GetFrameHeight();
 
         SetNextWindowPos(pos);
         SetNextWindowSize(size);
@@ -113,7 +113,7 @@ public sealed class DockSpaceView
         RightPanelDockId = rightNodeId;
 
         DockBuilderDockWindow(ParticleEffectView.ViewName, LeftPanelDockId);
-        DockBuilderDockWindow("Modifiers"u8, RightPanelDockId);
+        // DockBuilderDockWindow(ModifiersView.ViewName, RightPanelDockId);
     }
 
     public void ResetLayout()

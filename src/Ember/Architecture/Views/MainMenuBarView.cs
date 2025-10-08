@@ -1,6 +1,5 @@
 using System;
 using Ember.Architecture.PopupModals;
-using Ember.Architecture.Services;
 using Hexa.NET.ImGui;
 using static Hexa.NET.ImGui.ImGui;
 
@@ -9,16 +8,14 @@ namespace Ember.Architecture.Views;
 
 public sealed class MainMenuBarView
 {
-    private readonly IProjectService _projectService;
-    private readonly IUISettingsService _uiSettingsService;
+    private readonly EditorContext _context;
     private bool _openProject;
     private bool _createNewProject;
 
-    public MainMenuBarView(IServiceProvider services)
+    public MainMenuBarView(EditorContext context)
     {
-        ArgumentNullException.ThrowIfNull(services);
-        _projectService = services.GetService(typeof(IProjectService)) as IProjectService;
-        _uiSettingsService = services.GetService(typeof(IUISettingsService)) as IUISettingsService;
+        ArgumentNullException.ThrowIfNull(context);
+        _context = context;
     }
 
     public void Draw()
@@ -51,7 +48,7 @@ public sealed class MainMenuBarView
 
             if (MenuItem("Save project"u8))
             {
-                _projectService.SaveProject();
+                _context.SaveProject();
             }
 
             if (MenuItem("Exit"u8))
@@ -59,8 +56,7 @@ public sealed class MainMenuBarView
                 // TODO: This is not going to work
                 // we need to check for needs saving
                 // and find a proper way to "Exit" the game
-                _projectService.CloseProject();
-                // Exit Game
+                _context.CloseProject();
             }
 
             EndMenu();
@@ -74,40 +70,40 @@ public sealed class MainMenuBarView
         {
             if (BeginMenu("Background Color"u8))
             {
-                bool selected = _uiSettingsService.ClearColor == XnaColor.Black;
+                bool selected = _context.ClearColor == XnaColor.Black;
                 if (MenuItem("Black"u8, selected))
                 {
-                    _uiSettingsService.ClearColor = XnaColor.Black;
+                    _context.ClearColor = XnaColor.Black;
                 }
 
-                selected = _uiSettingsService.ClearColor.R == 64;
+                selected = _context.ClearColor.R == 64;
                 if (MenuItem("75% Black"u8, selected))
                 {
-                    _uiSettingsService.ClearColor = new XnaColor(64, 64, 64);
+                    _context.ClearColor = new XnaColor(64, 64, 64);
                 }
 
-                selected = _uiSettingsService.ClearColor.R == 128;
+                selected = _context.ClearColor.R == 128;
                 if (MenuItem("50% Black"u8, selected))
                 {
-                    _uiSettingsService.ClearColor = new XnaColor(128, 128, 128);
+                    _context.ClearColor = new XnaColor(128, 128, 128);
                 }
 
-                selected = _uiSettingsService.ClearColor.R == 192;
+                selected = _context.ClearColor.R == 192;
                 if (MenuItem("25% Black"u8, selected))
                 {
-                    _uiSettingsService.ClearColor = new XnaColor(192, 192, 192);
+                    _context.ClearColor = new XnaColor(192, 192, 192);
                 }
 
-                selected = _uiSettingsService.ClearColor == XnaColor.White;
+                selected = _context.ClearColor == XnaColor.White;
                 if (MenuItem("White"u8, selected))
                 {
-                    _uiSettingsService.ClearColor = XnaColor.White;
+                    _context.ClearColor = XnaColor.White;
                 }
 
-                selected = _uiSettingsService.ClearColor == XnaColor.CornflowerBlue;
+                selected = _context.ClearColor == XnaColor.CornflowerBlue;
                 if (MenuItem("Cornflower Blue"u8, selected))
                 {
-                    _uiSettingsService.ClearColor = XnaColor.CornflowerBlue;
+                    _context.ClearColor = XnaColor.CornflowerBlue;
                 }
 
                 EndMenu();
@@ -115,17 +111,19 @@ public sealed class MainMenuBarView
 
             if (BeginMenu("Theme"u8))
             {
-                bool selected = _uiSettingsService.Theme == ColorTheme.Light;
+                bool selected = _context.Theme == ColorTheme.Light;
                 if (MenuItem("Light"u8, selected))
                 {
-                    _uiSettingsService.ApplyTheme(ColorTheme.Light);
+                    _context.ApplyTheme(ColorTheme.Light);
                 }
 
-                selected = _uiSettingsService.Theme == ColorTheme.Dark;
+                selected = _context.Theme == ColorTheme.Dark;
                 if (MenuItem("Dark"u8, selected))
                 {
-                    _uiSettingsService.ApplyTheme(ColorTheme.Dark);
+                    _context.ApplyTheme(ColorTheme.Dark);
                 }
+
+                EndMenu();
             }
             EndMenu();
         }
@@ -161,7 +159,7 @@ public sealed class MainMenuBarView
             CreateNewProjectModal modal = CreateNewProjectModal.GetCreateNewProjectModal(this, null);
             if (modal.Draw())
             {
-                _projectService.CreateProject(modal.ProjectName, modal.ProjectDirectory, modal.CreateProjectDirectory);
+                _context.CreateProject(modal.ProjectName, modal.ProjectDirectory, modal.CreateProjectDirectory);
             }
             EndPopup();
         }
@@ -197,7 +195,7 @@ public sealed class MainMenuBarView
             FileDialog dialog = FileDialog.GetFileDialog(this, null, ".ember");
             if (dialog.Draw())
             {
-                EmberContext.OpenProject(dialog.SelectedItem.FullName);
+                _context.OpenProject(dialog.SelectedItem.FullName);
             }
             EndPopup();
         }

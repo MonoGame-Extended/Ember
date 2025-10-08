@@ -1,5 +1,4 @@
 using System;
-using Ember.Architecture.Services;
 using Hexa.NET.ImGui;
 using static Hexa.NET.ImGui.ImGui;
 
@@ -7,12 +6,12 @@ namespace Ember.Architecture.Views;
 
 public sealed class ToolbarView
 {
-    private readonly IProjectService _projectService;
+    private readonly EditorContext _context;
 
-    public ToolbarView(IServiceProvider services)
+    public ToolbarView(EditorContext context)
     {
-        ArgumentNullException.ThrowIfNull(services);
-        _projectService = services.GetService(typeof(IProjectService)) as IProjectService;
+        ArgumentNullException.ThrowIfNull(context);
+        _context = context;
     }
 
     public void Draw()
@@ -21,7 +20,6 @@ public sealed class ToolbarView
 
         // Position the toolbar below the main menu bar
         SysVec2 pos = viewportPtr.WorkPos;
-        pos.Y += GetFrameHeight();
 
         SetNextWindowPos(pos);
         SetNextWindowSize(new SysVec2(viewportPtr.WorkSize.X, GetFrameHeight()));
@@ -48,7 +46,7 @@ public sealed class ToolbarView
     {
         if (Button(Fonts.PlayIcon))
         {
-            _projectService.PauseProject(false);
+            _context.PauseProject(false);
         }
 
         if (IsItemHovered(ImGuiHoveredFlags.DelayNormal))
@@ -60,7 +58,7 @@ public sealed class ToolbarView
 
         if (Button(Fonts.PauseIcon))
         {
-            _projectService.PauseProject(true);
+            _context.PauseProject(true);
         }
 
         if (IsItemHovered(ImGuiHoveredFlags.DelayNormal))
