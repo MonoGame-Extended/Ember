@@ -251,8 +251,6 @@ public sealed class ParticleEffectView
 
             ParticleEmitter emitter = _context.SelectedEmitter;
 
-
-
             // If there is no selected emitter, just display a child window with
             // the text stating so and return back.
             if (emitter == null)
@@ -280,7 +278,7 @@ public sealed class ParticleEffectView
                     Text("Name"u8);
                     if (IsItemHovered(ImGuiHoveredFlags.DelayNormal))
                     {
-                        SetTooltip("The display name of the selected emitter");
+                        SetTooltip("The display name of the selected emitter"u8);
                     }
 
                     TableNextColumn();
@@ -295,6 +293,7 @@ public sealed class ParticleEffectView
                     // Texture Property
                     TableNextRow();
                     TableNextColumn();
+                    AlignTextToFramePadding();
                     Text("Texture"u8);
                     if (IsItemHovered(ImGuiHoveredFlags.DelayNormal))
                     {

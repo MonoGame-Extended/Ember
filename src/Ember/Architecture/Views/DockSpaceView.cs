@@ -113,7 +113,7 @@ public sealed class DockSpaceView
         RightPanelDockId = rightNodeId;
 
         DockBuilderDockWindow(ParticleEffectView.ViewName, LeftPanelDockId);
-        // DockBuilderDockWindow(ModifiersView.ViewName, RightPanelDockId);
+        DockBuilderDockWindow(ModifiersView.ViewName, RightPanelDockId);
     }
 
     public void ResetLayout()
