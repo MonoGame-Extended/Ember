@@ -1,6 +1,7 @@
 using System;
 using Ember.Architecture.Components;
 using Hexa.NET.ImGui;
+using MonoGame.Extended;
 using MonoGame.Extended.Particles.Modifiers;
 using MonoGame.Extended.Particles.Modifiers.Containers;
 using static Hexa.NET.ImGui.ImGui;
@@ -28,6 +29,7 @@ public sealed class ModifiersView
         if (Begin(ViewName))
         {
             DrawModifierList();
+            DrawSelectedModifierProperties();
         }
         End();
 
@@ -193,16 +195,18 @@ public sealed class ModifiersView
                 {
                     // Name property
                     string modifierName = modifier.Name;
-                    if (PropertyTable.TextProperty("Name"u8, "The display name of the selected modifier"u8, ref modifierName))
+                    if (PropertyTable.InputTextProperty("Name"u8, "The display name of the selected modifier"u8, ref modifierName))
                     {
                         modifier.Name = modifierName;
+                        _context.HasUnsavedChanges = true;
                     }
 
                     // Frequency property
                     float modifierFrequency = modifier.Frequency;
-                    if (PropertyTable.FloatProperty("Frequency"u8, "How often, in times per second, the modifier attempts to update the particle buffer"u8, ref modifierFrequency, 0.1f, 0.0f, float.MaxValue))
+                    if (PropertyTable.DragFloatProperty("Frequency"u8, "How often, in times per second, the modifier attempts to update the particle buffer"u8, ref modifierFrequency, 0.1f, 0.0f, float.MaxValue))
                     {
                         modifier.Frequency = modifierFrequency;
+                        _context.HasUnsavedChanges = true;
                     }
 
                     switch (modifier)
@@ -211,55 +215,56 @@ public sealed class ModifiersView
 
                         case CircleContainerModifier circleContainer:
                             bool circleContainerInside = circleContainer.Inside;
-                            if (PropertyTable.BoolProperty("Inside"u8, ""u8, ref circleContainerInside))
+                            if (PropertyTable.CheckboxProperty("Inside"u8, ""u8, ref circleContainerInside))
                             {
                                 circleContainer.Inside = circleContainerInside;
+                                _context.HasUnsavedChanges = true;
                             }
 
                             float circleContainerRadius = circleContainer.Radius;
-                            if (PropertyTable.FloatProperty("Radius"u8, "The radius of the circular container"u8, ref circleContainerRadius, 0.1f, 0.0f, float.MaxValue))
+                            if (PropertyTable.DragFloatProperty("Radius"u8, "The radius of the circular container"u8, ref circleContainerRadius, 0.1f, 0.0f, float.MaxValue))
                             {
                                 circleContainer.Radius = circleContainerRadius;
-                                EmberContext.HasUnsavedChanges = true;
+                                _context.HasUnsavedChanges = true;
                             }
 
                             float circleContainerRestitutionCoefficient = circleContainer.RestitutionCoefficient;
-                            if (PropertyTable.FloatProperty("Restitution Coefficient"u8, "The coefficient of restitution (bounciness) for particle collisions with the boundary"u8, ref circleContainerRestitutionCoefficient, 0.1f, 0.0f, float.MaxValue))
+                            if (PropertyTable.DragFloatProperty("Restitution Coefficient"u8, "The coefficient of restitution (bounciness) for particle collisions with the boundary"u8, ref circleContainerRestitutionCoefficient, 0.1f, 0.0f, float.MaxValue))
                             {
                                 circleContainer.RestitutionCoefficient = circleContainerRestitutionCoefficient;
-                                EmberContext.HasUnsavedChanges = true;
+                                _context.HasUnsavedChanges = true;
                             }
                             break;
 
                         case DragModifier drag:
                             float dragDensity = drag.Density;
-                            if (PropertyTable.FloatProperty("Density"u8, SR.DragModifier_Property_Density_Description, ref dragDensity, 0.1f, 0.0f, float.MaxValue))
+                            if (PropertyTable.DragFloatProperty("Density"u8, "The density of the fluid medium, affecting the strength of the drag force"u8, ref dragDensity, 0.1f, 0.0f, float.MaxValue))
                             {
                                 drag.Density = dragDensity;
-                                EmberContext.HasUnsavedChanges = true;
+                                _context.HasUnsavedChanges = true;
                             }
 
                             float dragDragCoefficient = drag.DragCoefficient;
-                            if (PropertyTable.FloatProperty("Drag Coefficient"u8, SR.DragModifier_Property_DragCoefficient_Description, ref dragDragCoefficient, 0.1f, 0.0f, float.MaxValue))
+                            if (PropertyTable.DragFloatProperty("Drag Coefficient"u8, "The drag coefficient, representing the aerodynamic or hydrodynamic properties of particles"u8, ref dragDragCoefficient, 0.1f, 0.0f, float.MaxValue))
                             {
                                 drag.DragCoefficient = dragDragCoefficient;
-                                EmberContext.HasUnsavedChanges = true;
+                                _context.HasUnsavedChanges = true;
                             }
                             break;
 
                         case LinearGravityModifier gravity:
                             XnaVec2 gravityDirection = gravity.Direction;
-                            if (DrawVector2Property(SR.LinearGravityModifier_Property_Direction_Name, SR.LinearGravityModifier_Property_Direction_Description, ref gravityDirection, 0.1f, float.MinValue, float.MaxValue))
+                            if (PropertyTable.DragVector2Property("Direction"u8, "The direction vector of the gravitational force"u8, ref gravityDirection, 0.1f, float.MinValue, float.MaxValue))
                             {
                                 gravity.Direction = gravityDirection;
-                                EmberContext.HasUnsavedChanges = true;
+                                _context.HasUnsavedChanges = true;
                             }
 
                             float gravityStrength = gravity.Strength;
-                            if (PropertyTable.FloatProperty("Strength"u8, SR.LinearGravityModifier_Property_Strength_Description, ref gravityStrength, 0.1f, 0.0f, float.MaxValue))
+                            if (PropertyTable.DragFloatProperty("Strength"u8, "The strength of the gravitational force, in units per second squared"u8, ref gravityStrength, 0.1f, 0.0f, float.MaxValue))
                             {
                                 gravity.Strength = gravityStrength;
-                                EmberContext.HasUnsavedChanges = true;
+                                _context.HasUnsavedChanges = true;
                             }
                             break;
 
@@ -269,21 +274,21 @@ public sealed class ModifiersView
 
                         case RectangleContainerModifier rectContainer:
                             int rectContainerWidth = rectContainer.Width;
-                            if (DrawIntProperty(SR.RectangleContainerModifier_Property_Width_Name, SR.RectangleContainerModifier_Property_Width_Description, ref rectContainerWidth, 1, 0, int.MaxValue))
+                            if (PropertyTable.DragIntProperty("Width"u8, "The width of the rectangular container"u8, ref rectContainerWidth, 1, 0, int.MaxValue))
                             {
                                 rectContainer.Width = rectContainerWidth;
-                                EmberContext.HasUnsavedChanges = true;
+                                _context.HasUnsavedChanges = true;
                             }
 
                             int rectContainerHeight = rectContainer.Height;
-                            if (DrawIntProperty(SR.RectangleContainerModifier_Property_Height_Name, SR.RectangleContainerModifier_Property_Height_Description, ref rectContainerHeight, 1, 0, int.MaxValue))
+                            if (PropertyTable.DragIntProperty("Height"u8, "The height of the rectangular container"u8, ref rectContainerHeight, 1, 0, int.MaxValue))
                             {
                                 rectContainer.Height = rectContainerHeight;
-                                EmberContext.HasUnsavedChanges = true;
+                                _context.HasUnsavedChanges = true;
                             }
 
                             float rectContainerRestitutionCoefficient = rectContainer.RestitutionCoefficient;
-                            if (PropertyTable.FloatProperty("Restitution Coefficient"u8, SR.RectangleContainerModifier_Property_RestitutionCoefficient_Description, ref rectContainerRestitutionCoefficient, 0.1f, 0.0f, float.MaxValue))
+                            if (PropertyTable.DragFloatProperty("Restitution Coefficient"u8, "The coefficient of restitution (bounciness) for particle collisions with the boundary"u8, ref rectContainerRestitutionCoefficient, 0.1f, 0.0f, float.MaxValue))
                             {
                                 rectContainer.RestitutionCoefficient = rectContainerRestitutionCoefficient;
                                 EmberContext.HasUnsavedChanges = true;
@@ -292,102 +297,102 @@ public sealed class ModifiersView
 
                         case RectangleLoopContainerModifier rectLoop:
                             int rectLoopWidth = rectLoop.Width;
-                            if (DrawIntProperty(SR.RectangleLoopContainerModifier_Property_Width_Name, SR.RectangleLoopContainerModifier_Property_Width_Description, ref rectLoopWidth, 1, 0, int.MaxValue))
+                            if (PropertyTable.DragIntProperty("Width"u8, "The width of the rectangular container"u8, ref rectLoopWidth, 1, 0, int.MaxValue))
                             {
                                 rectLoop.Width = rectLoopWidth;
-                                EmberContext.HasUnsavedChanges = true;
+                                _context.HasUnsavedChanges = true;
                             }
 
                             int rectLoopHeight = rectLoop.Height;
-                            if (DrawIntProperty(SR.RectangleLoopContainerModifier_Property_Height_Name, SR.RectangleLoopContainerModifier_Property_Height_Description, ref rectLoopHeight, 1, 0, int.MaxValue))
+                            if (PropertyTable.DragIntProperty("Height"u8, "The height of the rectangular container"u8, ref rectLoopHeight, 1, 0, int.MaxValue))
                             {
                                 rectLoop.Height = rectLoopHeight;
-                                EmberContext.HasUnsavedChanges = true;
+                                _context.HasUnsavedChanges = true;
                             }
                             break;
 
                         case RotationModifier rotation:
                             float rotationRotationRate = rotation.RotationRate;
-                            if (PropertyTable.FloatProperty("Rotation Rate"u8, SR.RotationModifier_Property_RotationRate_Description, ref rotationRotationRate, 0.1f, float.MinValue, float.MaxValue))
+                            if (PropertyTable.DragFloatProperty("Rotation Rate"u8, "The rate at which particles rotate, in radians per second"u8, ref rotationRotationRate, 0.1f, float.MinValue, float.MaxValue))
                             {
                                 rotation.RotationRate = rotationRotationRate;
-                                EmberContext.HasUnsavedChanges = true;
+                                _context.HasUnsavedChanges = true;
                             }
                             break;
 
                         case VelocityColorModifier velocityColor:
                             HslColor velocityColorStationaryColor = velocityColor.StationaryColor;
-                            if (DrawColorProperty(SR.VelocityColorModifier_Property_StationaryColor_Name, SR.VelocityColorModifier_Property_StationaryColor_Description, ref velocityColorStationaryColor))
+                            if (PropertyTable.Color3Property("Stationary Color"u8, "The color for particles that are stationary or moving slowly"u8, ref velocityColorStationaryColor))
                             {
                                 velocityColor.StationaryColor = velocityColorStationaryColor;
-                                EmberContext.HasUnsavedChanges = true;
+                                _context.HasUnsavedChanges = true;
                             }
 
                             HslColor velocityColorVelocityColor = velocityColor.VelocityColor;
-                            if (DrawColorProperty(SR.VelocityColorModifier_Property_VelocityColor_Name, SR.VelocityColorModifier_Property_VelocityColor_Description, ref velocityColorVelocityColor))
+                            if (PropertyTable.Color3Property("Velocity Color"u8, "The color for particles that have reached or exceeded the velocity threshold"u8, ref velocityColorVelocityColor))
                             {
                                 velocityColor.VelocityColor = velocityColorVelocityColor;
-                                EmberContext.HasUnsavedChanges = true;
+                                _context.HasUnsavedChanges = true;
                             }
 
                             float velocityColorVelocityThreshold = velocityColor.VelocityThreshold;
-                            if (PropertyTable.FloatProperty("Velocity Threshold"u8, SR.VelocityColorModifier_Property_VelocityThreshold_Description, ref velocityColorVelocityThreshold, 0.1f, 0.0f, float.MaxValue))
+                            if (PropertyTable.DragFloatProperty("Velocity Threshold"u8, "The velocity magnitude at which particles reach the maximum interpolation effect"u8, ref velocityColorVelocityThreshold, 0.1f, 0.0f, float.MaxValue))
                             {
                                 velocityColor.VelocityThreshold = velocityColorVelocityThreshold;
-                                EmberContext.HasUnsavedChanges = true;
+                                _context.HasUnsavedChanges = true;
                             }
                             break;
 
                         case VelocityModifier velocity:
                             float velocityVelocityThreshold = velocity.VelocityThreshold;
-                            if (PropertyTable.FloatProperty("Velocity Threshold"u8, SR.VelocityModifier_Property_VelocityThreshold_Description, ref velocityVelocityThreshold, 0.1f, 0.0f, float.MaxValue))
+                            if (PropertyTable.DragFloatProperty("Velocity Threshold"u8, "The velocity magnitude at which particles reach the maximum interpolation effect"u8, ref velocityVelocityThreshold, 0.1f, 0.0f, float.MaxValue))
                             {
                                 velocity.VelocityThreshold = velocityVelocityThreshold;
-                                EmberContext.HasUnsavedChanges = true;
+                                _context.HasUnsavedChanges = true;
                             }
                             break;
 
                         case VortexModifier vortex:
                             XnaVec2 vortexPosition = vortex.Position;
-                            if (DrawVector2Property(SR.VortexModifier_Property_Position_Name, SR.VortexModifier_Property_Position_Description, ref vortexPosition, 0.1f, float.MinValue, float.MaxValue))
+                            if (PropertyTable.DragVector2Property("Position"u8, "The vortex center relative to the particle emitter"u8, ref vortexPosition, 0.1f, float.MinValue, float.MaxValue))
                             {
                                 vortex.Position = vortexPosition;
-                                EmberContext.HasUnsavedChanges = true;
+                                _context.HasUnsavedChanges = true;
                             }
 
                             float vortexStrength = vortex.Strength;
-                            if (DrawFloatProperty(SR.VortexModifier_Property_Strength_Name, SR.VortexModifier_Property_Strength_Description, ref vortexStrength, 0.1f, float.MinValue, float.MaxValue))
+                            if (PropertyTable.DragFloatProperty("Strength"u8, "The force strength applied to particles at the outer radius"u8, ref vortexStrength, 0.1f, float.MinValue, float.MaxValue))
                             {
                                 vortex.Strength = vortexStrength;
-                                EmberContext.HasUnsavedChanges = true;
+                                _context.HasUnsavedChanges = true;
                             }
 
                             float vortexOuterRadius = vortex.OuterRadius;
-                            if (DrawFloatProperty(SR.VortexModifier_Property_OuterRadius_Name, SR.VortexModifier_Property_OuterRadius_Description, ref vortexOuterRadius, 0.1f, float.MinValue, float.MaxValue))
+                            if (PropertyTable.DragFloatProperty("Outer Radius"u8, "The maximum distance from the vortex center where forces are applied"u8, ref vortexOuterRadius, 0.1f, float.MinValue, float.MaxValue))
                             {
                                 vortex.OuterRadius = vortexOuterRadius;
-                                EmberContext.HasUnsavedChanges = true;
+                                _context.HasUnsavedChanges = true;
                             }
 
                             float vortexInnerRadius = vortex.InnerRadius;
-                            if (DrawFloatProperty(SR.VortexModifier_Property_InnerRadius_Name, SR.VortexModifier_Property_InnerRadius_Description, ref vortexInnerRadius, 0.1f, float.MinValue, float.MaxValue))
+                            if (PropertyTable.DragFloatProperty("Inner Radius"u8, "The minimum distance from the vortex center where forces are applied"u8, ref vortexInnerRadius, 0.1f, float.MinValue, float.MaxValue))
                             {
                                 vortex.InnerRadius = vortexInnerRadius;
-                                EmberContext.HasUnsavedChanges = true;
+                                _context.HasUnsavedChanges = true;
                             }
 
                             float vortexMaxVelocity = vortex.MaxVelocity;
-                            if (DrawFloatProperty(SR.VortexModifier_Property_MaxVelocity_Name, SR.VortexModifier_Property_MaxVelocity_Description, ref vortexMaxVelocity, 0.1f, float.MinValue, float.MaxValue))
+                            if (PropertyTable.DragFloatProperty("Max Velocity"u8, "The maximum velocity magnitude that particles can reach under vortex influence"u8, ref vortexMaxVelocity, 0.1f, float.MinValue, float.MaxValue))
                             {
                                 vortex.MaxVelocity = vortexMaxVelocity;
-                                EmberContext.HasUnsavedChanges = true;
+                                _context.HasUnsavedChanges = true;
                             }
 
                             float vortexRotationAngle = vortex.RotationAngle;
-                            if (DrawFloatProperty(SR.VortexModifier_Property_RotationAngle_Name, SR.VortexModifier_Property_RotationAngle_Description, ref vortexRotationAngle, 0.1f, float.MinValue, float.MaxValue))
+                            if (PropertyTable.DragFloatProperty("Rotation Angle"u8, "The rotation angle, in radians, applied to gravitational force vectors"u8, ref vortexRotationAngle, 0.1f, float.MinValue, float.MaxValue))
                             {
                                 vortex.RotationAngle = vortexRotationAngle;
-                                EmberContext.HasUnsavedChanges = true;
+                                _context.HasUnsavedChanges = true;
                             }
                             break;
                     }

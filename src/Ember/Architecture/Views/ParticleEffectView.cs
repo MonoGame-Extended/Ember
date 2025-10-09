@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using Ember.Architecture.Components;
 using Ember.Architecture.PopupModals;
 using Ember.Graphics;
 using Hexa.NET.ImGui;
@@ -246,247 +247,88 @@ public sealed class ParticleEffectView
     {
         if (CollapsingHeader("Emitter Properties"u8, ImGuiTreeNodeFlags.DefaultOpen))
         {
-            ImGuiChildFlags childFlags = ImGuiChildFlags.Borders
-                                         | ImGuiChildFlags.AutoResizeY;
-
-            ParticleEmitter emitter = _context.SelectedEmitter;
-
-            // If there is no selected emitter, just display a child window with
-            // the text stating so and return back.
-            if (emitter == null)
+            if (_context.SelectedEmitter is not ParticleEmitter emitter)
             {
-                if (BeginChild("##selected-emitter-properties-child-window"u8, SysVec2.Zero, childFlags))
-                {
-                    TextDisabled("No particle emitter selected"u8);
-                }
-                EndChild();
                 return;
             }
+
+            ImGuiChildFlags childFlags = ImGuiChildFlags.Borders
+                                         | ImGuiChildFlags.AutoResizeY;
 
             if (BeginChild("##selected-emitter-properties-child-window"u8, SysVec2.Zero, childFlags))
             {
                 BeginDisabled(_context.IsLocked(emitter));
-                if (BeginTable("##selected-emitter-properties-table"u8, columns: 2, ImGuiTableFlags.SizingStretchProp))
+                if (PropertyTable.BeginPropertyTable("##selected-emitter-properties-table"u8))
                 {
-                    TableSetupColumn("##selected-emitter-properties-label-column"u8, ImGuiTableColumnFlags.WidthStretch, 1.0f);
-                    TableSetupColumn("##selected-emitter-properties-value-column"u8, ImGuiTableColumnFlags.WidthStretch, 1.0f);
-
-                    // Name Property
-                    TableNextRow();
-                    TableNextColumn();
-                    AlignTextToFramePadding();
-                    Text("Name"u8);
-                    if (IsItemHovered(ImGuiHoveredFlags.DelayNormal))
-                    {
-                        SetTooltip("The display name of the selected emitter"u8);
-                    }
-
-                    TableNextColumn();
-                    SetNextItemWidth(-1);
+                    // Name property
                     string emitterName = emitter.Name;
-                    if (InputText("##selected-emitter-name-value"u8, ref emitterName, 256, ImGuiInputTextFlags.EnterReturnsTrue | ImGuiInputTextFlags.AutoSelectAll))
+                    if (PropertyTable.InputTextProperty("Name"u8, "The display name of the selected emitter"u8, ref emitterName))
                     {
                         emitter.Name = emitterName;
                         _context.HasUnsavedChanges = true;
                     }
 
                     // Texture Property
-                    TableNextRow();
-                    TableNextColumn();
-                    AlignTextToFramePadding();
-                    Text("Texture"u8);
-                    if (IsItemHovered(ImGuiHoveredFlags.DelayNormal))
+                    if (PropertyTable.TextureProperty("Texture"u8, "The texture used by the selected emitter"u8, emitter.TextureRegion))
                     {
-                        SetTooltip("The texture used for the selected emitter"u8);
+                        _selectTexture = true;
                     }
 
-                    TableNextColumn();
-                    if (emitter.TextureRegion is Texture2DRegion region)
+                    if (emitter.TextureRegion != null)
                     {
-                        string textureName = !string.IsNullOrEmpty(region.Name)
-                                             ? region.Name
-                                             : !string.IsNullOrEmpty(region.Texture.Name)
-                                               ? region.Texture.Name
-                                               : "Texture";
-
-                        if (Button(textureName, -SysVec2.UnitX))
+                        // Source Rectangle
+                        XnaRect sourceRectangle = emitter.TextureRegion.Bounds;
+                        if (PropertyTable.InputRectProperty("Source Rectangle"u8, "The rectangular bounds within the texture to render"u8, ref sourceRectangle))
                         {
-                            _selectTexture = true;
-                        }
-
-                        if (IsItemHovered())
-                        {
-                            if (BeginTooltip())
-                            {
-                                float maxPreviewSize = 256.0f;
-                                float textureWidth = region.Texture.Width;
-                                float textureHeight = region.Texture.Height;
-                                float aspectRatio = textureWidth / textureHeight;
-
-                                SysVec2 previewSize;
-                                if (aspectRatio > 1.0f)
-                                {
-                                    previewSize = new SysVec2(maxPreviewSize, maxPreviewSize / aspectRatio);
-                                }
-                                else
-                                {
-                                    previewSize = new SysVec2(maxPreviewSize * aspectRatio, maxPreviewSize);
-                                }
-
-                                ImTextureRef textureId = ImGuiRenderer.BindTexture(region.Texture);
-                                SysVec2 uv0 = new SysVec2()
-                                {
-                                    X = (float)region.Bounds.Left / region.Texture.Width,
-                                    Y = (float)region.Bounds.Top / region.Texture.Height
-                                };
-                                SysVec2 uv1 = new SysVec2()
-                                {
-                                    X = (float)region.Bounds.Right / region.Texture.Width,
-                                    Y = (float)region.Bounds.Bottom / region.Texture.Height
-                                };
-
-                                Image(textureId, previewSize, uv0, uv1);
-                                Text($"{region.Width}x{region.Height}px");
-
-                                EndTooltip();
-                            }
-                        }
-
-                        // Source Rectangle Property
-                        TableNextRow();
-                        TableNextColumn();
-                        AlignTextToFramePadding();
-                        Text("Source Rectangle"u8);
-
-                        TableNextColumn();
-                        XnaRect bounds = region.Bounds;
-                        XnaRect resetBounds = region.Texture.Bounds;
-                        int[] source = [bounds.X, bounds.Y, bounds.Width, bounds.Height];
-
-                        SetNextItemWidth(-1);
-                        if (InputInt4("##selected-emitter-source-rectangle-value"u8, ref source[0], ImGuiInputTextFlags.None))
-                        {
-                            bounds.X = source[0];
-                            bounds.Y = source[1];
-                            bounds.Width = source[2];
-                            bounds.Height = source[3];
-                            emitter.TextureRegion = new Texture2DRegion(region.Texture, bounds, region.Name);
+                            emitter.TextureRegion = new Texture2DRegion(emitter.TextureRegion.Texture, sourceRectangle);
                             _context.HasUnsavedChanges = true;
                         }
 
-                        TableNextRow();
-                        TableNextColumn();
-                        TableNextColumn();
-                        if (Button("Reset source rectangle"u8, -SysVec2.UnitX))
+                        // Reset source rectangle
+                        if (PropertyTable.ButtonProperty("Reset Source Rectangle"u8, "Resets the source rectangle back to the bounds of the texture"u8))
                         {
-                            emitter.TextureRegion = new Texture2DRegion(region.Texture, resetBounds, region.Name);
+                            emitter.TextureRegion = new Texture2DRegion(emitter.TextureRegion.Texture);
                             _context.HasUnsavedChanges = true;
-                        }
-                    }
-                    else
-                    {
-                        if (Button("Select Texture", -SysVec2.UnitX))
-                        {
-                            _selectTexture = true;
                         }
                     }
 
                     // Capacity Property
-                    TableNextRow();
-                    TableNextColumn();
-                    AlignTextToFramePadding();
-                    Text("Capacity"u8);
-                    if (IsItemHovered(ImGuiHoveredFlags.DelayNormal))
-                    {
-                        SetTooltip("The maximum number of particles that this emitter can have active at a given time"u8);
-                    }
-
-                    TableNextColumn();
-                    SetNextItemWidth(-1);
                     int emitterCapacity = emitter.Capacity;
-                    if (InputInt("##selected-emitter-capacity-value"u8, ref emitterCapacity, 0, 0, ImGuiInputTextFlags.None))
+                    if (PropertyTable.InputIntProperty("Capacity"u8, "The maximum number of particles that this emitter can have active at a given time"u8, ref emitterCapacity))
                     {
                         emitter.ChangeCapacity(emitterCapacity);
                         _context.HasUnsavedChanges = true;
                     }
 
                     // Lifespan Property
-                    TableNextRow();
-                    TableNextColumn();
-                    AlignTextToFramePadding();
-                    Text("Lifespan"u8);
-                    if (IsItemHovered(ImGuiHoveredFlags.DelayNormal))
-                    {
-                        SetTooltip("The amount of time, in seconds, that each particle released from this emitter will live"u8);
-                    }
-
-                    TableNextColumn();
-                    SetNextItemWidth(-1);
                     float emitterLifeSpan = emitter.LifeSpan;
-                    if (DragFloat("##selected-emitter-lifespan-value"u8, ref emitterLifeSpan, 0.1f, 0.0f, float.MaxValue, "%.2f"))
+                    if (PropertyTable.DragFloatProperty("Lifespan"u8, "The amount of time, in seconds, that each particle released from this emitter will live"u8, ref emitterLifeSpan, 0.1f, 0.0f, float.MaxValue))
                     {
                         emitter.LifeSpan = emitterLifeSpan;
                         _context.HasUnsavedChanges = true;
                     }
 
-                    // Rendering Order Property
-                    TableNextRow();
-                    TableNextColumn();
-                    AlignTextToFramePadding();
-                    Text("Rendering Order"u8);
-                    if (IsItemHovered(ImGuiHoveredFlags.DelayNormal))
-                    {
-                        SetTooltip("The order in which the particles are rendered\n\n- Front To Back: Particles are rendered in front to back order\n- Back To Front: Particles are rendered in back to front order."u8);
-                    }
-
-                    TableNextColumn();
-                    SetNextItemWidth(-1);
                     ReadOnlySpan<byte> renderingOrderPreview = emitter.RenderingOrder == ParticleRenderingOrder.FrontToBack
-                                                               ? "Front To Back"u8
-                                                               : "Back To Front"u8;
-
-                    if (BeginCombo("##selected-emitter-rendering-order-value"u8, renderingOrderPreview))
+                                                               ? "Front to Back"u8
+                                                               : "Back to Front"u8;
+                    if (PropertyTable.BeginComboProperty("Rendering Order"u8, "The order in which the particles are rendered\n\n- Front To Back: Particles are rendered in front to back order\n- Back To Front: Particles are rendered in back to front order"u8, renderingOrderPreview))
                     {
-                        // Front To Back
-                        bool isSelected = emitter.RenderingOrder == ParticleRenderingOrder.FrontToBack;
-                        if (Selectable("Front To Back"u8, isSelected))
+                        if (PropertyTable.ComboItem("Front to Back"u8, "Particles are rendered front to back"u8, emitter.RenderingOrder == ParticleRenderingOrder.FrontToBack))
                         {
                             emitter.RenderingOrder = ParticleRenderingOrder.FrontToBack;
                             _context.HasUnsavedChanges = true;
                         }
 
-                        if (IsItemHovered(ImGuiHoveredFlags.DelayNormal))
-                        {
-                            SetTooltip("Particles are rendered from front to back"u8);
-                        }
-
-                        if (isSelected)
-                        {
-                            SetItemDefaultFocus();
-                        }
-
-                        // Back To Front
-                        isSelected = emitter.RenderingOrder == ParticleRenderingOrder.BackToFront;
-                        if (Selectable("Back To Front"u8, isSelected))
+                        if (PropertyTable.ComboItem("Back to Front"u8, "Particles are rendered back to front"u8, emitter.RenderingOrder == ParticleRenderingOrder.BackToFront))
                         {
                             emitter.RenderingOrder = ParticleRenderingOrder.BackToFront;
                             _context.HasUnsavedChanges = true;
                         }
 
-                        if (IsItemHovered(ImGuiHoveredFlags.DelayNormal))
-                        {
-                            SetTooltip("Particles are rendered from back to front"u8);
-                        }
-
-                        if (isSelected)
-                        {
-                            SetItemDefaultFocus();
-                        }
-
-                        EndCombo();
+                        PropertyTable.EndComboProperty();
                     }
 
-                    EndTable();
+                    PropertyTable.EndPropertyTable();
                 }
                 EndDisabled();
             }
@@ -501,19 +343,8 @@ public sealed class ParticleEffectView
             ImGuiChildFlags childFlags = ImGuiChildFlags.Borders
                                          | ImGuiChildFlags.AutoResizeY;
 
-            ParticleEmitter emitter = _context.SelectedEmitter;
-
-
-
-            // If there is no selected emitter, just display a child window with
-            // the text stating so and return back.
-            if (emitter == null)
+            if (_context.SelectedEmitter is not ParticleEmitter emitter)
             {
-                if (BeginChild("##selected-emitter-profile-child-window"u8, SysVec2.Zero, childFlags))
-                {
-                    TextDisabled("No particle emitter selected"u8);
-                }
-                EndChild();
                 return;
             }
 
@@ -521,23 +352,8 @@ public sealed class ParticleEffectView
             {
                 BeginDisabled(_context.IsLocked(emitter));
 
-                if (BeginTable("##selected-emitter-profile-properties-table"u8, columns: 2, ImGuiTableFlags.SizingStretchProp))
+                if (PropertyTable.BeginPropertyTable("##selected-emitter-profile-properties-table"u8))
                 {
-                    TableSetupColumn("##selected-emitter-profile-properties-label-column"u8, ImGuiTableColumnFlags.WidthStretch, 1.0f);
-                    TableSetupColumn("##selected-emitter-profile-properties-value-column"u8, ImGuiTableColumnFlags.WidthStretch, 1.0f);
-
-                    // Profile Type Row
-                    TableNextRow();
-                    TableNextColumn();
-                    AlignTextToFramePadding();
-                    Text("Profile Type"u8);
-                    if (IsItemHovered(ImGuiHoveredFlags.DelayNormal))
-                    {
-                        SetTooltip("Profiles define the emission pattern, such as points, lines, rings, or areas from which particles originate"u8);
-                    }
-
-                    TableNextColumn();
-                    SetNextItemWidth(-1);
                     ReadOnlySpan<byte> profileTypePreview = emitter.Profile switch
                     {
                         BoxFillProfile => "Box Fill"u8,
@@ -550,18 +366,58 @@ public sealed class ParticleEffectView
                         SprayProfile => "Spray"u8,
                         _ => throw new InvalidOperationException($"Unknown profile type '{emitter.Profile.GetType()}")
                     };
-                    if (BeginCombo("##selected-emitter-profile-type"u8, profileTypePreview))
-                    {
-                        AddProfileComboboxItem(typeof(BoxFillProfile), "Box Fill"u8, "Randomly distributes particles throughout a rectangular area"u8, emitter);
-                        AddProfileComboboxItem(typeof(BoxProfile), "Box"u8, "Distributes particles along the edges of a rectangular boundary"u8, emitter);
-                        AddProfileComboboxItem(typeof(BoxUniformProfile), "Box Uniform"u8, "Distributes particles along the edges of a rectangular boundary with uniform density"u8, emitter);
-                        AddProfileComboboxItem(typeof(CircleProfile), "Circle"u8, "Distributes particles throughout a circular area with controllable radiation patterns"u8, emitter);
-                        AddProfileComboboxItem(typeof(LineProfile), "Line"u8, "Distributes particles uniformly along a line segment with random headings"u8, emitter);
-                        AddProfileComboboxItem(typeof(PointProfile), "Point"u8, "Emits all particles from a single point with random headings"u8, emitter);
-                        AddProfileComboboxItem(typeof(RingProfile), "Ring"u8, "Distributes particles along the perimeter of a circle with controllable radiation patterns"u8, emitter);
-                        AddProfileComboboxItem(typeof(SprayProfile), "Spray"u8, "Emits particles from a single point in a directional cone pattern"u8, emitter);
 
-                        EndCombo();
+                    if (PropertyTable.BeginComboProperty("Profile Type"u8, "Profiles define the emission pattern, such as points, lines, rings, or areas, from which particles originate"u8, profileTypePreview))
+                    {
+                        if (PropertyTable.ComboItem("Box Fill"u8, "Randomly distributes particles throughout a rectangular area"u8, emitter.Profile is BoxFillProfile))
+                        {
+                            emitter.Profile = Activator.CreateInstance(typeof(BoxFillProfile)) as Profile;
+                            _context.HasUnsavedChanges = true;
+                        }
+
+                        if (PropertyTable.ComboItem("Box"u8, "Distributes particles along the edges of a rectangular boundary"u8, emitter.Profile is BoxProfile))
+                        {
+                            emitter.Profile = Activator.CreateInstance(typeof(BoxProfile)) as Profile;
+                            _context.HasUnsavedChanges = true;
+                        }
+
+                        if (PropertyTable.ComboItem("Box Uniform"u8, "Distributes particles along the edges of a rectangular boundary with uniform density"u8, emitter.Profile is BoxUniformProfile))
+                        {
+                            emitter.Profile = Activator.CreateInstance(typeof(BoxUniformProfile)) as Profile;
+                            _context.HasUnsavedChanges = true;
+                        }
+
+                        if (PropertyTable.ComboItem("Circle"u8, "Distributes particles throughout a circular area with controllable radiation patterns"u8, emitter.Profile is CircleProfile))
+                        {
+                            emitter.Profile = Activator.CreateInstance(typeof(CircleProfile)) as Profile;
+                            _context.HasUnsavedChanges = true;
+                        }
+
+                        if (PropertyTable.ComboItem("Line"u8, "Distributes particles uniformly along a line segment with random headings"u8, emitter.Profile is LineProfile))
+                        {
+                            emitter.Profile = Activator.CreateInstance(typeof(LineProfile)) as Profile;
+                            _context.HasUnsavedChanges = true;
+                        }
+
+                        if (PropertyTable.ComboItem("Point"u8, "Emits all particles from a single point with random headings"u8, emitter.Profile is PointProfile))
+                        {
+                            emitter.Profile = Activator.CreateInstance(typeof(PointProfile)) as Profile;
+                            _context.HasUnsavedChanges = true;
+                        }
+
+                        if (PropertyTable.ComboItem("Ring"u8, "Distributes particles along the perimeter of a circle with controllable radiation patterns"u8, emitter.Profile is RingProfile))
+                        {
+                            emitter.Profile = Activator.CreateInstance(typeof(RingProfile)) as Profile;
+                            _context.HasUnsavedChanges = true;
+                        }
+
+                        if (PropertyTable.ComboItem("Spray"u8, "Emits particles from a single point in a directional cone pattern"u8, emitter.Profile is SprayProfile))
+                        {
+                            emitter.Profile = Activator.CreateInstance(typeof(SprayProfile)) as Profile;
+                            _context.HasUnsavedChanges = true;
+                        }
+
+                        PropertyTable.EndComboProperty();
                     }
 
                     // Profile Properties Row(s)
@@ -569,14 +425,14 @@ public sealed class ParticleEffectView
                     {
                         case BoxFillProfile boxFill:
                             float boxFillWidth = boxFill.Width;
-                            if (DrawProfileFloatProperty("Width"u8, "##box-fill-width"u8, ref boxFillWidth, 0.1f, 0.0f, float.MaxValue))
+                            if (PropertyTable.DragFloatProperty("Width"u8, "The width of the rectangular area"u8, ref boxFillWidth, 0.1f, 0.0f, float.MaxValue))
                             {
                                 boxFill.Width = boxFillWidth;
                                 _context.HasUnsavedChanges = true;
                             }
 
                             float boxFillHeight = boxFill.Height;
-                            if (DrawProfileFloatProperty("Height"u8, "##box-fill-height"u8, ref boxFillHeight, 0.1f, 0.0f, float.MaxValue))
+                            if (PropertyTable.DragFloatProperty("Height"u8, "The height of the rectangular area"u8, ref boxFillHeight, 0.1f, 0.0f, float.MaxValue))
                             {
                                 boxFill.Height = boxFillHeight;
                                 _context.HasUnsavedChanges = true;
@@ -585,14 +441,14 @@ public sealed class ParticleEffectView
 
                         case BoxProfile box:
                             float boxWidth = box.Width;
-                            if (DrawProfileFloatProperty("Width"u8, "##box-width"u8, ref boxWidth, 0.1f, 0.0f, float.MaxValue))
+                            if (PropertyTable.DragFloatProperty("Width"u8, "The width of the rectangular perimeter"u8, ref boxWidth, 0.1f, 0.0f, float.MaxValue))
                             {
                                 box.Width = boxWidth;
                                 _context.HasUnsavedChanges = true;
                             }
 
                             float boxHeight = box.Height;
-                            if (DrawProfileFloatProperty("Height"u8, "##box-height"u8, ref boxHeight, 0.1f, 0.0f, float.MaxValue))
+                            if (PropertyTable.DragFloatProperty("Height"u8, "The height of the rectangular perimeter"u8, ref boxHeight, 0.1f, 0.0f, float.MaxValue))
                             {
                                 box.Height = boxHeight;
                                 _context.HasUnsavedChanges = true;
@@ -601,14 +457,14 @@ public sealed class ParticleEffectView
 
                         case BoxUniformProfile boxUniform:
                             float boxUniformWidth = boxUniform.Width;
-                            if (DrawProfileFloatProperty("Width"u8, "##box-uniform-width"u8, ref boxUniformWidth, 0.1f, 0.0f, float.MaxValue))
+                            if (PropertyTable.DragFloatProperty("Width"u8, "The width of the rectangular perimeter"u8, ref boxUniformWidth, 0.1f, 0.0f, float.MaxValue))
                             {
                                 boxUniform.Width = boxUniformWidth;
                                 _context.HasUnsavedChanges = true;
                             }
 
                             float boxUniformHeight = boxUniform.Height;
-                            if (DrawProfileFloatProperty("Height"u8, "##box-uniform-height"u8, ref boxUniformHeight, 0.1f, 0.0f, float.MaxValue))
+                            if (PropertyTable.DragFloatProperty("Height"u8, "The height of the rectangular perimeter"u8, ref boxUniformHeight, 0.1f, 0.0f, float.MaxValue))
                             {
                                 boxUniform.Height = boxUniformHeight;
                                 _context.HasUnsavedChanges = true;
@@ -617,30 +473,53 @@ public sealed class ParticleEffectView
 
                         case CircleProfile circle:
                             float circleRadius = circle.Radius;
-                            if (DrawProfileFloatProperty("Radius"u8, "##circle-radius"u8, ref circleRadius, 0.1f, 0.0f, float.MaxValue))
+                            if (PropertyTable.DragFloatProperty("Radius"u8, "The radius of the circular area"u8, ref circleRadius, 0.1f, 0.0f, float.MaxValue))
                             {
                                 circle.Radius = circleRadius;
                                 _context.HasUnsavedChanges = true;
                             }
 
-                            CircleRadiation circleRadiate = circle.Radiate;
-                            if (DrawProfileCircleRadiationProperty("Radiate"u8, "##circle-radiate"u8, ref circleRadiate))
+                            ReadOnlySpan<byte> circleRadiatePreview = circle.Radiate switch
                             {
-                                circle.Radiate = circleRadiate;
-                                _context.HasUnsavedChanges = true;
+                                CircleRadiation.None => "None"u8,
+                                CircleRadiation.In => "In"u8,
+                                CircleRadiation.Out => "Out"u8,
+                                _ => throw new InvalidOperationException($"Unknown circle radiation '{circle.Radiate}")
+                            };
+                            if (PropertyTable.BeginComboProperty("Radiate"u8, "The radiation mode that determines how particle headings are calculate"u8, circleRadiatePreview))
+                            {
+                                if (PropertyTable.ComboItem("None"u8, "Particles move toward the center of the circle"u8, circle.Radiate == CircleRadiation.None))
+                                {
+                                    circle.Radiate = CircleRadiation.None;
+                                    _context.HasUnsavedChanges = true;
+                                }
+
+                                if (PropertyTable.ComboItem("In"u8, "Particles move in random directions unrelated to their positions"u8, circle.Radiate == CircleRadiation.In))
+                                {
+                                    circle.Radiate = CircleRadiation.In;
+                                    _context.HasUnsavedChanges = true;
+                                }
+
+                                if (PropertyTable.ComboItem("Out"u8, "Particles move away from the center of the circle"u8, circle.Radiate == CircleRadiation.Out))
+                                {
+                                    circle.Radiate = CircleRadiation.Out;
+                                    _context.HasUnsavedChanges = true;
+                                }
+
+                                PropertyTable.EndComboProperty();
                             }
                             break;
 
                         case LineProfile line:
                             XnaVec2 lineAxis = line.Axis;
-                            if (DrawProfileVector2Property("Axis"u8, "##line-axis"u8, ref lineAxis, 1f, -1f, 1f))
+                            if (PropertyTable.DragVector2Property("Axis"u8, "The direction vector of the line axis"u8, ref lineAxis, 1f, -1f, 1f))
                             {
                                 line.Axis = lineAxis;
                                 _context.HasUnsavedChanges = true;
                             }
 
                             float lineLength = line.Length;
-                            if (DrawProfileFloatProperty("Length"u8, "##line-length"u8, ref lineLength, 0.1f, 0.0f, float.MaxValue))
+                            if (PropertyTable.DragFloatProperty("Length"u8, "The length of the line segment"u8, ref lineLength, 0.1f, 0.0f, float.MaxValue))
                             {
                                 line.Length = lineLength;
                                 _context.HasUnsavedChanges = true;
@@ -653,30 +532,53 @@ public sealed class ParticleEffectView
 
                         case RingProfile ring:
                             float ringRadius = ring.Radius;
-                            if (DrawProfileFloatProperty("Radius"u8, "##ring-radius"u8, ref ringRadius, 0.1f, 0.0f, float.MaxValue))
+                            if (PropertyTable.DragFloatProperty("Radius"u8, "The radius if the ring."u8, ref ringRadius, 0.1f, 0.0f, float.MaxValue))
                             {
                                 ring.Radius = ringRadius;
                                 _context.HasUnsavedChanges = true;
                             }
 
-                            CircleRadiation ringRadiate = ring.Radiate;
-                            if (DrawProfileCircleRadiationProperty("Radiate"u8, "##ring-radiate"u8, ref ringRadiate))
+                            ReadOnlySpan<byte> ringRadiatePreview = ring.Radiate switch
                             {
-                                ring.Radiate = ringRadiate;
-                                _context.HasUnsavedChanges = true;
+                                CircleRadiation.None => "None"u8,
+                                CircleRadiation.In => "In"u8,
+                                CircleRadiation.Out => "Out"u8,
+                                _ => throw new InvalidOperationException($"Unknown circle radiation '{ring.Radiate}")
+                            };
+                            if (PropertyTable.BeginComboProperty("Radiate"u8, "The radiation mode that determines how particle headings are calculate"u8, ringRadiatePreview))
+                            {
+                                if (PropertyTable.ComboItem("None"u8, "Particles move in random directions unrelated to their positions"u8, ring.Radiate == CircleRadiation.None))
+                                {
+                                    ring.Radiate = CircleRadiation.None;
+                                    _context.HasUnsavedChanges = true;
+                                }
+
+                                if (PropertyTable.ComboItem("In"u8, "Particles move toward the center of the circle"u8, ring.Radiate == CircleRadiation.In))
+                                {
+                                    ring.Radiate = CircleRadiation.In;
+                                    _context.HasUnsavedChanges = true;
+                                }
+
+                                if (PropertyTable.ComboItem("Out"u8, "Particles move away from the center of the circle"u8, ring.Radiate == CircleRadiation.Out))
+                                {
+                                    ring.Radiate = CircleRadiation.Out;
+                                    _context.HasUnsavedChanges = true;
+                                }
+
+                                PropertyTable.EndComboProperty();
                             }
                             break;
 
                         case SprayProfile spray:
                             XnaVec2 sprayDirection = spray.Direction;
-                            if (DrawProfileVector2Property("Direction"u8, "##spray-direction"u8, ref sprayDirection, 0.1f, float.MinValue, float.MaxValue))
+                            if (PropertyTable.DragVector2Property("Direction"u8, "The central direction vector of the spray"u8, ref sprayDirection, 0.1f, float.MinValue, float.MaxValue))
                             {
                                 spray.Direction = sprayDirection;
                                 _context.HasUnsavedChanges = true;
                             }
 
                             float spraySpread = spray.Spread;
-                            if (DrawProfileFloatProperty("Spread"u8, "##spray-spread"u8, ref spraySpread, 0.1f, 0.0f, float.MaxValue))
+                            if (PropertyTable.DragFloatProperty("Spread"u8, "The angular spread of the spray cone (in radians)"u8, ref spraySpread, 0.1f, 0.0f, float.MaxValue))
                             {
                                 spray.Spread = spraySpread;
                                 _context.HasUnsavedChanges = true;
@@ -692,205 +594,61 @@ public sealed class ParticleEffectView
         }
     }
 
-    private void AddProfileComboboxItem(Type profileType, ReadOnlySpan<byte> label, ReadOnlySpan<byte> tooltip, ParticleEmitter emitter)
-    {
-        bool isSelected = _context.SelectedEmitter.Profile.GetType() == profileType;
-        if (Selectable(label, isSelected))
-        {
-            emitter.Profile = Activator.CreateInstance(profileType) as Profile;
-            _context.HasUnsavedChanges = true;
-        }
-        if (IsItemHovered(ImGuiHoveredFlags.DelayNormal))
-        {
-            SetTooltip(tooltip);
-        }
-        if (isSelected)
-        {
-            SetItemDefaultFocus();
-        }
-    }
-
-    private bool DrawProfileFloatProperty(ReadOnlySpan<byte> label, ReadOnlySpan<byte> id, ref float value, float step, float min, float max)
-    {
-        TableNextRow();
-        TableNextColumn();
-        AlignTextToFramePadding();
-        Text(label);
-        TableNextColumn();
-        SetNextItemWidth(-1);
-        return DragFloat(id, ref value, step, min, max, "%.2f"u8);
-    }
-
-    private bool DrawProfileVector2Property(ReadOnlySpan<byte> label, ReadOnlySpan<byte> id, ref XnaVec2 value, float step, float min, float max)
-    {
-        bool result = false;
-
-        ImGuiStylePtr stylePtr = GetStyle();
-
-        TableNextRow();
-        TableNextColumn();
-        AlignTextToFramePadding();
-        Text(label);
-
-        TableNextColumn();
-
-        float availWidth = GetContentRegionAvail().X;
-        float itemSpacingWidth = stylePtr.ItemSpacing.X;
-        float dragWidth = (availWidth - itemSpacingWidth) * 0.5f;
-        SetNextItemWidth(dragWidth);
-
-        PushID(label);
-        if (DragFloat("##x"u8, ref value.X, step, min, max, "X: %.2f"u8))
-        {
-            result = true;
-        }
-
-        SameLine();
-        SetNextItemWidth(dragWidth);
-        if (DragFloat("##y"u8, ref value.Y, step, min, max, "Y: %.2f"u8))
-        {
-            result = true;
-        }
-        PopID();
-
-        return result;
-    }
-
-    private bool DrawProfileCircleRadiationProperty(ReadOnlySpan<byte> label, ReadOnlySpan<byte> id, ref CircleRadiation value)
-    {
-        bool result = false;
-
-        TableNextRow();
-        TableNextColumn();
-        AlignTextToFramePadding();
-        Text(label);
-
-        TableNextColumn();
-        SetNextItemWidth(-1);
-        ReadOnlySpan<byte> circleRadiationPreview = value switch
-        {
-            CircleRadiation.None => "None"u8,
-            CircleRadiation.In => "In"u8,
-            CircleRadiation.Out => "Out"u8,
-            _ => throw new InvalidOperationException($"Unknown circle radiation type '{value}'")
-        };
-        if (BeginCombo(id, circleRadiationPreview))
-        {
-            AddCircleRadiationComboboxItem(CircleRadiation.None, ref value, ref result, "None"u8, "Particles move in random directions unrelated to their positions"u8);
-            AddCircleRadiationComboboxItem(CircleRadiation.In, ref value, ref result, "In"u8, "Particles move toward the center of the circle"u8);
-            AddCircleRadiationComboboxItem(CircleRadiation.Out, ref value, ref result, "Out"u8, "Particles move away from the center of the circle"u8);
-
-            EndCombo();
-        }
-
-        return result;
-    }
-
-    private void AddCircleRadiationComboboxItem(CircleRadiation enumValue, ref CircleRadiation value, ref bool changed, ReadOnlySpan<byte> label, ReadOnlySpan<byte> description)
-    {
-        bool isSelected = enumValue == value;
-        if (Selectable(label, isSelected))
-        {
-            value = enumValue;
-            changed = true;
-        }
-        if (IsItemHovered(ImGuiHoveredFlags.DelayNormal))
-        {
-            SetTooltip(description);
-        }
-        if (isSelected)
-        {
-            SetItemDefaultFocus();
-        }
-    }
-
     private void DrawSelectedEmitterReleaseParameters()
     {
         if (CollapsingHeader("Emitter Release Parameters"u8, ImGuiTreeNodeFlags.DefaultOpen))
         {
-            ImGuiChildFlags childFlags = ImGuiChildFlags.Borders
-                                         | ImGuiChildFlags.AutoResizeY;
-
-            ParticleEmitter emitter = _context.SelectedEmitter;
-
-            if (emitter != _lastSelectedEmitter)
+            if (_context.SelectedEmitter is not ParticleEmitter emitter)
             {
-                _isColorReleaseParameterInitialized = false;
-                _lastSelectedEmitter = emitter;
-            }
-
-            // If there is no selected emitter, just display a child window with
-            // the text stating so and return back.
-            if (emitter == null)
-            {
-                if (BeginChild("##selected-emitter-release-parameters-child-window"u8, SysVec2.Zero, childFlags))
-                {
-                    TextDisabled("No particle emitter selected"u8);
-                }
-                EndChild();
                 return;
             }
+
+            ImGuiChildFlags childFlags = ImGuiChildFlags.Borders
+                                         | ImGuiChildFlags.AutoResizeY;
 
             if (BeginChild("##selected-emitter-release-parameters-child-window"u8, SysVec2.Zero, childFlags))
             {
                 BeginDisabled(_context.IsLocked(emitter));
 
-                if (BeginTable("##selected-emitter-release-parameters-table"u8, columns: 3, ImGuiTableFlags.SizingStretchProp))
+                if (PropertyTable.BeginReleaseParameterPropertyTable("##selected-emitter-release-parameters-table"u8))
                 {
-                    TableSetupColumn("##selected-emitter-release-parameters-label-column"u8, ImGuiTableColumnFlags.WidthStretch, 1.0f);
-                    TableSetupColumn("##selected-emitter-release-parameters-kind-column"u8, ImGuiTableColumnFlags.WidthStretch, 1.0f);
-                    TableSetupColumn("##selected-emitter-release-parameters-value-column"u8, ImGuiTableColumnFlags.WidthStretch, 1.0f);
-
-                    ParticleInt32Parameter quantity = emitter.Parameters.Quantity;
-                    if (DrawEmitterReleaseParameterRow("Quantity"u8, SR.ReleaseParameter_Quantity_Description, ref quantity))
+                    if (PropertyTable.ReleaseParameter("Quantity"u8, "The number of particles released per emission"u8, ref emitter.Parameters.Quantity))
                     {
-                        emitter.Parameters.Quantity = quantity;
                         _context.HasUnsavedChanges = true;
                     }
 
-                    ParticleFloatParameter speed = emitter.Parameters.Speed;
-                    if (DrawEmitterReleaseParameterRow("Speed"u8, SR.ReleaseParameter_Speed_Description, ref speed))
+                    if (PropertyTable.ReleaseParameter("Speed"u8, "The initial speed of particles when released"u8, ref emitter.Parameters.Speed))
                     {
-                        emitter.Parameters.Speed = speed;
                         _context.HasUnsavedChanges = true;
                     }
 
-                    ParticleColorParameter color = emitter.Parameters.Color;
-                    if (DrawEmitterReleaseParameterRow("Color"u8, "The color of particles in HSL format"u8, ref color))
+                    if (PropertyTable.ReleaseParameter("Color"u8, "The color of the particles"u8, ref emitter.Parameters.Color))
                     {
-                        emitter.Parameters.Color = color;
                         _context.HasUnsavedChanges = true;
                     }
 
-                    ParticleFloatParameter opacity = emitter.Parameters.Opacity;
-                    if (DrawEmitterReleaseParameterRow("Opacity"u8, "The transparency of particles (0.0 = transparent, 1.0 = opaque)"u8, ref opacity))
+                    if (PropertyTable.ReleaseParameter("Opacity"u8, "The transparency of particles (0.0 = transparent, 1.0 = opaque)"u8, ref emitter.Parameters.Opacity))
                     {
-                        emitter.Parameters.Opacity = opacity;
                         _context.HasUnsavedChanges = true;
                     }
 
-                    ParticleVector2Parameter scale = emitter.Parameters.Scale;
-                    if (DrawEmitterReleaseParameterRow("Scale"u8, "The size multiplier of particles"u8, ref scale))
+
+                    if (PropertyTable.ReleaseParameter("Scale"u8, "The size multiplier of particles"u8, ref emitter.Parameters.Scale))
                     {
-                        emitter.Parameters.Scale = scale;
                         _context.HasUnsavedChanges = true;
                     }
 
-                    ParticleFloatParameter rotation = emitter.Parameters.Rotation;
-                    if (DrawEmitterReleaseParameterRow("Rotation"u8, "The initial rotation angle of particles in radians"u8, ref rotation))
+                    if (PropertyTable.ReleaseParameter("Rotation"u8, "The initial rotation angle of particles in radians"u8, ref emitter.Parameters.Rotation))
                     {
-                        emitter.Parameters.Rotation = rotation;
                         _context.HasUnsavedChanges = true;
                     }
 
-                    ParticleFloatParameter mass = emitter.Parameters.Mass;
-                    if (DrawEmitterReleaseParameterRow("Mass"u8, "The mass of particles (affects physics interactions)"u8, ref mass))
+                    if (PropertyTable.ReleaseParameter("Mass"u8, "The mass of particles (affects physics interactions)"u8, ref emitter.Parameters.Mass))
                     {
-                        emitter.Parameters.Mass = mass;
                         _context.HasUnsavedChanges = true;
                     }
 
-                    EndTable();
+                    PropertyTable.EndPropertyTable();
                 }
 
                 EndDisabled();
