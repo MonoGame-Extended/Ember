@@ -23,8 +23,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{7AC35D35
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MonoGame.Extended.Tests", "external\monogame-extended\tests\MonoGame.Extended.Tests\MonoGame.Extended.Tests.csproj", "{D1F194CA-7DD2-4ABB-B95D-4BDB2489B3E2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImGuiFileDialog", "src\ImGuiFileDialog\ImGuiFileDialog.csproj", "{BAF7ADF4-3A81-46E9-9186-F894D5F225AD}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -83,18 +81,6 @@ Global
 		{D1F194CA-7DD2-4ABB-B95D-4BDB2489B3E2}.Release|x64.Build.0 = Release|Any CPU
 		{D1F194CA-7DD2-4ABB-B95D-4BDB2489B3E2}.Release|x86.ActiveCfg = Release|Any CPU
 		{D1F194CA-7DD2-4ABB-B95D-4BDB2489B3E2}.Release|x86.Build.0 = Release|Any CPU
-		{BAF7ADF4-3A81-46E9-9186-F894D5F225AD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{BAF7ADF4-3A81-46E9-9186-F894D5F225AD}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{BAF7ADF4-3A81-46E9-9186-F894D5F225AD}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{BAF7ADF4-3A81-46E9-9186-F894D5F225AD}.Debug|x64.Build.0 = Debug|Any CPU
-		{BAF7ADF4-3A81-46E9-9186-F894D5F225AD}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{BAF7ADF4-3A81-46E9-9186-F894D5F225AD}.Debug|x86.Build.0 = Debug|Any CPU
-		{BAF7ADF4-3A81-46E9-9186-F894D5F225AD}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{BAF7ADF4-3A81-46E9-9186-F894D5F225AD}.Release|Any CPU.Build.0 = Release|Any CPU
-		{BAF7ADF4-3A81-46E9-9186-F894D5F225AD}.Release|x64.ActiveCfg = Release|Any CPU
-		{BAF7ADF4-3A81-46E9-9186-F894D5F225AD}.Release|x64.Build.0 = Release|Any CPU
-		{BAF7ADF4-3A81-46E9-9186-F894D5F225AD}.Release|x86.ActiveCfg = Release|Any CPU
-		{BAF7ADF4-3A81-46E9-9186-F894D5F225AD}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -107,6 +93,5 @@ Global
 		{73A4F423-9DE2-4BE7-B54F-F4405B5EC1DD} = {B36A84DF-456D-A817-6EDD-3EC3E7F6E11F}
 		{7AC35D35-47D6-EEA9-813C-7811340A2F4C} = {965567CB-F937-ED3B-4D75-C4A4A730D130}
 		{D1F194CA-7DD2-4ABB-B95D-4BDB2489B3E2} = {7AC35D35-47D6-EEA9-813C-7811340A2F4C}
-		{BAF7ADF4-3A81-46E9-9186-F894D5F225AD} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 	EndGlobalSection
 EndGlobal

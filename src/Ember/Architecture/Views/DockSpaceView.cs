@@ -24,10 +24,7 @@ public sealed class DockSpaceView
         ImGuiViewportPtr viewportPtr = GetMainViewport();
 
         SysVec2 pos = viewportPtr.WorkPos;
-        pos.Y += GetFrameHeight();
-
         SysVec2 size = viewportPtr.WorkSize;
-        size.Y -= GetFrameHeight();
 
         SetNextWindowPos(pos);
         SetNextWindowSize(size);

@@ -126,7 +126,7 @@ public sealed class ParticleEffectView
 
             SysVec2 childWindowSize = new SysVec2(0.0f, 300.0f);
 
-            if (Button(SR.Button_AddNewEmitter, new SysVec2(-1, 0)))
+            if (Button("Add New Emitter"u8, new SysVec2(-1, 0)))
             {
                 _context.AddEmitter();
             }
@@ -918,7 +918,7 @@ public sealed class ParticleEffectView
             }
 
             SameLine();
-            Text(SR.Label_To);
+            Text(" to "u8);
 
             SameLine();
             if (ColorButton("##random-max-button"u8, randomColorMax, ImGuiColorEditFlags.None, buttonSize))

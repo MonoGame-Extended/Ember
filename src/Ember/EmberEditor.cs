@@ -7,9 +7,9 @@ using System.Globalization;
 using System.Reflection;
 using System.Text;
 using Ember.Architecture;
+using Ember.Architecture.Style;
 using Ember.Architecture.Views;
 using Ember.Graphics;
-using Ember.UI.Styling;
 using Hexa.NET.ImGui;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -54,7 +54,7 @@ public class EmberEditor : Game
 
     private void OnClientSizeChanged(object sender, EventArgs e)
     {
-        EmberContext.CenterParticleEffect();
+        _context.CenterParticleEffect();
     }
 
     protected override unsafe void Initialize()
@@ -69,13 +69,10 @@ public class EmberEditor : Game
         ImGuiIOPtr ioPtr = ImGui.GetIO();
         ioPtr.ConfigFlags |= ImGuiConfigFlags.DockingEnable;
 
-        // Load Fonts
         Fonts.Load();
 
-        // Set the styling and theme for ImGui
-        CatppuccinTheme.Apply(CatppuccinVariant.Mocha);
-
         _context = new(this);
+        _context.ApplyTheme<CatppuccinFrappeTheme>();
 
         _mainView = new MainView(_context);
 
@@ -117,7 +114,7 @@ public class EmberEditor : Game
 
     protected override unsafe void Draw(GameTime gameTime)
     {
-        GraphicsDevice.Clear(EmberContext.ClearColor);
+        GraphicsDevice.Clear(_context.ClearColor);
 
         if (_context.ParticleEffect is ParticleEffect particleEffect)
         {

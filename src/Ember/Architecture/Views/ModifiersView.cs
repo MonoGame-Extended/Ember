@@ -1,9 +1,11 @@
 using System;
+using System.Collections.Generic;
 using Ember.Architecture.Components;
 using Hexa.NET.ImGui;
 using MonoGame.Extended;
 using MonoGame.Extended.Particles.Modifiers;
 using MonoGame.Extended.Particles.Modifiers.Containers;
+using MonoGame.Extended.Particles.Modifiers.Interpolators;
 using static Hexa.NET.ImGui.ImGui;
 
 namespace Ember.Architecture.Views;
@@ -17,6 +19,10 @@ public sealed class ModifiersView
     private int _modifierDragToIndex = -1;
     private Type _modifierTypeToAdd;
     private bool _chooseModifier;
+    private bool _chooseInterpolator;
+    private int _interpolatorDragFromIndex = -1;
+    private int _interpolatorDragToIndex = -1;
+    private Type _interpolatorToAdd;
 
     public ModifiersView(EditorContext context)
     {
@@ -30,10 +36,13 @@ public sealed class ModifiersView
         {
             DrawModifierList();
             DrawSelectedModifierProperties();
+            DrawInterpolatorList();
+            DrawSelectedInterpolatorProperties();
         }
         End();
 
         DrawChooseModifierPopup();
+        DrawChooseInterpolatorPopup();
     }
 
     private unsafe void DrawModifierList()
@@ -291,7 +300,7 @@ public sealed class ModifiersView
                             if (PropertyTable.DragFloatProperty("Restitution Coefficient"u8, "The coefficient of restitution (bounciness) for particle collisions with the boundary"u8, ref rectContainerRestitutionCoefficient, 0.1f, 0.0f, float.MaxValue))
                             {
                                 rectContainer.RestitutionCoefficient = rectContainerRestitutionCoefficient;
-                                EmberContext.HasUnsavedChanges = true;
+                                _context.HasUnsavedChanges = true;
                             }
                             break;
 
@@ -405,6 +414,260 @@ public sealed class ModifiersView
         }
     }
 
+    private unsafe void DrawInterpolatorList()
+    {
+        if (!_context.SupportsInterpolators(_context.SelectedModifier))
+        {
+            return;
+        }
+
+        List<Interpolator> interpolators = _context.GetCurrentInterpolators();
+
+        if (CollapsingHeader("Interpolators"u8, ImGuiTreeNodeFlags.DefaultOpen))
+        {
+            ImGuiChildFlags childFlags = ImGuiChildFlags.Borders
+                                         | ImGuiChildFlags.AutoResizeY;
+
+            SysVec2 childWindowSize = new SysVec2(0.0f, 300.0f);
+
+            if (Button("Add Interpolator"u8, -SysVec2.UnitX))
+            {
+                _chooseInterpolator = true;
+            }
+
+            if (BeginChild("##interpolator-list-child-window"u8, childWindowSize, childFlags))
+            {
+                float iconColumnWidth = 20.0f;
+                ImGuiTableFlags tableFlags = ImGuiTableFlags.ScrollY
+                                             | ImGuiTableFlags.RowBg
+                                             | ImGuiTableFlags.SizingStretchProp;
+
+                if (BeginTable("##interpolator-table"u8, columns: 4, tableFlags))
+                {
+                    TableSetupColumn("##interpolator-list-name-column"u8, ImGuiTableColumnFlags.WidthStretch, 1.0f);
+                    TableSetupColumn("##interpolator-list-lock-column"u8, ImGuiTableColumnFlags.WidthFixed, iconColumnWidth);
+                    TableSetupColumn("##interpolator-list-visibility-column"u8, ImGuiTableColumnFlags.WidthFixed, iconColumnWidth);
+                    TableSetupColumn("##interpolator-list-delete-column"u8, ImGuiTableColumnFlags.WidthFixed, iconColumnWidth);
+
+                    for (int i = 0; i < interpolators.Count; i++)
+                    {
+                        TableNextRow();
+                        PushID(i);
+
+                        Interpolator interpolator = interpolators[i];
+                        bool isLocked = _context.IsLocked(interpolator);
+                        bool isSelected = interpolator == _context.SelectedInterpolator;
+
+                        // Name Column
+                        TableNextColumn();
+                        SysVec2 nameButtonSize = new SysVec2(-1, GetFrameHeight());
+                        PushStyleVar(ImGuiStyleVar.ButtonTextAlign, new SysVec2(0.0f, 0.5f));
+                        if (Button(interpolator.Name, nameButtonSize))
+                        {
+                            _context.SelectInterpolator(i);
+                        }
+
+                        if (BeginDragDropSource(ImGuiDragDropFlags.None))
+                        {
+                            int* indexPtr = &i;
+                            SetDragDropPayload("interpolator-reorder-payload"u8, &i, sizeof(int));
+                            Text($"Moving: {interpolator.Name}");
+                            EndDragDropSource();
+                        }
+
+                        if (BeginDragDropTarget())
+                        {
+                            ImGuiPayloadPtr payloadPtr = AcceptDragDropPayload("interpolator-reorder-payload"u8);
+                            if (!payloadPtr.IsNull)
+                            {
+                                _interpolatorDragFromIndex = *(int*)payloadPtr.Data;
+                                _interpolatorDragToIndex = i;
+                            }
+
+                            EndDragDropTarget();
+                        }
+
+                        PopStyleVar();
+
+                        // Lock column
+                        TableNextColumn();
+                        Text(isLocked ? Fonts.LockIcon : Fonts.UnlockedIcon);
+                        if (IsItemHovered() && IsItemClicked(ImGuiMouseButton.Left))
+                        {
+                            _context.ToggleLock(interpolator);
+                        }
+
+                        // Visibility Column
+                        TableNextColumn();
+                        BeginDisabled(isLocked);
+                        Text(interpolator.Enabled ? Fonts.EnabledIcon : Fonts.DisabledIcon);
+                        if (IsItemHovered() && IsItemClicked(ImGuiMouseButton.Left))
+                        {
+                            interpolator.Enabled = !interpolator.Enabled;
+                            _context.HasUnsavedChanges = true;
+                        }
+                        EndDisabled();
+
+                        // Delete column
+                        TableNextColumn();
+                        BeginDisabled(isLocked);
+                        Text(Fonts.DeleteIcon);
+                        if (IsItemHovered() && IsItemClicked(ImGuiMouseButton.Left))
+                        {
+                            _context.RemoveInterpolator(i);
+                        }
+                        EndDisabled();
+
+                        // Reorder emitters if a drag/drop occured
+                        if (_interpolatorDragFromIndex != -1 && _interpolatorDragToIndex != -1 && _interpolatorDragFromIndex != _interpolatorDragToIndex)
+                        {
+                            _context.ReorderInterpolators(_interpolatorDragFromIndex, _interpolatorDragToIndex);
+                            _interpolatorDragFromIndex = -1;
+                            _interpolatorDragToIndex = -1;
+                        }
+
+                        PopID();
+                    }
+                    EndTable();
+                }
+            }
+            EndChild();
+        }
+
+
+    }
+
+    private void DrawSelectedInterpolatorProperties()
+    {
+        if (_context.SelectedInterpolator is not Interpolator interpolator)
+        {
+            return;
+        }
+
+        if (CollapsingHeader("Interpolator Properties"u8, ImGuiTreeNodeFlags.DefaultOpen))
+        {
+            ImGuiChildFlags childFlags = ImGuiChildFlags.Borders
+                                         | ImGuiChildFlags.AutoResizeY;
+
+            if (BeginChild("##selected-interpolator-properties-child-window"u8, SysVec2.Zero, childFlags))
+            {
+                BeginDisabled(_context.IsLocked(interpolator));
+                if (PropertyTable.BeginPropertyTable("##selected-interpolator-properties-table"u8))
+                {
+                    // Name property
+                    string interpolatorName = interpolator.Name;
+                    if (PropertyTable.InputTextProperty("Name"u8, "The display name of the selected interpolator"u8, ref interpolatorName))
+                    {
+                        interpolator.Name = interpolatorName;
+                        _context.HasUnsavedChanges = true;
+                    }
+
+                    switch (interpolator)
+                    {
+                        case ColorInterpolator colorInterpolator:
+                            HslColor colorInterpolatorStartValue = colorInterpolator.StartValue;
+                            if (PropertyTable.Color3Property("Start Value"u8, "Initial HSL color for particles"u8, ref colorInterpolatorStartValue))
+                            {
+                                colorInterpolator.StartValue = colorInterpolatorStartValue;
+                                _context.HasUnsavedChanges = true;
+                            }
+
+                            HslColor colorInterpolatorEndValue = colorInterpolator.EndValue;
+                            if (PropertyTable.Color3Property("End Value"u8, "Final HSL color for particles"u8, ref colorInterpolatorEndValue))
+                            {
+                                colorInterpolator.EndValue = colorInterpolatorEndValue;
+                                _context.HasUnsavedChanges = true;
+                            }
+                            break;
+
+                        case HueInterpolator hueInterpolator:
+                            float hueInterpolatorStartValue = hueInterpolator.StartValue;
+                            if (PropertyTable.DragFloatProperty("Start Value"u8, "Initial hue value (0.0 = red, 0.33 = green, 0.66 = blue, 1.0 = red)"u8, ref hueInterpolatorStartValue, 0.01f, 0.0f, 1.0f))
+                            {
+                                hueInterpolator.StartValue = hueInterpolatorStartValue;
+                                _context.HasUnsavedChanges = true;
+                            }
+
+                            float hueInterpolatorEndValue = hueInterpolator.EndValue;
+                            if (PropertyTable.DragFloatProperty("End Value"u8, "Final hue value (0.0 = red, 0.33 = green, 0.66 = blue, 1.0 = red)"u8, ref hueInterpolatorEndValue, 0.01f, 0.0f, 1.0f))
+                            {
+                                hueInterpolator.EndValue = hueInterpolatorEndValue;
+                                _context.HasUnsavedChanges = true;
+                            }
+                            break;
+
+                        case OpacityInterpolator opacityInterpolator:
+                            float opacityInterpolatorStartValue = opacityInterpolator.StartValue;
+                            if (PropertyTable.DragFloatProperty("Start Value"u8, "Initial opacity (0.0 = transparent, 1.0 = opaque)"u8, ref opacityInterpolatorStartValue, 0.01f, 0.0f, 1.0f))
+                            {
+                                opacityInterpolator.StartValue = opacityInterpolatorStartValue;
+                                _context.HasUnsavedChanges = true;
+                            }
+
+                            float opacityInterpolatorEndValue = opacityInterpolator.EndValue;
+                            if (PropertyTable.DragFloatProperty("End Value"u8, "Final opacity (0.0 = transparent, 1.0 = opaque)"u8, ref opacityInterpolatorEndValue, 0.01f, 0.0f, 1.0f))
+                            {
+                                opacityInterpolator.EndValue = opacityInterpolatorEndValue;
+                                _context.HasUnsavedChanges = true;
+                            }
+                            break;
+
+                        case RotationInterpolator rotationInterpolator:
+                            float rotationInterpolatorStartValue = rotationInterpolator.StartValue;
+                            if (PropertyTable.DragFloatProperty("Start Value"u8, "Initial rotation angle in radians (π = 180°, 2π = 360°)"u8, ref rotationInterpolatorStartValue, 0.01f, -MathF.PI * 2.0f, MathF.PI * 2.0f))
+                            {
+                                rotationInterpolator.StartValue = rotationInterpolatorStartValue;
+                                _context.HasUnsavedChanges = true;
+                            }
+
+                            float rotationInterpolatorEndValue = rotationInterpolator.EndValue;
+                            if (PropertyTable.DragFloatProperty("End Value"u8, "Final rotation angle in radians (π = 180°, 2π = 360°)"u8, ref rotationInterpolatorEndValue, 0.01f, -MathF.PI * 2.0f, MathF.PI * 2.0f))
+                            {
+                                rotationInterpolator.EndValue = rotationInterpolatorEndValue;
+                                _context.HasUnsavedChanges = true;
+                            }
+                            break;
+
+                        case ScaleInterpolator scaleInterpolator:
+                            XnaVec2 scaleInterpolatorStartValue = scaleInterpolator.StartValue;
+                            if (PropertyTable.DragVector2Property("Start Value"u8, "Initial particle size multiplier (1.0 = original size)"u8, ref scaleInterpolatorStartValue, 0.01f, 0.0f, 10.0f))
+                            {
+                                scaleInterpolator.StartValue = scaleInterpolatorStartValue;
+                                _context.HasUnsavedChanges = true;
+                            }
+
+                            XnaVec2 scaleInterpolatorEndValue = scaleInterpolator.EndValue;
+                            if (PropertyTable.DragVector2Property("End Value"u8, "Final particle size multiplier (1.0 = original size)"u8, ref scaleInterpolatorEndValue, 0.01f, 0.0f, 10.0f))
+                            {
+                                scaleInterpolator.EndValue = scaleInterpolatorEndValue;
+                                _context.HasUnsavedChanges = true;
+                            }
+                            break;
+
+                        case VelocityInterpolator velocityInterpolator:
+                            XnaVec2 velocityInterpolatorStartValue = velocityInterpolator.StartValue;
+                            if (PropertyTable.DragVector2Property("Start Value"u8, "Initial velocity vector in units per second (X, Y)"u8, ref velocityInterpolatorStartValue, 1.0f, -1000.0f, 1000.0f))
+                            {
+                                velocityInterpolator.StartValue = velocityInterpolatorStartValue;
+                                _context.HasUnsavedChanges = true;
+                            }
+
+                            XnaVec2 velocityInterpolatorEndValue = velocityInterpolator.EndValue;
+                            if (PropertyTable.DragVector2Property("End Value"u8, "Final velocity vector in units per second (X, Y)"u8, ref velocityInterpolatorEndValue, 1.0f, -1000.0f, 1000.0f))
+                            {
+                                velocityInterpolator.EndValue = velocityInterpolatorEndValue;
+                                _context.HasUnsavedChanges = true;
+                            }
+                            break;
+                    }
+                    PropertyTable.EndPropertyTable();
+                }
+                EndDisabled();
+            }
+            EndChild();
+        }
+    }
+
     private void DrawChooseModifierPopup()
     {
         if (_chooseModifier)
@@ -486,4 +749,79 @@ public sealed class ModifiersView
         }
     }
 
+    private void DrawChooseInterpolatorPopup()
+    {
+        if (_chooseInterpolator)
+        {
+            OpenPopup("Choose Interpolator"u8);
+            _chooseInterpolator = false;
+            _interpolatorToAdd = null;
+        }
+
+
+        ImGuiViewportPtr viewportPtr = GetMainViewport();
+        SysVec2 workCenter = viewportPtr.WorkPos + (viewportPtr.WorkSize * 0.5f);
+
+        SetNextWindowPos(workCenter, ImGuiCond.Always, new SysVec2(0.5f));
+        SetNextWindowSizeConstraints(new SysVec2(400, 0), viewportPtr.WorkSize);
+
+        ImGuiWindowFlags modalFlags = ImGuiWindowFlags.Modal
+                                      | ImGuiWindowFlags.AlwaysAutoResize
+                                      | ImGuiWindowFlags.NoResize
+                                      | ImGuiWindowFlags.NoCollapse
+                                      | ImGuiWindowFlags.NoMove;
+
+        if (BeginPopupModal("Choose Interpolator"u8, modalFlags))
+        {
+            if (BeginChild("##choose-interpolator-list"u8, ImGuiChildFlags.Borders | ImGuiChildFlags.AutoResizeY))
+            {
+                AddInterpolatorChoice(typeof(ColorInterpolator), "Color Interpolator"u8, "Gradually changes all color components (hue, saturation, lightness) of particles over their lifetime"u8);
+                AddInterpolatorChoice(typeof(HueInterpolator), "Hue Interpolator"u8, "Changes only the hue component of particle colors while preserving saturation and lightness"u8);
+                AddInterpolatorChoice(typeof(OpacityInterpolator), "Opacity Interpolator"u8, "Gradually changes particle transparency from completely transparent to opaque"u8);
+                AddInterpolatorChoice(typeof(RotationInterpolator), "Rotation Interpolator"u8, "Gradually changes the rotation angle of particles over their lifetime"u8);
+                AddInterpolatorChoice(typeof(ScaleInterpolator), "Scale Interpolator"u8, "Gradually changes the size of particles by scaling their width and height"u8);
+                AddInterpolatorChoice(typeof(VelocityInterpolator), "Velocity Interpolator"u8, "Gradually changes the velocity vector of particles, affecting their movement direction and speed"u8);
+            }
+            EndChild();
+
+            Separator();
+
+            BeginDisabled(_modifierTypeToAdd == null);
+            if (Button("Select"u8))
+            {
+                _context.AddInterpolator(_interpolatorToAdd);
+                _interpolatorToAdd = null;
+                CloseCurrentPopup();
+            }
+            EndDisabled();
+
+            SameLine();
+            if (Button("Cancel"u8))
+            {
+                _interpolatorToAdd = null;
+                CloseCurrentPopup();
+            }
+
+            EndPopup();
+        }
+    }
+
+    private void AddInterpolatorChoice(Type interpolatorType, ReadOnlySpan<byte> label, ReadOnlySpan<byte> tooltip)
+    {
+        bool isSelected = _modifierTypeToAdd == interpolatorType;
+        if (Selectable(label, isSelected))
+        {
+            _interpolatorToAdd = interpolatorType;
+        }
+        if (IsItemHovered(ImGuiHoveredFlags.DelayNormal))
+        {
+            SetTooltip(tooltip);
+        }
+        if (IsItemHovered() && IsMouseDoubleClicked(ImGuiMouseButton.Left))
+        {
+            _context.AddInterpolator(interpolatorType);
+            _interpolatorToAdd = null;
+            CloseCurrentPopup();
+        }
+    }
 }

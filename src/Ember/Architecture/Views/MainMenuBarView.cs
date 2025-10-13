@@ -1,5 +1,6 @@
 using System;
 using Ember.Architecture.PopupModals;
+using Ember.Architecture.Style;
 using Hexa.NET.ImGui;
 using static Hexa.NET.ImGui.ImGui;
 
@@ -111,16 +112,16 @@ public sealed class MainMenuBarView
 
             if (BeginMenu("Theme"u8))
             {
-                bool selected = _context.Theme == ColorTheme.Light;
+                bool selected = _context.CurrentTheme is CatppuccinLatteTheme;
                 if (MenuItem("Light"u8, selected))
                 {
-                    _context.ApplyTheme(ColorTheme.Light);
+                    _context.ApplyTheme<CatppuccinLatteTheme>();
                 }
 
-                selected = _context.Theme == ColorTheme.Dark;
+                selected = _context.CurrentTheme is CatppuccinFrappeTheme;
                 if (MenuItem("Dark"u8, selected))
                 {
-                    _context.ApplyTheme(ColorTheme.Dark);
+                    _context.ApplyTheme<CatppuccinFrappeTheme>();
                 }
 
                 EndMenu();
