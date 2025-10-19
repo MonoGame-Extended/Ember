@@ -328,6 +328,14 @@ public sealed class ParticleEffectView
                         PropertyTable.EndComboProperty();
                     }
 
+                    // Offset Property
+                    XnaVec2 emitterOffset = emitter.Offset;
+                    if (PropertyTable.DragVector2Property("Offset"u8, "The position offset applied to this emitter from the effect position"u8, ref emitterOffset, 1.0f, float.MinValue, float.MaxValue))
+                    {
+                        emitter.Offset = emitterOffset;
+                        _context.HasUnsavedChanges = true;
+                    }
+
                     PropertyTable.EndPropertyTable();
                 }
                 EndDisabled();
