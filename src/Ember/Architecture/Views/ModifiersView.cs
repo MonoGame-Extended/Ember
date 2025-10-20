@@ -106,10 +106,14 @@ public sealed class ModifiersView
                             Modifier modifier = _context.SelectedEmitter.Modifiers[i];
                             bool isLocked = _context.IsLocked(modifier);
                             bool isSelected = modifier == _context.SelectedModifier;
+                            uint buttonColor = isSelected ? GetColorU32(ImGuiCol.Button) : GetColorU32(SysVec4.Zero);
+                            uint buttonHoverColor = GetColorU32(ImGuiCol.ButtonHovered);
 
                             // Name Column
                             TableNextColumn();
                             SysVec2 nameButtonSize = new SysVec2(-1, GetFrameHeight());
+                            PushStyleColor(ImGuiCol.Button, buttonColor);
+                            PushStyleColor(ImGuiCol.ButtonHovered, buttonHoverColor);
                             PushStyleVar(ImGuiStyleVar.ButtonTextAlign, new SysVec2(0.0f, 0.5f));
                             if (Button(modifier.Name, nameButtonSize))
                             {
@@ -136,6 +140,7 @@ public sealed class ModifiersView
                                 EndDragDropTarget();
                             }
 
+                            PopStyleColor(2);
                             PopStyleVar();
 
                             // Lock column
@@ -167,7 +172,7 @@ public sealed class ModifiersView
                             }
                             EndDisabled();
 
-                            // Reorder emitters if a drag/drop occured
+                            // Reorder emitters if a drag/drop occurred
                             if (_modifierDragFromIndex != -1 && _modifierDragToIndex != -1 && _modifierDragFromIndex != _modifierDragToIndex)
                             {
                                 _context.ReorderModifiers(_modifierDragFromIndex, _modifierDragToIndex);
@@ -457,10 +462,14 @@ public sealed class ModifiersView
                         Interpolator interpolator = interpolators[i];
                         bool isLocked = _context.IsLocked(interpolator);
                         bool isSelected = interpolator == _context.SelectedInterpolator;
+                        uint buttonColor = isSelected ? GetColorU32(ImGuiCol.Button) : GetColorU32(SysVec4.Zero);
+                        uint buttonHoverColor = GetColorU32(ImGuiCol.ButtonHovered);
 
                         // Name Column
                         TableNextColumn();
                         SysVec2 nameButtonSize = new SysVec2(-1, GetFrameHeight());
+                        PushStyleColor(ImGuiCol.Button, buttonColor);
+                        PushStyleColor(ImGuiCol.ButtonHovered, buttonHoverColor);
                         PushStyleVar(ImGuiStyleVar.ButtonTextAlign, new SysVec2(0.0f, 0.5f));
                         if (Button(interpolator.Name, nameButtonSize))
                         {
@@ -487,6 +496,7 @@ public sealed class ModifiersView
                             EndDragDropTarget();
                         }
 
+                        PopStyleColor(2);
                         PopStyleVar();
 
                         // Lock column
@@ -518,7 +528,7 @@ public sealed class ModifiersView
                         }
                         EndDisabled();
 
-                        // Reorder emitters if a drag/drop occured
+                        // Reorder emitters if a drag/drop occurred
                         if (_interpolatorDragFromIndex != -1 && _interpolatorDragToIndex != -1 && _interpolatorDragFromIndex != _interpolatorDragToIndex)
                         {
                             _context.ReorderInterpolators(_interpolatorDragFromIndex, _interpolatorDragToIndex);

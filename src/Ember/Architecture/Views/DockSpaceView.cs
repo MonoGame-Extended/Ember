@@ -84,8 +84,8 @@ public sealed class DockSpaceView
         uint centerNodeId;
 
         DockBuilderSplitNode(DockSpaceId, ImGuiDir.Down, 0.25f, &bottomNodeId, &topNodeId);
-        DockBuilderSplitNode(topNodeId, ImGuiDir.Left, 0.20f, &leftNodeId, &centerNodeId);
-        DockBuilderSplitNode(centerNodeId, ImGuiDir.Right, 0.20f, &rightNodeId, &centerNodeId);
+        DockBuilderSplitNode(topNodeId, ImGuiDir.Left, 0.30f, &leftNodeId, &centerNodeId);
+        DockBuilderSplitNode(centerNodeId, ImGuiDir.Right, 0.30f, &rightNodeId, &centerNodeId);
 
         ImGuiDockNodePtr bottomNodePtr = DockBuilderGetNode(bottomNodeId);
         if (!bottomNodePtr.IsNull)

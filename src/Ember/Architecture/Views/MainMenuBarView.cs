@@ -1,7 +1,13 @@
 using System;
+using System.Diagnostics;
+using System.IO;
+using System.Reflection;
 using Ember.Architecture.PopupModals;
 using Ember.Architecture.Style;
+using Ember.Graphics;
 using Hexa.NET.ImGui;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using static Hexa.NET.ImGui.ImGui;
 
 
@@ -12,6 +18,10 @@ public sealed class MainMenuBarView
     private readonly EditorContext _context;
     private bool _openProject;
     private bool _createNewProject;
+    private bool _showAbout;
+    private Texture2D _iconTexture;
+    private ImTextureRef _iconTextureRef;
+    private bool _iconLoaded;
 
     public MainMenuBarView(EditorContext context)
     {
@@ -25,12 +35,14 @@ public sealed class MainMenuBarView
         {
             DrawFileMenu();
             DrawPreferencesMenu();
-
+            DrawHelpMenu();
             EndMainMenuBar();
         }
 
         DrawCreateNewProjectPopup();
         DrawOpenProjectPopup();
+        DrawAboutPopup();
+
     }
 
     private void DrawFileMenu()
@@ -54,10 +66,7 @@ public sealed class MainMenuBarView
 
             if (MenuItem("Exit"u8))
             {
-                // TODO: This is not going to work
-                // we need to check for needs saving
-                // and find a proper way to "Exit" the game
-                _context.CloseProject();
+                _context.RequestExit();
             }
 
             EndMenu();
@@ -66,7 +75,6 @@ public sealed class MainMenuBarView
 
     private void DrawPreferencesMenu()
     {
-
         if (BeginMenu("Preferences"u8))
         {
             if (BeginMenu("Background Color"u8))
@@ -130,6 +138,18 @@ public sealed class MainMenuBarView
         }
     }
 
+    private void DrawHelpMenu()
+    {
+        if (BeginMenu("Help"u8))
+        {
+            if (MenuItem("About"u8))
+            {
+                _showAbout = true;
+            }
+
+            EndMenu();
+        }
+    }
     private void DrawCreateNewProjectPopup()
     {
         // I really don't like this way of signalling to open the popup modal.
@@ -160,7 +180,7 @@ public sealed class MainMenuBarView
             CreateNewProjectModal modal = CreateNewProjectModal.GetCreateNewProjectModal(this, null);
             if (modal.Draw())
             {
-                _context.CreateProject(modal.ProjectName, modal.ProjectDirectory, modal.CreateProjectDirectory);
+                _context.RequestCreateProject(modal.ProjectName, modal.ProjectDirectory, modal.CreateProjectDirectory);
             }
             EndPopup();
         }
@@ -196,8 +216,108 @@ public sealed class MainMenuBarView
             FileDialog dialog = FileDialog.GetFileDialog(this, null, ".ember");
             if (dialog.Draw())
             {
-                _context.OpenProject(dialog.SelectedItem.FullName);
+                _context.RequestOpenProject(dialog.SelectedItem.FullName);
             }
+            EndPopup();
+        }
+    }
+
+    private void DrawAboutPopup()
+    {
+        if (_showAbout)
+        {
+            OpenPopup("About"u8);
+            _showAbout = false;
+        }
+
+        ImGuiViewportPtr viewportPtr = GetMainViewport();
+        SysVec2 workCenter = viewportPtr.WorkPos + (viewportPtr.WorkSize * 0.5f);
+
+        SetNextWindowPos(workCenter, ImGuiCond.Always, new SysVec2(0.5f));
+        SetNextWindowSizeConstraints(new SysVec2(400, 0), new SysVec2(500, float.MaxValue));
+
+        ImGuiWindowFlags modalFlags = ImGuiWindowFlags.Modal
+                                      | ImGuiWindowFlags.AlwaysAutoResize
+                                      | ImGuiWindowFlags.NoResize
+                                      | ImGuiWindowFlags.NoMove;
+
+        if (BeginPopupModal("About"u8, modalFlags))
+        {
+            if (!_iconLoaded)
+            {
+                var entryAssembly = Assembly.GetEntryAssembly();
+                using (Stream stream = entryAssembly.GetManifestResourceStream("Icon.bmp"))
+                {
+                    _iconTexture = Texture2D.FromStream(_context.Game.GraphicsDevice, stream);
+                    _iconTextureRef = ImGuiRenderer.BindTexture(_iconTexture);
+                    _iconLoaded = true;
+                }
+            }
+
+            // Center the icon
+            SysVec2 iconSize = _iconTexture.Bounds.Size.ToVector2().ToNumerics() * 0.5f;
+            float iconCursorX = (GetContentRegionAvail().X - iconSize.X) * 0.5f;
+            SetCursorPosX(GetCursorPosX() + iconCursorX);
+            Image(_iconTextureRef, iconSize);
+
+            // Center "Ember" text
+            PushFont(null, 20.0f);
+            string emberText = "Ember";
+            float emberTextWidth = CalcTextSize(emberText).X;
+            float emberCursorX = (GetContentRegionAvail().X - emberTextWidth) * 0.5f;
+            SetCursorPosX(GetCursorPosX() + emberCursorX);
+            Text(emberText);
+            PopFont();
+
+            // Center version text
+            string versionText = $"Version {_context.Version}";
+            float versionTextWidth = CalcTextSize(versionText).X;
+            float versionCursorX = (GetContentRegionAvail().X - versionTextWidth) * 0.5f;
+            SetCursorPosX(GetCursorPosX() + versionCursorX);
+            TextDisabled(versionText);
+
+            Spacing();
+
+            TextWrapped("A particle effect editor for MonoGame Extended");
+            Spacing();
+
+            Text("Licensed under the MIT License");
+            Spacing();
+
+            Text("Copyright © 2025 Christopher Whitley and Contributors");
+            Spacing();
+
+            Separator();
+            Spacing();
+
+            float buttonWidth = (GetContentRegionAvail().X - (GetStyle().ItemSpacing.X * 2)) / 3.0f;
+            SysVec2 buttonSize = new SysVec2(buttonWidth, 0);
+
+            if (Button("GitHub"u8, buttonSize))
+            {
+                try
+                {
+                    Process.Start(new ProcessStartInfo() { FileName = "https://github.com/monogame-extended/ember", UseShellExecute = true });
+                }
+                catch { }
+            }
+
+            SameLine();
+            if (Button("Donate"u8, buttonSize))
+            {
+                try
+                {
+                    Process.Start(new ProcessStartInfo() { FileName = "https://github.com/sponsors/aristurtledev", UseShellExecute = true });
+                }
+                catch { }
+            }
+
+            SameLine();
+            if (Button("Close"u8, buttonSize))
+            {
+                CloseCurrentPopup();
+            }
+
             EndPopup();
         }
     }

@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Runtime.InteropServices;
+using System.Reflection;
 using Ember.Architecture.Style;
 using Hexa.NET.ImGui;
 using Microsoft.Xna.Framework;
@@ -9,7 +9,6 @@ using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using MonoGame.Extended;
 using MonoGame.Extended.Particles;
-using MonoGame.Extended.Particles.Data;
 using MonoGame.Extended.Particles.Modifiers;
 using MonoGame.Extended.Particles.Modifiers.Containers;
 using MonoGame.Extended.Particles.Modifiers.Interpolators;
@@ -23,74 +22,36 @@ public sealed class EditorContext : IDisposable
     private readonly Game _game;
     private readonly GraphicsDevice _graphicsDevice;
     private readonly ContentManager _contentManager;
+    private readonly string _version = Assembly.GetExecutingAssembly().GetName().Version?.ToString();
 
     private float _baseFontSize = 16.0f;
     private float _fontScaleMain = 1.0f;
 
-    /// <summary>
-    /// Gets the current particle effect being edited.
-    /// </summary>
+    private bool _shouldExit;
+    private PendingAction _pendingAction = PendingAction.None;
+    private string _pendingProjectName;
+    private string _pendingProjectDirectory;
+    private bool _pendingCreateProjectDirectory;
+    private string _pendingProjectFilePath;
+
     public ParticleEffect ParticleEffect { get; private set; }
-
-    /// <summary>
-    /// Gets the currently selected particle emitter.
-    /// </summary>
     public ParticleEmitter SelectedEmitter { get; private set; }
-
-    /// <summary>
-    /// Gets the index of the currently selected particle emitter
-    /// </summary>
     public int SelectedEmitterIndex { get; private set; } = -1;
 
-    /// <summary>
-    /// Gets the currently selected modifier.
-    /// </summary>
     public Modifier SelectedModifier { get; private set; }
-
-    /// <summary>
-    /// Gets the index of the currently selected modifier.
-    /// </summary>
     public int SelectedModifierIndex { get; private set; } = -1;
 
-    /// <summary>
-    /// Gets the currently selected interpolator.
-    /// </summary>
     public Interpolator SelectedInterpolator { get; private set; }
-
-    /// <summary>
-    /// Gets the index of the currently selected interpolator.
-    /// </summary>
     public int SelectedInterpolatorIndex { get; private set; } = -1;
 
-    /// <summary>
-    /// Gets the name of the current project.
-    /// </summary>
     public string ProjectName { get; private set; } = string.Empty;
-
-    /// <summary>
-    /// Gets the directory path of the current project.
-    /// </summary>
     public string ProjectDirectory { get; private set; } = string.Empty;
-
-    /// <summary>
-    /// Gets the file path of the current project.
-    /// </summary>
     public string ProjectFilePath { get; private set; } = string.Empty;
 
-    /// <summary>
-    /// Gets or sets a value indicating whether the project has unsaved changes.
-    /// </summary>
     public bool HasUnsavedChanges { get; set; }
-
-    /// <summary>
-    /// Gets a value indicating whether a project is currently open.
-    /// </summary>
     public bool IsProjectOpen => ParticleEffect != null;
-
-    /// <summary>
-    /// Gets a value indicating whether the project playback is currently paused.
-    /// </summary>
     public bool IsProjectPaused { get; private set; } = false;
+    public bool IsSavePromptPending => _pendingAction != PendingAction.None;
 
     public float BaseFontSize
     {
@@ -124,9 +85,10 @@ public sealed class EditorContext : IDisposable
 
     public ITheme CurrentTheme { get; set; }
 
-    /// <summary>
-    /// Gets a value indicating whether this <see cref="EditorContext"/> has been disposed of.
-    /// </summary>
+    public string Version => _version;
+
+    public Game Game => _game;
+
     public bool IsDisposed { get; private set; }
 
     public EditorContext(Game game)
@@ -136,18 +98,99 @@ public sealed class EditorContext : IDisposable
         _game = game;
         _graphicsDevice = game.GraphicsDevice;
         _contentManager = game.Content;
+        _game.Exiting += OnExiting;
         ApplyTheme<CatppuccinFrappeTheme>();
         ApplyFontSettings();
     }
 
     ~EditorContext() => Dispose(false);
 
-    // public void CreateParticleEffect(string name)
-    // {
-    //     ArgumentException.ThrowIfNullOrEmpty(name);
-    //     CloseProject();
-    //     ParticleEffect = new ParticleEffect(name);
-    // }
+    private void OnExiting(object sender, EventArgs e)
+    {
+        if (!_shouldExit && HasUnsavedChanges)
+        {
+            _pendingAction = PendingAction.Exit;
+            ((ExitingEventArgs)e).Cancel = true;
+        }
+    }
+
+    public void RequestExit()
+    {
+        if (HasUnsavedChanges)
+        {
+            _pendingAction = PendingAction.Exit;
+        }
+        else
+        {
+            _game.Exit();
+        }
+    }
+
+    public void RequestCreateProject(string projectName, string projectDirectory, bool createProjectDirectory)
+    {
+        if (HasUnsavedChanges)
+        {
+            _pendingAction = PendingAction.CreateProject;
+            _pendingProjectName = projectName;
+            _pendingProjectDirectory = projectDirectory;
+            _pendingCreateProjectDirectory = createProjectDirectory;
+        }
+        else
+        {
+            CreateProject(projectName, projectDirectory, createProjectDirectory);
+        }
+    }
+
+    public void RequestOpenProject(string filePath)
+    {
+        if (HasUnsavedChanges)
+        {
+            _pendingAction = PendingAction.OpenProject;
+            _pendingProjectFilePath = filePath;
+        }
+        else
+        {
+            OpenProject(filePath);
+        }
+    }
+
+    public void ConfirmPendingAction(bool save)
+    {
+        if (save)
+        {
+            SaveProject();
+        }
+
+        ExecutePendingAction();
+    }
+
+    public void CancelPendingAction()
+    {
+        _pendingAction = PendingAction.None;
+        _pendingProjectName = null;
+        _pendingProjectDirectory = null;
+        _pendingCreateProjectDirectory = false;
+        _pendingProjectFilePath = null;
+    }
+
+    private void ExecutePendingAction()
+    {
+        switch (_pendingAction)
+        {
+            case PendingAction.Exit:
+                _shouldExit = true;
+                _game.Exit();
+                break;
+            case PendingAction.CreateProject:
+                CreateProject(_pendingProjectName, _pendingProjectDirectory, _pendingCreateProjectDirectory);
+                break;
+            case PendingAction.OpenProject:
+                OpenProject(_pendingProjectFilePath);
+                break;
+        }
+
+        CancelPendingAction();
+    }
 
     public void CenterParticleEffect()
     {

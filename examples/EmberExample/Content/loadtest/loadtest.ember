@@ -2,7 +2,7 @@
 <ParticleEffect Name="loadtest" Position="960,508" Rotation="0" Scale="1,1" AutoTrigger="True" AutoTriggerFrequency="0">
   <Emitters>
     <ParticleEmitter Name="ParticleEmitter" LifeSpan="1" Offset="0,0" LayerDepth="0" ReclaimFrequency="60" Capacity="40000" ModifierExecutionStrategy="Serial" RenderingOrder="FrontToBack">
-      <TextureRegion Name="Pixel.png" Bounds="0,0,1,1" />
+      <TextureRegion Name="" Bounds="0,0,1,1" />
       <Parameters>
         <Quantity Kind="Constant" Constant="650" />
         <Speed Kind="Random" RandomMin="0" RandomMax="200" />
@@ -14,7 +14,7 @@
       </Parameters>
       <Profile Type="LineProfile" Axis="1,0" Length="1000" />
       <Modifiers>
-        <Modifier Name="LinearGravityModifier" Frequency="15" Type="LinearGravityModifier" Direction="0,1" Strength="250" />
+        <Modifier Name="LinearGravityModifier" Frequency="15" Type="LinearGravityModifier" Direction="0,1" Strength="100" />
         <Modifier Name="OpacityFastFadeModifier" Frequency="10" Type="OpacityFastFadeModifier" />
         <Modifier Name="RectangleContainerModifier" Frequency="30" Type="RectangleContainerModifier" Width="1000" Height="1000" RestitutionCoefficient="0.5" />
         <Modifier Name="DragModifier" Frequency="10" Type="DragModifier" DragCoefficient="0.47" Density="0.125" />

@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using Ember.Architecture.Components;
 using Ember.Architecture.PopupModals;
-using Ember.Graphics;
 using Hexa.NET.ImGui;
 using MonoGame.Extended;
 using MonoGame.Extended.Graphics;
@@ -165,10 +164,14 @@ public sealed class ParticleEffectView
                         ParticleEmitter emitter = _context.ParticleEffect.Emitters[i];
                         bool isLocked = _context.IsLocked(emitter);
                         bool isSelected = emitter == _context.SelectedEmitter;
+                        uint buttonColor = isSelected ? GetColorU32(ImGuiCol.Button) : GetColorU32(SysVec4.Zero);
+                        uint buttonHoverColor = GetColorU32(ImGuiCol.ButtonHovered);
 
                         // Name Column
                         TableNextColumn();
                         SysVec2 nameButtonSize = new SysVec2(-1, GetFrameHeight());
+                        PushStyleColor(ImGuiCol.Button, buttonColor);
+                        PushStyleColor(ImGuiCol.ButtonHovered, buttonHoverColor);
                         PushStyleVar(ImGuiStyleVar.ButtonTextAlign, new SysVec2(0.0f, 0.5f));
                         if (Button(emitter.Name, nameButtonSize))
                         {
@@ -195,6 +198,7 @@ public sealed class ParticleEffectView
                             EndDragDropTarget();
                         }
 
+                        PopStyleColor(2);
                         PopStyleVar();
 
                         // Lock column
@@ -226,7 +230,7 @@ public sealed class ParticleEffectView
                         }
                         EndDisabled();
 
-                        // Reorder emitters if a drag/drop occured
+                        // Reorder emitters if a drag/drop occurred
                         if (_emitterDragFromIndex != -1 && _emitterDragToIndex != -1 && _emitterDragFromIndex != _emitterDragToIndex)
                         {
                             _context.ReorderEmitters(_emitterDragFromIndex, _emitterDragToIndex);
@@ -531,6 +535,57 @@ public sealed class ParticleEffectView
                             {
                                 line.Length = lineLength;
                                 _context.HasUnsavedChanges = true;
+                            }
+
+
+                            ReadOnlySpan<byte> lineRadiatePreview = line.Radiate switch
+                            {
+                                LineRadiation.None => "None"u8,
+                                LineRadiation.Directional => "Directional"u8,
+                                LineRadiation.PerpendicularUp => "Perpendicular Up"u8,
+                                LineRadiation.PerpendicularDown => "Perpendicular Down"u8,
+                                _ => throw new InvalidOperationException($"Unknown circle radiation '{line.Radiate}")
+                            };
+                            if (PropertyTable.BeginComboProperty("Radiate"u8, "Determines the initial particle headings when radiating from the line axis"u8, lineRadiatePreview))
+                            {
+                                if (PropertyTable.ComboItem("None"u8, "The initial heading of particles is completely random and has no relationship to their position along the line"u8, line.Radiate == LineRadiation.None))
+                                {
+                                    line.Radiate = LineRadiation.None;
+                                    _context.HasUnsavedChanges = true;
+                                }
+
+                                if (PropertyTable.ComboItem("Directional"u8, "All particles are given the same initial heading as specified by the Direction vector"u8, line.Radiate == LineRadiation.Directional))
+                                {
+                                    line.Radiate = LineRadiation.Directional;
+                                    line.Direction = XnaVec2.UnitY;
+                                    _context.HasUnsavedChanges = true;
+                                }
+
+                                if (PropertyTable.ComboItem("Perpendicular Up"u8, "All particles are given initial headings perpendicular to the line's axis, pointing upward in screen coordinates (negative Y direction)"u8, line.Radiate == LineRadiation.PerpendicularUp))
+                                {
+                                    line.Radiate = LineRadiation.PerpendicularUp;
+                                    line.Direction = XnaVec2.Zero;
+                                    _context.HasUnsavedChanges = true;
+                                }
+
+                                if (PropertyTable.ComboItem("Perpendicular Down"u8, "All particles are given initial headings perpendicular to the line's axis, pointing downward in screen coordinates (positive Y direction)"u8, line.Radiate == LineRadiation.PerpendicularDown))
+                                {
+                                    line.Radiate = LineRadiation.PerpendicularDown;
+                                    line.Direction = XnaVec2.Zero;
+                                    _context.HasUnsavedChanges = true;
+                                }
+
+                                PropertyTable.EndComboProperty();
+                            }
+
+                            if (line.Radiate == LineRadiation.Directional)
+                            {
+                                XnaVec2 lineDirection = line.Direction;
+                                if (PropertyTable.DragVector2Property("Direction"u8, ""u8, ref lineDirection, 0.1f, -1.0f, 1.0f))
+                                {
+                                    line.Direction = lineDirection;
+                                    _context.HasUnsavedChanges = true;
+                                }
                             }
                             break;
 

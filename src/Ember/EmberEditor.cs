@@ -23,7 +23,7 @@ namespace Ember;
 public class EmberEditor : Game
 {
     private static EmberEditor s_instance;
-    private static readonly CompositeFormat s_windowTitle = CompositeFormat.Parse("Ember: {0} | {1:F3} ms/Frame | {2:F1} FPS");
+    private static readonly CompositeFormat s_windowTitle = CompositeFormat.Parse("Ember: {0} | {1:F3} ms/Frame | {2:F1} FPS {3}");
     private static readonly string s_version = Assembly.GetExecutingAssembly().GetName().Version?.ToString();
 
     private static float s_frameRate;
@@ -129,6 +129,7 @@ public class EmberEditor : Game
 
         s_frameRate = ImGui.GetIO().Framerate;
 
-        Window.Title = string.Format(CultureInfo.InvariantCulture, s_windowTitle, s_version, 1000.0f / s_frameRate, s_frameRate);
+
+        Window.Title = string.Format(CultureInfo.InvariantCulture, s_windowTitle, s_version, 1000.0f / s_frameRate, s_frameRate, _context.HasUnsavedChanges ? "*" : string.Empty);
     }
 }
