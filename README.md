@@ -132,7 +132,7 @@ Interpolators integrate with **Age Modifier** (time-based) and **Velocity Modifi
    - Use HSL color controls for precise color manipulation
 
 6. **Save and Export**
-   - Save your project using `File > Save` or `Ctrl+S`
+   - Save your project using `File > Save`
    - Projects are saved in `.ember` format for future editing
 
 ### Project Structure

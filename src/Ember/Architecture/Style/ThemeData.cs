@@ -2,11 +2,10 @@
 // Licensed under the MIT license.
 // See LICENSE file in the project root for full license information.
 
-namespace Ember.UI.Modals;
+namespace Ember.Architecture.Style  ;
 
-public enum ModalResult
+public readonly struct ThemeData
 {
-    Success,
-    Cancel,
-    Error
+    public ThemeColors Colors { get; init; }
+    public ThemeMetrics Metrics { get; init; }
 }

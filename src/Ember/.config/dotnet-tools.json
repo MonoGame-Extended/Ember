@@ -36,6 +36,13 @@
         "mgcb-editor-mac"
       ],
       "rollForward": false
+    },
+    "monopack": {
+      "version": "1.2.0",
+      "commands": [
+        "monopack"
+      ],
+      "rollForward": false
     }
   }
 }

@@ -10,7 +10,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <Version>1.0.2</Version>
+    <Version>1.0.3</Version>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -24,11 +24,13 @@
     <None Include="Content/**/*" CopyToOutputDirectory="PreserveNewest" />
     <EmbeddedResource Include="Icon.ico" LogicalName="Icon.ico" />
     <EmbeddedResource Include="Icon.bmp" LogicalName="Icon.bmp" />
-    <EmbeddedResource Include="i18n\**\*.json" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\external\monogame-extended\source\MonoGame.Extended\MonoGame.Extended.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Hexa.NET.ImGui" Version="2.2.8.5" />
     <PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.*" />
   </ItemGroup>

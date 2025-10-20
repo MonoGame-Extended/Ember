@@ -155,7 +155,11 @@ public class Game1 : Game
                 ImGui.BeginDisabled(_particleEffect == null);
                 ImGui.Text("Auto Trigger: ");
                 ImGui.TableNextColumn();
-                ImGui.Checkbox("##auto_trigger"u8, ref _particleEffect.AutoTrigger);
+                bool autoTrigger = _particleEffect.AutoTrigger;
+                if(ImGui.Checkbox("##auto_trigger"u8, ref autoTrigger))
+                {
+                    _particleEffect.AutoTrigger = autoTrigger;
+                }
                 ImGui.EndDisabled();
 
                 ImGui.TableNextRow();

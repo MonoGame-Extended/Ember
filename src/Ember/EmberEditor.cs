@@ -6,10 +6,10 @@ using System;
 using System.Globalization;
 using System.Reflection;
 using System.Text;
+using Ember.Architecture;
+using Ember.Architecture.Style;
+using Ember.Architecture.Views;
 using Ember.Graphics;
-using Ember.UI;
-using Ember.UI.Modals;
-using Ember.UI.Styling;
 using Hexa.NET.ImGui;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -23,7 +23,7 @@ namespace Ember;
 public class EmberEditor : Game
 {
     private static EmberEditor s_instance;
-    private static readonly CompositeFormat s_windowTitle = CompositeFormat.Parse("Ember: {0} | {1:F3} ms/Frame | {2:F1} FPS");
+    private static readonly CompositeFormat s_windowTitle = CompositeFormat.Parse("Ember: {0} | {1:F3} ms/Frame | {2:F1} FPS {3}");
     private static readonly string s_version = Assembly.GetExecutingAssembly().GetName().Version?.ToString();
 
     private static float s_frameRate;
@@ -34,6 +34,9 @@ public class EmberEditor : Game
     // Input
     private static MouseState s_previousMouseState;
     private static MouseState s_currentMouseState;
+
+    private MainView _mainView;
+    private EditorContext _context;
 
     public EmberEditor()
     {
@@ -51,7 +54,7 @@ public class EmberEditor : Game
 
     private void OnClientSizeChanged(object sender, EventArgs e)
     {
-        EmberContext.CenterParticleEffect();
+        _context.CenterParticleEffect();
     }
 
     protected override unsafe void Initialize()
@@ -66,14 +69,13 @@ public class EmberEditor : Game
         ImGuiIOPtr ioPtr = ImGui.GetIO();
         ioPtr.ConfigFlags |= ImGuiConfigFlags.DockingEnable;
 
-        // Load Fonts
         Fonts.Load();
 
-        // Set the styling and theme for ImGui
-        CatppuccinTheme.Apply(CatppuccinVariant.Mocha);
+        _context = new(this);
+        _context.ApplyTheme<CatppuccinFrappeTheme>();
 
-        // Initialize the editor context
-        EmberContext.Initialize(this);
+        _mainView = new MainView(_context);
+
     }
 
     protected override void LoadContent()
@@ -86,8 +88,12 @@ public class EmberEditor : Game
         s_previousMouseState = s_currentMouseState;
         s_currentMouseState = Mouse.GetState();
 
+        if (_context.IsProjectPaused)
+        {
+            return;
+        }
         // Emit particles on click
-        if (EmberContext.ParticleEffect is ParticleEffect particleEffect)
+        if (_context.ParticleEffect is ParticleEffect particleEffect)
         {
             ImGuiIOPtr ioPtr = ImGui.GetIO();
 
@@ -108,9 +114,9 @@ public class EmberEditor : Game
 
     protected override unsafe void Draw(GameTime gameTime)
     {
-        GraphicsDevice.Clear(EmberContext.ClearColor);
+        GraphicsDevice.Clear(_context.ClearColor);
 
-        if (EmberContext.ParticleEffect is ParticleEffect particleEffect)
+        if (_context.ParticleEffect is ParticleEffect particleEffect)
         {
             _spriteBatch.Begin(samplerState: SamplerState.PointWrap, blendState: BlendState.AlphaBlend);
             _spriteBatch.Draw(particleEffect);
@@ -118,29 +124,12 @@ public class EmberEditor : Game
         }
 
         ImGuiRenderer.BeforeLayout(gameTime);
-
-        MainMenuBar.Draw();
-        PreferencesWindow.Draw();
-        DockSpace.Draw();
-
-        if (EmberContext.ParticleEffect != null)
-        {
-            PropertiesWindow.Draw();
-            ModifiersWindow.Draw();
-        }
-
-        CreateNewProjectModal.Draw();
-        FileBrowserModal.Draw();
-
-        OverwriteExistingFileModal.Draw();
-        ChooseModifierModal.Draw();
-        ChooseInterpolatorModal.Draw();
-        UnsavedChangesModal.Draw();
-
+        _mainView.Draw();
         ImGuiRenderer.AfterLayout();
 
         s_frameRate = ImGui.GetIO().Framerate;
 
-        Window.Title = string.Format(CultureInfo.InvariantCulture, s_windowTitle, s_version, 1000.0f / s_frameRate, s_frameRate);
+
+        Window.Title = string.Format(CultureInfo.InvariantCulture, s_windowTitle, s_version, 1000.0f / s_frameRate, s_frameRate, _context.HasUnsavedChanges ? "*" : string.Empty);
     }
 }
