@@ -1,8 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<ParticleEffect Name="loadtest" Position="960,508" Rotation="0" Scale="1,1" AutoTrigger="True" AutoTriggerFrequency="0">
+<ParticleEffect Name="loadtest" Position="1920,1027" Rotation="0" Scale="1,1" AutoTrigger="True" AutoTriggerFrequency="0">
   <Emitters>
     <ParticleEmitter Name="ParticleEmitter" LifeSpan="1" Offset="0,0" LayerDepth="0" ReclaimFrequency="60" Capacity="40000" ModifierExecutionStrategy="Serial" RenderingOrder="FrontToBack">
-      <TextureRegion Name="" Bounds="0,0,1,1" />
+      <TextureRegion Name="Pixel.png" Bounds="0,0,1,1" />
       <Parameters>
         <Quantity Kind="Constant" Constant="650" />
         <Speed Kind="Random" RandomMin="0" RandomMax="200" />
