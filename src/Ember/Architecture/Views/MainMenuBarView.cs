@@ -142,6 +142,15 @@ public sealed class MainMenuBarView
     {
         if (BeginMenu("Help"u8))
         {
+            if (MenuItem("Documentation"u8))
+            {
+                try
+                {
+                    Process.Start(new ProcessStartInfo() { FileName = "https://monogameextended.net/docs/tools/ember/", UseShellExecute = true });
+                }
+                catch { }
+            }
+
             if (MenuItem("About"u8))
             {
                 _showAbout = true;
