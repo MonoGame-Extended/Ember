@@ -694,8 +694,7 @@ public sealed class EditorContext : IDisposable
         SetWorkingDirectory(ProjectDirectory);
         _contentManager.RootDirectory = ProjectDirectory;
 
-        using ParticleEffectReader reader = new(ProjectFilePath, _contentManager);
-        ParticleEffect = reader.ReadParticleEffect();
+        ParticleEffect = ParticleEffectSerializer.Deserialize(ProjectFilePath, _contentManager);
         CenterParticleEffect();
 
         HasUnsavedChanges = false;
@@ -708,8 +707,7 @@ public sealed class EditorContext : IDisposable
             return;
         }
 
-        using ParticleEffectWriter writer = new(ProjectFilePath);
-        writer.WriteParticleEffect(ParticleEffect);
+        ParticleEffectSerializer.Serialize(ProjectFilePath, ParticleEffect);
 
         HasUnsavedChanges = false;
     }
