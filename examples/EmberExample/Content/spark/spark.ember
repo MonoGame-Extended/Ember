@@ -14,8 +14,8 @@
       </Parameters>
       <Profile Type="PointProfile" />
       <Modifiers>
-        <Modifier Name="LinearGravityModifier" Frequency="15" Type="LinearGravityModifier" Direction="0,1" Strength="30" />
-        <Modifier Name="OpacityFastFadeModifier" Frequency="10" Type="OpacityFastFadeModifier" />
+        <Modifier Name="LinearGravityModifier" Enabled="True" Frequency="15" Type="LinearGravityModifier" Direction="0,1" Strength="30" />
+        <Modifier Name="OpacityFastFadeModifier" Enabled="True" Frequency="10" Type="OpacityFastFadeModifier" />
       </Modifiers>
     </ParticleEmitter>
   </Emitters>
