@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<ParticleEffect Name="smoke" Position="640,360" Rotation="0" Scale="1,1" AutoTrigger="False" AutoTriggerFrequency="0.1">
+<ParticleEffect Name="smoke" Position="960,508" Rotation="0" Scale="1,1" AutoTrigger="False" AutoTriggerFrequency="0.1">
   <Emitters>
     <ParticleEmitter Name="ParticleEmitter" LifeSpan="3" Offset="0,0" LayerDepth="0" ReclaimFrequency="60" Capacity="2000" ModifierExecutionStrategy="Serial" RenderingOrder="FrontToBack">
       <TextureRegion Name="Cloud.png" Bounds="0,0,128,128" />
@@ -14,16 +14,16 @@
       </Parameters>
       <Profile Type="PointProfile" />
       <Modifiers>
-        <Modifier Name="DragModifier" Frequency="10" Type="DragModifier" DragCoefficient="0.47" Density="0.125" />
-        <Modifier Name="AgeModifier" Frequency="60" Type="AgeModifier">
+        <Modifier Name="DragModifier" Enabled="True" Frequency="10" Type="DragModifier" DragCoefficient="0.47" Density="0.125" />
+        <Modifier Name="AgeModifier" Enabled="True" Frequency="60" Type="AgeModifier">
           <Interpolators>
-            <Interpolator Name="ScaleInterpolator" Type="ScaleInterpolator" StartValue="0.25,0.25" EndValue="2,2" />
+            <Interpolator Name="ScaleInterpolator" Enabled="True" Type="ScaleInterpolator" StartValue="0.25,0.25" EndValue="2,2" />
           </Interpolators>
         </Modifier>
-        <Modifier Name="RotationModifier" Frequency="15" Type="RotationModifier" RotationRate="1" />
-        <Modifier Name="AgeModifier" Frequency="25" Type="AgeModifier">
+        <Modifier Name="RotationModifier" Enabled="True" Frequency="15" Type="RotationModifier" RotationRate="1" />
+        <Modifier Name="AgeModifier" Enabled="True" Frequency="25" Type="AgeModifier">
           <Interpolators>
-            <Interpolator Name="OpacityInterpolator" Type="OpacityInterpolator" StartValue="0.3" EndValue="0" />
+            <Interpolator Name="OpacityInterpolator" Enabled="True" Type="OpacityInterpolator" StartValue="0.3" EndValue="0" />
           </Interpolators>
         </Modifier>
       </Modifiers>

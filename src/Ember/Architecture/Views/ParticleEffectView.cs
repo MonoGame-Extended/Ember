@@ -1232,7 +1232,7 @@ public sealed class ParticleEffectView
         var texture = _context.GetTexture(fileName);
         if (texture != null)
         {
-            emitter.TextureRegion = new Texture2DRegion(texture, texture.Bounds, fileName);
+            emitter.TextureRegion = new Texture2DRegion(texture, texture.Bounds);
             _context.HasUnsavedChanges = true;
         }
     }
