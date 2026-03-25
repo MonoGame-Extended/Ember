@@ -48,6 +48,9 @@ public sealed class EditorContext : IDisposable
     public string ProjectDirectory { get; private set; } = string.Empty;
     public string ProjectFilePath { get; private set; } = string.Empty;
 
+    public string LastUsedTextureDirectory { get; set; } = string.Empty;
+    public string LastUsedProjectDirectory { get; set; } = string.Empty;
+
     public bool HasUnsavedChanges { get; set; }
     public bool IsProjectOpen => ParticleEffect != null;
     public bool IsProjectPaused { get; private set; } = false;
@@ -673,6 +676,9 @@ public sealed class EditorContext : IDisposable
         SetWorkingDirectory(ProjectDirectory);
         _contentManager.RootDirectory = ProjectDirectory;
 
+        LastUsedTextureDirectory = ProjectDirectory;
+        LastUsedProjectDirectory = ProjectDirectory;
+
         ParticleEffect = new ParticleEffect(ProjectName);
 
         CenterParticleEffect();
@@ -693,6 +699,9 @@ public sealed class EditorContext : IDisposable
 
         SetWorkingDirectory(ProjectDirectory);
         _contentManager.RootDirectory = ProjectDirectory;
+
+        LastUsedTextureDirectory = ProjectDirectory;
+        LastUsedProjectDirectory = ProjectDirectory;
 
         ParticleEffect = ParticleEffectSerializer.Deserialize(ProjectFilePath, _contentManager);
         CenterParticleEffect();

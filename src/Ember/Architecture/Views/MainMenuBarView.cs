@@ -222,9 +222,10 @@ public sealed class MainMenuBarView
 
         if (BeginPopupModal("open-project"u8, modalFlags))
         {
-            FileDialog dialog = FileDialog.GetFileDialog(this, null, ".ember");
+            FileDialog dialog = FileDialog.GetFileDialog(this, _context.LastUsedProjectDirectory, ".ember");
             if (dialog.Draw())
             {
+                _context.LastUsedProjectDirectory = Path.GetDirectoryName(dialog.SelectedItem.FullName);
                 _context.RequestOpenProject(dialog.SelectedItem.FullName);
             }
             EndPopup();
