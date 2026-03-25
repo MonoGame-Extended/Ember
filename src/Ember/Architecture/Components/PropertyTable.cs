@@ -708,7 +708,7 @@ public static class PropertyTable
         SameLine();
         SetNextItemWidth(dragWidth);
         float maxY = max.Y;
-        if (DragFloat("##max-y"u8, ref maxY, 0.1f, min.Y, float.MaxValue, "X: %.2f"u8))
+        if (DragFloat("##max-y"u8, ref maxY, 0.1f, min.Y, float.MaxValue, "Y: %.2f"u8))
         {
             max.Y = maxY;
             changed = true;
