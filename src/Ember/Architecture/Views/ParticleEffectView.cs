@@ -1144,11 +1144,13 @@ public sealed class ParticleEffectView
 
         if (BeginPopupModal("select-texture"u8, modalFlags))
         {
-            FileDialog dialog = FileDialog.GetFileDialog(this, null, ".png");
+            FileDialog dialog = FileDialog.GetFileDialog(this, _context.LastUsedTextureDirectory, ".png");
             if (dialog.Draw())
             {
                 string filePath = dialog.SelectedItem.FullName;
                 string fileName = Path.GetFileName(filePath);
+
+                _context.LastUsedTextureDirectory = Path.GetDirectoryName(filePath);
 
                 if (_context.IsRelativeTo(filePath))
                 {
