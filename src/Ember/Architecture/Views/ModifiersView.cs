@@ -217,7 +217,7 @@ public sealed class ModifiersView
 
                     // Frequency property
                     float modifierFrequency = modifier.Frequency;
-                    if (PropertyTable.DragFloatProperty("Frequency"u8, "How often, in times per second, the modifier attempts to update the particle buffer"u8, ref modifierFrequency, 0.1f, 0.0f, float.MaxValue))
+                    if (PropertyTable.DragFloatProperty("Frequency"u8, "How often, in times per second, the modifier attempts to update the particle buffer"u8, ref modifierFrequency, 0.1f, 0.1f, float.MaxValue))
                     {
                         modifier.Frequency = modifierFrequency;
                         _context.HasUnsavedChanges = true;
