@@ -127,8 +127,7 @@ public class Game1 : Game
                 ImGui.TableNextColumn();
                 if (ImGui.Button("Ring"u8, new System.Numerics.Vector2(-1, 0)))
                 {
-                    string fileName = Path.Combine(_contentPath, "ring", "ring.ember");
-                    LoadParticleEffect(fileName);
+                    LoadParticleEffect("ring/ring", true);
                 }
 
                 ImGui.TableNextColumn();
@@ -156,7 +155,7 @@ public class Game1 : Game
                 ImGui.Text("Auto Trigger: ");
                 ImGui.TableNextColumn();
                 bool autoTrigger = _particleEffect.AutoTrigger;
-                if(ImGui.Checkbox("##auto_trigger"u8, ref autoTrigger))
+                if (ImGui.Checkbox("##auto_trigger"u8, ref autoTrigger))
                 {
                     _particleEffect.AutoTrigger = autoTrigger;
                 }
@@ -213,7 +212,7 @@ public class Game1 : Game
         ImGuiRenderer.AfterLayout();
     }
 
-    private void LoadParticleEffect(string fileName)
+    private void LoadParticleEffect(string fileName, bool useContentPipeline = false)
     {
         if (_particleEffect != null)
         {
@@ -221,9 +220,16 @@ public class Game1 : Game
             _particleEffect = null;
         }
 
-        using ParticleEffectReader reader = new(fileName, Content);
-        _particleEffect = reader.ReadParticleEffect();
-        _particleEffect.Position = GraphicsDevice.Viewport.Bounds.Center.ToVector2();
-        _particleEffect.AutoTrigger = false;
+        if (useContentPipeline)
+        {
+            _particleEffect = Content.Load<ParticleEffect>(fileName);
+        }
+        else
+        {
+            using ParticleEffectReader reader = new(fileName, Content);
+            _particleEffect = reader.ReadParticleEffect();
+            _particleEffect.Position = GraphicsDevice.Viewport.Bounds.Center.ToVector2();
+            _particleEffect.AutoTrigger = false;
+        }
     }
 }

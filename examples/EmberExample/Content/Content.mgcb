@@ -10,6 +10,7 @@
 
 #-------------------------------- References --------------------------------#
 
+/reference:..\..\..\external\monogame-extended\.artifacts\source\bin\MonoGame.Extended.Content.Pipeline\release\MonoGame.Extended.Content.Pipeline.dll
 
 #---------------------------------- Content ---------------------------------#
 
@@ -20,7 +21,9 @@
 /copy:loadtest/Pixel.png
 
 #begin ring/ring.ember
-/copy:ring/ring.ember
+/importer:
+/processor:
+/build:ring/ring.ember
 
 #begin ring/Ring.png
 /copy:ring/Ring.png
@@ -36,3 +39,4 @@
 
 #begin spark/spark.ember
 /copy:spark/spark.ember
+
