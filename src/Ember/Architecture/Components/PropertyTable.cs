@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Text;
 using Ember.Graphics;
 using Hexa.NET.ImGui;
@@ -250,21 +251,15 @@ public static class PropertyTable
 
         if (region != null)
         {
-            ReadOnlySpan<byte> name;
-            if (!string.IsNullOrEmpty(region.Name))
-            {
-                name = Encoding.UTF8.GetBytes(region.Name);
-            }
-            else if (!string.IsNullOrEmpty(region.Texture.Name))
-            {
-                name = Encoding.UTF8.GetBytes(region.Texture.Name);
-            }
-            else
-            {
-                name = "Texture"u8;
-            }
+            string texturePath = !string.IsNullOrEmpty(region.Texture.Name)
+                                  ? region.Texture.Name
+                                  : region.Name;
 
-            if (Button(name, -SysVec2.UnitX))
+            string displayName = !string.IsNullOrEmpty(texturePath)
+                                  ? Path.GetFileName(texturePath)
+                                  : "Texture";
+
+            if (Button(Encoding.UTF8.GetBytes(displayName), -SysVec2.UnitX))
             {
                 clicked = true;
             }
@@ -301,6 +296,12 @@ public static class PropertyTable
                     };
 
                     Image(textureRef, previewSize, uv0, uv1);
+
+                    if (!string.IsNullOrEmpty(texturePath))
+                    {
+                        TextDisabled(texturePath);
+                    }
+
                     EndTooltip();
                 }
             }

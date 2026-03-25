@@ -7,6 +7,7 @@ using MonoGame.Extended;
 using MonoGame.Extended.Graphics;
 using MonoGame.Extended.Particles;
 using MonoGame.Extended.Particles.Data;
+using Microsoft.Xna.Framework.Graphics;
 using MonoGame.Extended.Particles.Profiles;
 using static Hexa.NET.ImGui.ImGui;
 
@@ -21,8 +22,6 @@ public sealed class ParticleEffectView
     private int _emitterDragFromIndex = -1;
     private int _emitterDragToIndex = -1;
     private bool _selectTexture;
-    private string _pendingTextureFilePath = string.Empty;
-    private bool _confirmOverwrite;
     private HslColor _userFromColor;
     private HslColor _userToColor;
     private bool _isColorReleaseParameterInitialized;
@@ -52,7 +51,6 @@ public sealed class ParticleEffectView
         End();
 
         DrawSelectTexturePopup();
-        DrawOverwriteConfirmationPopup();
     }
 
     private void DrawParticleEffectProperties()
@@ -1148,90 +1146,17 @@ public sealed class ParticleEffectView
             if (dialog.Draw())
             {
                 string filePath = dialog.SelectedItem.FullName;
-                string fileName = Path.GetFileName(filePath);
+                string relativePath = _context.GetRelativePath(filePath);
 
                 _context.LastUsedTextureDirectory = Path.GetDirectoryName(filePath);
-
-                if (_context.IsRelativeTo(filePath))
-                {
-                    // File is already inside the project directory (previously imported).
-                    // Reuse the cached texture without copying or prompting.
-                    _context.AddTexture(filePath);
-                    AssignTextureToSelectedEmitter(fileName);
-                }
-                else if (_context.TextureExists(fileName))
-                {
-                    // A different source file from outside the project shares the
-                    // same filename as an already-imported texture. Prompt to overwrite.
-                    _pendingTextureFilePath = filePath;
-                    _confirmOverwrite = true;
-                }
-                else
-                {
-                    // New texture from outside the project directory. Copy and load.
-                    _context.AddTexture(filePath);
-                    AssignTextureToSelectedEmitter(fileName);
-                }
+                _context.AddTexture(filePath);
+                AssignTextureToSelectedEmitter(relativePath);
             }
             EndPopup();
         }
     }
 
-    private void DrawOverwriteConfirmationPopup()
-    {
-        if (_confirmOverwrite)
-        {
-            OpenPopup("confirm-overwrite"u8);
-            _confirmOverwrite = false;
-        }
-
-        ImGuiViewportPtr viewportPtr = GetMainViewport();
-        SysVec2 workCenter = viewportPtr.WorkPos + (viewportPtr.WorkSize * 0.5f);
-
-        SetNextWindowPos(workCenter, ImGuiCond.Always, new SysVec2(0.5f));
-        SetNextWindowSizeConstraints(new SysVec2(400, 0), viewportPtr.WorkSize);
-
-        ImGuiWindowFlags modalFlags = ImGuiWindowFlags.Modal
-                                      | ImGuiWindowFlags.AlwaysAutoResize
-                                      | ImGuiWindowFlags.NoResize
-                                      | ImGuiWindowFlags.NoCollapse
-                                      | ImGuiWindowFlags.NoMove;
-
-        if (BeginPopupModal("confirm-overwrite"u8, modalFlags))
-        {
-            string fileName = Path.GetFileName(_pendingTextureFilePath);
-            Text($"A texture named '{fileName}' already exists.");
-            Spacing();
-            Text("Do you want to overwrite it?"u8);
-            Spacing();
-            Spacing();
-
-            ImGuiStylePtr stylePtr = GetStyle();
-            SysVec2 buttonSize = new SysVec2(100.0f, 0);
-            float widthNeeded = (buttonSize.X * 2) + stylePtr.ItemSpacing.X;
-            float cursorX = GetCursorPosX() + GetContentRegionAvail().X - widthNeeded;
-            SetCursorPosX(cursorX);
-
-            if (Button("Yes"u8, buttonSize))
-            {
-                _context.AddTexture(_pendingTextureFilePath, overwrite: true);
-                AssignTextureToSelectedEmitter(fileName);
-                _pendingTextureFilePath = null;
-                CloseCurrentPopup();
-            }
-
-            SameLine();
-            if (Button("No"u8, buttonSize))
-            {
-                _pendingTextureFilePath = null;
-                CloseCurrentPopup();
-            }
-
-            EndPopup();
-        }
-    }
-
-    private void AssignTextureToSelectedEmitter(string fileName)
+    private void AssignTextureToSelectedEmitter(string relativePath)
     {
         ParticleEmitter emitter = _context.SelectedEmitter;
         if (emitter == null)
@@ -1239,7 +1164,7 @@ public sealed class ParticleEffectView
             return;
         }
 
-        var texture = _context.GetTexture(fileName);
+        Texture2D texture = _context.GetTexture(relativePath);
         if (texture != null)
         {
             emitter.TextureRegion = new Texture2DRegion(texture, texture.Bounds);
