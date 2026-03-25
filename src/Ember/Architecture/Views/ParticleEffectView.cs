@@ -1147,21 +1147,29 @@ public sealed class ParticleEffectView
             FileDialog dialog = FileDialog.GetFileDialog(this, null, ".png");
             if (dialog.Draw())
             {
-                string fileName = Path.GetFileName(dialog.SelectedItem.FullName);
+                string filePath = dialog.SelectedItem.FullName;
+                string fileName = Path.GetFileName(filePath);
 
-                // Check if this texture already exists in the project
-                if (_context.TextureExists(fileName))
+                if (_context.IsRelativeTo(filePath))
                 {
-                    _pendingTextureFilePath = dialog.SelectedItem.FullName;
+                    // File is already inside the project directory (previously imported).
+                    // Reuse the cached texture without copying or prompting.
+                    _context.AddTexture(filePath);
+                    AssignTextureToSelectedEmitter(fileName);
+                }
+                else if (_context.TextureExists(fileName))
+                {
+                    // A different source file from outside the project shares the
+                    // same filename as an already-imported texture. Prompt to overwrite.
+                    _pendingTextureFilePath = filePath;
                     _confirmOverwrite = true;
                 }
                 else
                 {
-                    // No conflict, add directly
-                    _context.AddTexture(dialog.SelectedItem.FullName);
+                    // New texture from outside the project directory. Copy and load.
+                    _context.AddTexture(filePath);
                     AssignTextureToSelectedEmitter(fileName);
                 }
-
             }
             EndPopup();
         }
