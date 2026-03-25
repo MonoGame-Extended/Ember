@@ -471,9 +471,36 @@ public static class PropertyTable
         }
         else if (value.Kind == ParticleValueKind.Random)
         {
-            if (ReleaseParameterRandomVector2(ref value.RandomMin, ref value.RandomMax))
+            TableNextColumn();
+            bool uniform = value.Uniform;
+            if (Checkbox("Uniform##uniform"u8, ref uniform))
             {
+                value.Uniform = uniform;
+                if (uniform)
+                {
+                    value.RandomMin.Y = value.RandomMin.X;
+                    value.RandomMax.Y = value.RandomMax.X;
+                }
                 changed = true;
+            }
+
+            TableNextRow();
+            TableNextColumn();
+            TableNextColumn();
+
+            if (value.Uniform)
+            {
+                if (ReleaseParameterUniformRandomVector2(ref value.RandomMin, ref value.RandomMax))
+                {
+                    changed = true;
+                }
+            }
+            else
+            {
+                if (ReleaseParameterRandomVector2(ref value.RandomMin, ref value.RandomMax))
+                {
+                    changed = true;
+                }
             }
         }
 
@@ -651,6 +678,43 @@ public static class PropertyTable
         if (DragFloat("##constant-y"u8, ref y, 0.1f, 0.0f, float.MaxValue, "Y: %.2f"u8))
         {
             value.Y = y;
+            changed = true;
+        }
+
+        return changed;
+    }
+
+    private static bool ReleaseParameterUniformRandomVector2(ref XnaVec2 min, ref XnaVec2 max)
+    {
+        bool changed = false;
+
+        ImGuiStylePtr stylePtr = GetStyle();
+        TableNextColumn();
+
+        float availWidth = GetContentRegionAvail().X;
+        float toWidth = CalcTextSize(" to "u8).X;
+        float spacing = stylePtr.ItemSpacing.X * 2.0f;
+        float dragWidth = (availWidth - toWidth - spacing) * 0.5f;
+
+        SetNextItemWidth(dragWidth);
+        float minVal = min.X;
+        if (DragFloat("##uniform-min"u8, ref minVal, 0.1f, 0.0f, max.X, "%.2f"u8))
+        {
+            min.X = minVal;
+            min.Y = minVal;
+            changed = true;
+        }
+
+        SameLine();
+        Text(" to "u8);
+
+        SameLine();
+        SetNextItemWidth(dragWidth);
+        float maxVal = max.X;
+        if (DragFloat("##uniform-max"u8, ref maxVal, 0.1f, min.X, float.MaxValue, "%.2f"u8))
+        {
+            max.X = maxVal;
+            max.Y = maxVal;
             changed = true;
         }
 
