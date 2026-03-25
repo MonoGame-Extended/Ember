@@ -559,81 +559,39 @@ public sealed class EditorContext : IDisposable
     public string GetWorkingDirectory() => Directory.GetCurrentDirectory();
     public void SetWorkingDirectory(string directory) => Directory.SetCurrentDirectory(directory);
 
-    public string CopyTo(string filePath, bool overwrite = false)
-    {
-        ArgumentException.ThrowIfNullOrEmpty(filePath);
-
-        string sourceName = Path.GetFileName(filePath);
-        string destination = Path.Combine(GetWorkingDirectory(), sourceName);
-        File.Copy(filePath, destination, overwrite);
-        return destination;
-    }
-
     public string GetRelativePath(string filePath) => Path.GetRelativePath(GetWorkingDirectory(), filePath);
 
-    public bool IsRelativeTo(string filePath)
-    {
-        string relativePath = GetRelativePath(filePath);
-        return !relativePath.StartsWith('.');
-    }
+    public bool TextureExists(string relativePath) => _textureCache.ContainsKey(relativePath);
 
-    public bool TextureExists(string fileName) => _textureCache.ContainsKey(fileName);
-
-    public void AddTexture(string filePath, bool overwrite = false)
+    public void AddTexture(string filePath)
     {
         ArgumentException.ThrowIfNullOrEmpty(filePath);
 
-        string fileName = Path.GetFileName(filePath);
+        string relativePath = GetRelativePath(filePath);
 
-        // If already in project directory, just load it
-        if (IsRelativeTo(filePath))
+        if (TextureExists(relativePath))
         {
-            if (overwrite || !TextureExists(fileName))
-            {
-                LoadTexture(fileName);
-            }
             return;
         }
 
-        string destinationPath = Path.Combine(GetWorkingDirectory(), fileName);
-
-        // Check if file exists and whether we should overwrite
-        if (File.Exists(destinationPath) && !overwrite)
-        {
-            // File exists but we're not overwriting, so just ensure it's loaded
-            if (!TextureExists(fileName))
-            {
-                LoadTexture(fileName);
-            }
-            return;
-        }
-
-        // Copy and load texture
-        CopyTo(filePath, overwrite: true);
-        LoadTexture(fileName);
+        LoadTexture(filePath, relativePath);
     }
 
-    public Texture2D LoadTexture(string fileName)
+    private Texture2D LoadTexture(string absolutePath, string relativePath)
     {
-        ArgumentException.ThrowIfNullOrEmpty(fileName);
+        ArgumentException.ThrowIfNullOrEmpty(absolutePath);
+        ArgumentException.ThrowIfNullOrEmpty(relativePath);
 
-        // If already cached, unload and reload
-        if (_textureCache.TryGetValue(fileName, out Texture2D cached))
-        {
-            cached.Dispose();
-            _textureCache.Remove(fileName);
-        }
-
-        Texture2D texture = Texture2D.FromFile(_graphicsDevice, fileName);
-        texture.Name = fileName;
-        _textureCache[fileName] = texture;
+        Texture2D texture = Texture2D.FromFile(_graphicsDevice, absolutePath);
+        texture.Name = relativePath;
+        _textureCache[relativePath] = texture;
 
         return texture;
     }
 
-    public Texture2D GetTexture(string fileName)
+    public Texture2D GetTexture(string relativePath)
     {
-        if (_textureCache.TryGetValue(fileName, out Texture2D texture))
+        if (_textureCache.TryGetValue(relativePath, out Texture2D texture))
         {
             return texture;
         }
